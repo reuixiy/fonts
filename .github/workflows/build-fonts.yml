@@ -81,52 +81,29 @@ jobs:
           }
           EOF
       
-      - name: Deploy to build branch
-        run: |
-          echo "🚀 Deploying to build branch..."
-          
-          # Configure git
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          # Create orphan build branch if it doesn't exist
-          git fetch origin build || true
-          
-          if git rev-parse --verify origin/build >/dev/null 2>&1; then
-            git checkout -b build origin/build
-            # Clean existing content
-            git rm -rf . || true
-          else
-            git checkout --orphan build
-            # Remove all tracked files
-            git rm -rf . || true
-          fi
-          
-          # Copy build artifacts
-          cp -r build/* . 2>/dev/null || true
-          
-          # Add and commit
-          git add .
-          
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "🔄 Font build $(date -u +%Y-%m-%d) - Run ${{ github.run_id }}
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
+          destination_dir: fonts
+          orphan: true
+          publish_branch: build
+          commit_message: |
+            🔄 Font build ${{ github.run_id }} - $(date -u +%Y-%m-%d)
             
             Updated fonts: ${{ github.event.inputs.updated-fonts || 'all' }}
-            Source commit: ${{ github.sha }}"
-            
-            # Push to build branch
-            git push origin build
+            Source commit: ${{ github.sha }}
           fi
       
       - name: Summary
         run: |
-          echo "✅ Font build complete!"
+          echo "✅ Font build and deployment complete!"
           echo "📊 Build Summary:"
           echo "- Build ID: ${{ github.run_id }}"
           echo "- Updated fonts: ${{ github.event.inputs.updated-fonts || 'all' }}"
           echo "- Build date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          echo "- Deployed to: build branch"
           
           if [ -f build/metadata.json ]; then
             echo "📋 Metadata:"

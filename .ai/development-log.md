@@ -132,6 +132,16 @@ This log tracks the development progress of the automated web font subsetting an
 - Updated all `npm run` commands to `pnpm run`
 - Ensured pnpm-lock.yaml is committed to repository
 
+### Issue #5: Complex Manual Git Deployment
+**Date**: June 17, 2025  
+**Issue**: Manual git operations in GitHub Actions for deployment are complex and error-prone  
+**Status**: ✅ Resolved  
+**Solution**: Replaced manual git operations with `peaceiris/actions-gh-pages@v3` action:
+- Simplified deployment to build branch
+- Automatic orphan branch handling
+- More reliable and maintainable
+- Built-in error handling and retry logic
+
 ## Resolved Issues
 
 ### ✅ Project Structure Setup
