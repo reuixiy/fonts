@@ -1,11 +1,15 @@
 import js from '@eslint/js';
+import tsEslint from '@typescript-eslint/eslint-plugin';
+import tsParser from '@typescript-eslint/parser';
 
 export default [
   js.configs.recommended,
   {
+    files: ['**/*.{js,ts}'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
+      parser: tsParser,
       globals: {
         console: 'readonly',
         process: 'readonly',
@@ -27,23 +31,38 @@ export default [
         Response: 'readonly',
       },
     },
+    plugins: {
+      '@typescript-eslint': tsEslint,
+    },
     rules: {
-      'no-unused-vars': ['error', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-        caughtErrorsIgnorePattern: '^_'
-      }],
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
       'no-console': 'off',
       'prefer-const': 'error',
       'no-var': 'error',
       'object-shorthand': 'error',
       'prefer-arrow-callback': 'error',
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      '@typescript-eslint/prefer-optional-chain': 'error',
     },
   },
   {
-    files: ['**/*.js'],
+    files: ['**/*.ts'],
     languageOptions: {
-      sourceType: 'module',
+      parser: tsParser,
+      parserOptions: {
+        project: './tsconfig.json',
+      },
     },
   },
   {

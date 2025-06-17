@@ -4,8 +4,15 @@ import FontSubset from './fontSubset.js';
 import CSSGenerator from '../scripts/generate-css.js';
 import LicenseGenerator from '../scripts/generate-license.js';
 import chalk from 'chalk';
+import type { VersionCheckResult } from './types.js';
 
 class FontWorkflow {
+  private versionChecker: VersionChecker;
+  private fontDownloader: FontDownloader;
+  private fontSubset: FontSubset;
+  private cssGenerator: CSSGenerator;
+  private licenseGenerator: LicenseGenerator;
+
   constructor() {
     this.versionChecker = new VersionChecker();
     this.fontDownloader = new FontDownloader();
@@ -14,7 +21,7 @@ class FontWorkflow {
     this.licenseGenerator = new LicenseGenerator();
   }
 
-  async runFullWorkflow() {
+  async runFullWorkflow(): Promise<void> {
     console.log(
       chalk.bold.blue('🚀 Starting Full Font Processing Workflow\\n')
     );
@@ -22,7 +29,7 @@ class FontWorkflow {
     try {
       // Step 1: Check versions
       console.log(chalk.bold.yellow('📋 Step 1: Checking font versions...'));
-      const versionResult = await this.versionChecker.run();
+      const versionResult = await this.versionChecker.run() as VersionCheckResult;
 
       if (!versionResult.hasUpdates) {
         console.log(
@@ -52,8 +59,8 @@ class FontWorkflow {
       console.log(
         chalk.bold.green('\\n🎉 Full workflow completed successfully!')
       );
-    } catch (error) {
-      console.error(chalk.red('❌ Workflow failed:'), error.message);
+    } catch (error: unknown) {
+      console.error(chalk.red('❌ Workflow failed:'), (error as Error).message);
       process.exit(1);
     }
   }
@@ -83,13 +90,13 @@ class FontWorkflow {
       console.log(
         chalk.bold.green('\\n🎉 Build workflow completed successfully!')
       );
-    } catch (error) {
-      console.error(chalk.red('❌ Build workflow failed:'), error.message);
+    } catch (error: unknown) {
+      console.error(chalk.red('❌ Build workflow failed:'), (error as Error).message);
       process.exit(1);
     }
   }
 
-  async runSpecificFonts(fontIds) {
+  async runSpecificFonts(fontIds: string[]): Promise<void> {
     console.log(
       chalk.bold.blue(`🚀 Processing Specific Fonts: ${fontIds.join(', ')}\\n`)
     );
@@ -122,10 +129,10 @@ class FontWorkflow {
           '\\n🎉 Specific font processing completed successfully!'
         )
       );
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(
         chalk.red('❌ Specific font processing failed:'),
-        error.message
+        (error as Error).message
       );
       process.exit(1);
     }
@@ -177,7 +184,7 @@ async function main() {
 }
 
 // Run if called directly
-if (import.meta.url === new URL(process.argv[1], 'file:').href) {
+if (import.meta.url === new URL(process.argv[1] ?? '', 'file:').href) {
   main();
 }
 
