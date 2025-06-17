@@ -94,7 +94,6 @@ jobs:
             
             Updated fonts: ${{ github.event.inputs.updated-fonts || 'all' }}
             Source commit: ${{ github.sha }}
-          fi
       
       - name: Summary
         run: |
