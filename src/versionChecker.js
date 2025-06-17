@@ -27,8 +27,34 @@ class VersionChecker {
 
   async loadVersionCache() {
     try {
-      // In GitHub Actions, try to load from environment variables first
+      // In GitHub Actions, try to load from cache branch first
       if (process.env.GITHUB_ACTIONS) {
+        try {
+          const owner = process.env.GITHUB_REPOSITORY_OWNER || 'reuixiy';
+          const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'fonts';
+          
+          const { data } = await this.octokit.rest.repos.getContent({
+            owner,
+            repo,
+            path: 'version-cache.json',
+            ref: 'cache'
+          });
+
+          if (data.content) {
+            const content = Buffer.from(data.content, 'base64').toString('utf-8');
+            const parsedCache = JSON.parse(content);
+            console.log(
+              chalk.blue('📋 Loaded version cache from cache branch')
+            );
+            return parsedCache;
+          }
+        } catch (error) {
+          console.log(
+            chalk.gray('📋 No cache branch found, checking environment variables...')
+          );
+        }
+
+        // Fallback to environment variables (legacy support)
         const cacheData = {};
         if (process.env.FONT_IMING_VERSION) {
           cacheData.iming = { version: process.env.FONT_IMING_VERSION };

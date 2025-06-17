@@ -37,10 +37,6 @@ jobs:
         id: version-check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Load cached versions from previous runs
-          FONT_IMING_VERSION: ${{ vars.FONT_IMING_VERSION }}
-          FONT_LXGW_VERSION: ${{ vars.FONT_LXGW_VERSION }}
-          FONT_AMSTELVAR_VERSION: ${{ vars.FONT_AMSTELVAR_VERSION }}
         run: pnpm run check-versions
       
       - name: Update version cache
@@ -48,17 +44,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Update repository variables to persist version cache
-          if [ -n "${{ steps.version-check.outputs.font_iming_version }}" ]; then
-            gh variable set FONT_IMING_VERSION --body "${{ steps.version-check.outputs.font_iming_version }}"
+          # Commit version cache to a dedicated cache branch for persistence
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Create/checkout cache branch
+          git fetch origin cache || git checkout --orphan cache
+          git checkout cache 2>/dev/null || git checkout --orphan cache
+          
+          # Create/update version cache file
+          echo "Updating version cache..."
+          cp .version-cache.json version-cache.json 2>/dev/null || echo "{}" > version-cache.json
+          
+          # Commit and push if there are changes
+          git add version-cache.json
+          if git diff --staged --quiet; then
+            echo "No cache changes to commit"
+          else
+            git commit -m "Update font version cache - $(date)"
+            git push origin cache
+            echo "✅ Version cache committed to cache branch"
           fi
-          if [ -n "${{ steps.version-check.outputs.font_lxgw_version }}" ]; then
-            gh variable set FONT_LXGW_VERSION --body "${{ steps.version-check.outputs.font_lxgw_version }}"
-          fi
-          if [ -n "${{ steps.version-check.outputs.font_amstelvar_version }}" ]; then
-            gh variable set FONT_AMSTELVAR_VERSION --body "${{ steps.version-check.outputs.font_amstelvar_version }}"
-          fi
-          echo "✅ Version cache updated in repository variables"
 
   trigger-build:
     needs: check-versions
