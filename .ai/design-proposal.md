@@ -13,17 +13,23 @@ fonts/
 │       ├── version-check.yml     # Daily font version checking
 │       └── build-fonts.yml       # Font building and deployment workflow
 ├── src/
-│   ├── fontSubset.js            # Main font subsetting program
-│   ├── versionChecker.js        # Version checking utility
+│   ├── fontSubset.ts            # Main font subsetting program (TypeScript)
+│   ├── versionChecker.ts        # Version checking utility (TypeScript)
+│   ├── types.ts                 # TypeScript type definitions
+│   ├── index.ts                 # Main entry point (TypeScript)
 │   └── config/
 │       └── fonts.json           # Font configuration file
 ├── scripts/
-│   ├── download-fonts.js        # Font downloading script
-│   └── generate-css.js          # CSS generation script
+│   ├── download-fonts.ts        # Font downloading script (TypeScript)
+│   ├── generate-css.ts          # CSS generation script (TypeScript)
+│   └── generate-license.ts      # License generation script (TypeScript)
+├── dist/                        # TypeScript compiled output
 ├── .ai/
 │   ├── requirements.md          # Project requirements
 │   ├── design-proposal.md       # This design document
 │   └── development-log.md       # Development progress log
+├── tsconfig.json                # TypeScript configuration
+├── eslint.config.ts             # ESLint configuration (TypeScript)
 ├── package.json
 ├── README.md
 └── .gitignore
@@ -31,7 +37,7 @@ fonts/
 
 ## 2. Core Functional Modules
 
-### A. Version Checking Module (`versionChecker.js`)
+### A. Version Checking Module (`versionChecker.ts`)
 
 **Purpose**: Detect font updates and trigger builds only when necessary
 
@@ -40,13 +46,15 @@ fonts/
 - **Amstelvar**: Monitor latest commit hash (since it doesn't use releases)
 - Store current version information in GitHub repository variables
 - Compare local records with remote versions to determine build necessity
+- **TypeScript**: Full type safety with proper error handling and type annotations
 
 **Implementation Details**:
-- Use GitHub API with authentication tokens
+- Use GitHub API with authentication tokens and typed responses
 - Store version metadata as repository variables
 - Output boolean flags for each font indicating update status
+- Comprehensive type definitions for API responses and internal data structures
 
-### B. Font Download Module (`download-fonts.js`)
+### B. Font Download Module (`download-fonts.ts`)
 
 **Purpose**: Retrieve the latest font files from their respective sources
 
@@ -308,6 +316,9 @@ graph TD
 
 ## Date Created
 June 17, 2025
+
+## Last Updated
+June 17, 2025 (TypeScript Migration - v2.0.0)
 
 ## Author
 GitHub Copilot AI Assistant

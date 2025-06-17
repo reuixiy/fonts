@@ -1,8 +1,8 @@
 {
   "name": "web-font-auto-subsetting",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Automated web font subsetting and deployment workflow",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
@@ -48,6 +48,7 @@
     "@typescript-eslint/parser": "^8.34.1",
     "cssnano": "^7.0.7",
     "eslint": "^9.29.0",
+    "jiti": "^2.4.2",
     "postcss": "^8.5.6",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"

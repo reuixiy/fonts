@@ -1,10 +1,11 @@
-import VersionChecker from './versionChecker.js';
-import FontDownloader from '../scripts/download-fonts.js';
-import FontSubset from './fontSubset.js';
-import CSSGenerator from '../scripts/generate-css.js';
-import LicenseGenerator from '../scripts/generate-license.js';
 import chalk from 'chalk';
-import type { VersionCheckResult } from './types.js';
+
+import CSSGenerator from '@scripts/generate-css.js';
+import LicenseGenerator from '@scripts/generate-license.js';
+import FontDownloader from '@scripts/download-fonts.js';
+import FontSubset from '@/fontSubset.js';
+import VersionChecker from '@/versionChecker.js';
+import type { VersionCheckResult } from '@/types.js';
 
 class FontWorkflow {
   private versionChecker: VersionChecker;
@@ -29,7 +30,8 @@ class FontWorkflow {
     try {
       // Step 1: Check versions
       console.log(chalk.bold.yellow('📋 Step 1: Checking font versions...'));
-      const versionResult = await this.versionChecker.run() as VersionCheckResult;
+      const versionResult =
+        (await this.versionChecker.run()) as VersionCheckResult;
 
       if (!versionResult.hasUpdates) {
         console.log(
@@ -91,7 +93,10 @@ class FontWorkflow {
         chalk.bold.green('\\n🎉 Build workflow completed successfully!')
       );
     } catch (error: unknown) {
-      console.error(chalk.red('❌ Build workflow failed:'), (error as Error).message);
+      console.error(
+        chalk.red('❌ Build workflow failed:'),
+        (error as Error).message
+      );
       process.exit(1);
     }
   }

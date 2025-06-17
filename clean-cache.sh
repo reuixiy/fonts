@@ -99,6 +99,7 @@ clean_node_modules() {
 clean_build_artifacts() {
     print_status "Cleaning build artifacts..."
     safe_remove "build" "build directory"
+    safe_remove "dist" "TypeScript compiled output directory"
     safe_remove "downloads" "downloads directory"
     safe_remove ".version-cache.json" "local version cache file"
 }
@@ -225,6 +226,7 @@ main() {
     echo ""
     print_status "Next steps:"
     echo "  • Run 'pnpm install' to reinstall dependencies"
+    echo "  • Run 'pnpm run build' to compile TypeScript"
     echo "  • Run 'pnpm start -- --build-only' to rebuild fonts"
     echo ""
 }

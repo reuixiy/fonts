@@ -1,8 +1,9 @@
 import js from '@eslint/js';
 import tsEslint from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
+import type { Linter } from 'eslint';
 
-export default [
+const config: Linter.Config[] = [
   js.configs.recommended,
   {
     files: ['**/*.{js,ts}'],
@@ -32,7 +33,8 @@ export default [
       },
     },
     plugins: {
-      '@typescript-eslint': tsEslint,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      '@typescript-eslint': tsEslint as any,
     },
     rules: {
       'no-unused-vars': 'off',
@@ -76,3 +78,5 @@ export default [
     ],
   },
 ];
+
+export default config;

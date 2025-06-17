@@ -55,6 +55,12 @@ This repository aims to design a web font auto-subsetting workflow that provides
 
 ## Technical Requirements
 
+### Implementation Technology
+- **Language**: TypeScript for enhanced type safety and developer experience
+- **Runtime**: Node.js 20+ for modern JavaScript features and performance
+- **Package Manager**: pnpm for efficient dependency management
+- **Build System**: TypeScript compiler with strict type checking
+
 ### Version Detection Strategy
 - **I.Ming & LxgwWenkaiTC**: Monitor GitHub Releases API for version updates
 - **Amstelvar**: Monitor repository commits since it doesn't use releases
@@ -75,9 +81,14 @@ This repository aims to design a web font auto-subsetting workflow that provides
 
 1. **Automation**: Zero manual intervention required for font updates
 2. **Efficiency**: Only process fonts when updates are detected
-3. **Reliability**: Consistent builds with proper error handling
+3. **Reliability**: Consistent builds with proper error handling and type safety
 4. **Accessibility**: Easy integration of processed fonts into web projects
 5. **Performance**: Optimized font files suitable for web delivery
+6. **Type Safety**: Full TypeScript coverage with strict type checking
+7. **Developer Experience**: Modern tooling with ESLint, absolute imports, and hot reloading
 
 ## Date Created
 June 17, 2025
+
+## Last Updated
+June 17, 2025 (TypeScript Migration - v2.0.0)

@@ -1,27 +1,47 @@
+import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
-import chalk from 'chalk';
+
+import type { FontConfig, FontsConfig } from '@/types.js';
+
+interface LicenseData {
+  generatedAt: string;
+  fonts: {
+    [fontId: string]: {
+      name: string;
+      displayName: string;
+      source: string;
+      license: {
+        type: string;
+        url: string;
+      };
+    };
+  };
+}
 
 class LicenseGenerator {
+  private configPath: string;
+  private buildDir: string;
+
   constructor() {
     this.configPath = path.join(process.cwd(), 'src/config/fonts.json');
     this.buildDir = path.join(process.cwd(), 'build');
   }
 
-  async loadConfig() {
+  async loadConfig(): Promise<FontsConfig> {
     try {
       const config = await fs.readJson(this.configPath);
-      return config;
+      return config as FontsConfig;
     } catch (error) {
       console.error(
         chalk.red('Failed to load font configuration:'),
-        error.message
+        (error as Error).message
       );
       throw error;
     }
   }
 
-  async generateLicenseFile() {
+  async generateLicenseFile(): Promise<void> {
     console.log(chalk.blue('📄 Generating font license information...'));
 
     const config = await this.loadConfig();
@@ -77,7 +97,7 @@ When using these fonts, please provide appropriate attribution as required by th
     console.log(chalk.green(`✅ License file generated: ${licensePath}`));
 
     // Also generate JSON format for programmatic use
-    const licenseData = {
+    const licenseData: LicenseData = {
       generatedAt: timestamp,
       fonts: Object.fromEntries(
         Object.entries(config.fonts).map(([fontId, fontConfig]) => [
@@ -98,8 +118,8 @@ When using these fonts, please provide appropriate attribution as required by th
     console.log(chalk.green(`✅ License JSON generated: ${licenseJsonPath}`));
   }
 
-  getDescription(fontConfig) {
-    const descriptions = {
+  getDescription(fontConfig: FontConfig): string {
+    const descriptions: Record<string, string> = {
       imingcp:
         'A high-quality Traditional Chinese serif font based on Mincho style',
       lxgwwenkaitc:
@@ -108,14 +128,14 @@ When using these fonts, please provide appropriate attribution as required by th
     };
 
     return (
-      descriptions[fontConfig.name.toLowerCase().replace(/[^a-z]/g, '')] ||
+      descriptions[fontConfig.name.toLowerCase().replace(/[^a-z]/g, '')] ??
       'A beautiful font for web typography'
     );
   }
 }
 
 // Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === new URL(process.argv[1] ?? '', 'file:').href) {
   const generator = new LicenseGenerator();
   generator.generateLicenseFile().catch(console.error);
 }

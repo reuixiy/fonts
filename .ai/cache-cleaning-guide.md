@@ -17,6 +17,7 @@ pnpm run clean:git      # Only git cache branch
 ## What Gets Cleaned
 
 ### Build Artifacts (`--build`)
+- `dist/` - TypeScript compiled output
 - `build/` - Generated fonts and CSS files
 - `downloads/` - Downloaded font files
 - `.version-cache.json` - Local version cache
@@ -97,7 +98,9 @@ pnpm run clean:git
 After cleaning, you typically need to:
 
 1. **After cleaning dependencies**: `pnpm install`
-2. **After cleaning build**: `pnpm start -- --build-only`
+2. **After cleaning build**: 
+   - `pnpm run build` (compile TypeScript)
+   - `pnpm start -- --build-only` (rebuild fonts)
 3. **After cleaning git cache**: Version checker will recreate on next run
 
 ## Troubleshooting
@@ -120,3 +123,7 @@ If git cache cleaning fails:
 - Ensure you're in a git repository
 - Check if you have permission to delete branches
 - Manually delete: `git branch -D cache`
+
+---
+
+**Last Updated**: June 17, 2025 (TypeScript Migration - v2.0.0)

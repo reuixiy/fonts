@@ -55,8 +55,9 @@ Please refer to each font's source repository for complete license terms and att
 
 ### Prerequisites
 
-- Node.js 18+ 
-- Python 3.8+
+- Node.js 20+ (TypeScript compilation and runtime)
+- pnpm 9+ (package manager)
+- Python 3.8+ (for font processing)
 - `fonttools` with WOFF support
 
 ### Installation
@@ -94,13 +95,19 @@ pnpm start                    # Full workflow with version checking
 pnpm start -- --build-only   # Build all fonts without version checking
 pnpm start -- --fonts <ids>  # Process specific fonts (e.g., imingcp lxgwwenkaitc)
 
-# Individual steps
+# Individual steps (TypeScript)
 pnpm run check-versions       # Check for font version updates
 pnpm run download-fonts       # Download fonts
-pnpm run subset-fonts         # Process and subset fonts  
+pnpm run subset-fonts         # Process and subset fonts
 pnpm run generate-css         # Generate CSS files
 pnpm run generate-license     # Generate license information
-pnpm run build               # Complete build process (legacy, use pnpm start instead)
+
+# Development and Build Commands
+pnpm run build               # Compile TypeScript to JavaScript (dist/)
+pnpm run type-check          # Type checking without compilation
+pnpm run lint                # ESLint code linting
+pnpm run lint:fix            # Auto-fix linting issues
+pnpm run dev                 # Development mode with watch (tsx watch)
 ```
 
 **Font IDs**: `imingcp`, `lxgwwenkaitc`, `amstelvar`
@@ -110,10 +117,10 @@ pnpm run build               # Complete build process (legacy, use pnpm start in
 Clean various cache files and build artifacts:
 
 ```bash
-# Clean everything (build, downloads, node_modules, git cache)
+# Clean everything (dist/, build/, downloads/, node_modules, git cache)
 pnpm run clean:all
 
-# Clean only build artifacts (build/, downloads/, cache files)
+# Clean only build artifacts (dist/, build/, downloads/, cache files)
 pnpm run clean:build
 
 # Clean only dependencies (node_modules, lock files)
@@ -138,6 +145,8 @@ Font configuration is stored in `src/config/fonts.json`. This file defines:
 - Character priority rankings
 - Output specifications
 - CSS generation parameters
+
+The project is built with **TypeScript** for enhanced type safety and developer experience. All source files use absolute imports with path mapping configured in `tsconfig.json`.
 
 ### Example Configuration
 
@@ -300,24 +309,32 @@ The chunked fonts provide progressive loading with optimal performance:
 .
 ├── .ai/                    # AI-generated documentation
 ├── .github/workflows/      # GitHub Actions workflows
+├── dist/                   # TypeScript compiled output (build artifacts)
 ├── src/
 │   ├── config/
 │   │   └── fonts.json     # Font configuration
-│   ├── fontSubset.js      # Font subsetting logic
-│   ├── versionChecker.js  # Version checking utility
-│   └── index.js          # Main entry point
+│   ├── fontSubset.ts      # Font subsetting logic (TypeScript)
+│   ├── versionChecker.ts  # Version checking utility (TypeScript)
+│   ├── types.ts           # TypeScript type definitions
+│   └── index.ts          # Main entry point (TypeScript)
 ├── scripts/
-│   ├── download-fonts.js  # Font download script
-│   └── generate-css.js    # CSS generation script
+│   ├── download-fonts.ts  # Font download script (TypeScript)
+│   ├── generate-css.ts    # CSS generation script (TypeScript)
+│   └── generate-license.ts # License generation script (TypeScript)
+├── tsconfig.json          # TypeScript configuration
+├── eslint.config.ts       # ESLint configuration (TypeScript)
+├── clean-cache.sh         # Cache cleaning script
 └── package.json
 ```
 
 ### Adding New Fonts
 
 1. **Update configuration** in `src/config/fonts.json`
-2. **Add font-specific logic** if needed in the processing modules
-3. **Test locally** with `pnpm run build`
-4. **Commit changes** to trigger automated build
+2. **Add font-specific logic** if needed in the TypeScript processing modules
+3. **Update type definitions** in `src/types.ts` if new configuration options are added
+4. **Test locally** with `pnpm run build` (compile TypeScript) and `pnpm start`
+5. **Run type checking** with `pnpm run type-check` to ensure type safety
+6. **Commit changes** to trigger automated build
 
 ### Local Testing
 
@@ -326,6 +343,13 @@ The chunked fonts provide progressive loading with optimal performance:
 pnpm start                    # Full workflow with version checking
 pnpm start -- --build-only   # Build all fonts (skip version check)
 pnpm start -- --fonts imingcp # Test specific font processing
+
+# TypeScript Development
+pnpm run build                # Compile TypeScript to dist/
+pnpm run type-check          # Check types without compilation
+pnpm run lint                # Lint TypeScript code
+pnpm run lint:fix            # Auto-fix linting issues
+pnpm run dev                 # Development mode with watch
 
 # Test individual components
 pnpm run check-versions       # Test version checking
@@ -384,6 +408,17 @@ pip install 'fonttools[woff]'
 - Run `pnpm run clean:build` to force regeneration
 - Check file validation is passing correctly
 
+**TypeScript compilation errors**
+```bash
+# Check type errors
+pnpm run type-check
+
+# Fix common issues
+# - Check import paths use absolute imports (@/ prefix)
+# - Ensure all TypeScript files have proper type annotations
+# - Verify configuration in tsconfig.json
+```
+
 ## 📄 License
 
 MIT License - see LICENSE file for details.
@@ -406,4 +441,4 @@ Detailed documentation is available in the `.ai/` folder:
 ---
 
 **Last Updated**: 2025-06-17
-**Version**: 1.0.0
+**Version**: 2.0.0 (TypeScript Migration)
