@@ -62,9 +62,28 @@ jobs:
           echo "🔄 Starting font build workflow..."
           pnpm start -- --build-only
       
+      - name: Verify build output
+        run: |
+          echo "🔍 Checking build output..."
+          if [ -d "build" ]; then
+            echo "✅ Build directory exists"
+            echo "📁 Build directory contents:"
+            find build -type f | head -20
+          else
+            echo "❌ Build directory not found"
+            echo "📁 Current directory contents:"
+            ls -la
+          fi
+      
       - name: Create build metadata
         run: |
           echo "📋 Creating build metadata..."
+          mkdir -p build
+          
+          # Create basic directory structure if it doesn't exist
+          mkdir -p build/fonts
+          mkdir -p build/css
+          
           cat > build/metadata.json << EOF
           {
             "buildDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
@@ -74,6 +93,8 @@ jobs:
             "fonts": $(cat src/config/fonts.json | jq -c '.fonts')
           }
           EOF
+          
+          echo "✅ Build metadata created"
       
       - name: Get current date
         id: date

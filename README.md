@@ -19,7 +19,7 @@ An automated workflow for downloading, subsetting, and deploying web fonts with 
 - **Font ID**: `imingcp`
 - **Weight**: 400 (Regular)
 - **Source**: [ichitenfont/I.Ming](https://github.com/ichitenfont/I.Ming)
-- **License**: [IPA Font License Agreement v1.0](https://github.com/ichitenfont/I.Ming/blob/main/LICENSE)
+- **License**: [IPA Font License Agreement v1.0](https://github.com/ichitenfont/I.Ming/blob/master/LICENSE.md)
 - **Description**: A high-quality Traditional Chinese serif font based on Mincho style
 
 #### LXGW WenKai TC (Traditional Chinese Handwriting)
