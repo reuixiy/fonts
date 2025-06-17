@@ -134,9 +134,11 @@ class FontSubset {
     // Check if output file already exists
     if (await fs.pathExists(outputPath)) {
       const stats = await fs.stat(outputPath);
-      console.log(chalk.green(`    ⏭️  File already exists: ${outputFileName}`));
+      console.log(
+        chalk.green(`    ⏭️  File already exists: ${outputFileName}`)
+      );
       console.log(chalk.gray(`    Size: ${(stats.size / 1024).toFixed(1)}KB`));
-      
+
       return {
         path: outputPath,
         filename: outputFileName,
@@ -199,9 +201,13 @@ class FontSubset {
       // Check if output file already exists
       if (await fs.pathExists(outputPath)) {
         const stats = await fs.stat(outputPath);
-        console.log(chalk.green(`    ⏭️  File already exists: ${outputFileName}`));
-        console.log(chalk.gray(`    Size: ${(stats.size / 1024).toFixed(1)}KB`));
-        
+        console.log(
+          chalk.green(`    ⏭️  File already exists: ${outputFileName}`)
+        );
+        console.log(
+          chalk.gray(`    Size: ${(stats.size / 1024).toFixed(1)}KB`)
+        );
+
         results.push({
           path: outputPath,
           filename: outputFileName,
