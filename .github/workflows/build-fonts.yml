@@ -59,7 +59,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "� Starting font build workflow..."
+          echo "🔄 Starting font build workflow..."
           pnpm start -- --build-only
       
       - name: Create build metadata
@@ -75,6 +75,10 @@ jobs:
           }
           EOF
       
+      - name: Get current date
+        id: date
+        run: echo "date=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
+      
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -82,11 +86,7 @@ jobs:
           publish_dir: ./build
           force_orphan: true
           publish_branch: build
-          commit_message: |
-            🔄 Font build ${{ github.run_id }} - $(date -u +%Y-%m-%d)
-            
-            Updated fonts: ${{ github.event.inputs.updated-fonts || 'all' }}
-            Source commit: ${{ github.sha }}
+          commit_message: "🔄 Font build ${{ github.run_id }} - ${{ steps.date.outputs.date }} | Fonts: ${{ github.event.inputs.updated-fonts || 'all' }} | Source: ${{ github.sha }}"
       
       - name: Summary
         run: |
