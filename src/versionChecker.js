@@ -27,32 +27,9 @@ class VersionChecker {
 
   async loadVersionCache() {
     try {
-      // In GitHub Actions, try to load from repository variables first
+      // In GitHub Actions, try to load from environment variables first
       if (process.env.GITHUB_ACTIONS) {
         const cacheData = {};
-        
-        // Try to load from GitHub Repository Variables
-        try {
-          const response = await this.octokit.rest.actions.getRepoVariable({
-            owner: process.env.GITHUB_REPOSITORY_OWNER || 'reuixiy',
-            repo: process.env.GITHUB_REPOSITORY?.split('/')[1] || 'fonts',
-            name: 'FONT_VERSION_CACHE'
-          });
-          
-          if (response.data.value) {
-            const parsedCache = JSON.parse(response.data.value);
-            console.log(
-              chalk.blue('📋 Loaded version cache from GitHub Repository Variables')
-            );
-            return parsedCache;
-          }
-        } catch (repoVarError) {
-          console.log(
-            chalk.gray('📋 No repository variable cache found, checking environment variables...')
-          );
-        }
-
-        // Fallback to environment variables (legacy support)
         if (process.env.FONT_IMING_VERSION) {
           cacheData.iming = { version: process.env.FONT_IMING_VERSION };
         }
@@ -216,34 +193,12 @@ class VersionChecker {
   async updateVersionCache(currentVersions) {
     await this.saveVersionCache(currentVersions);
 
-    // In GitHub Actions, save to Repository Variables for persistence
-    if (process.env.GITHUB_ACTIONS && process.env.GITHUB_TOKEN) {
-      try {
-        const owner = process.env.GITHUB_REPOSITORY_OWNER || 'reuixiy';
-        const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'fonts';
-        
-        // Save entire cache as a JSON string in repository variable
-        await this.octokit.rest.actions.createOrUpdateRepoVariable({
-          owner,
-          repo,
-          name: 'FONT_VERSION_CACHE',
-          value: JSON.stringify(currentVersions)
-        });
-        
-        console.log(chalk.green('📝 Version cache saved to GitHub Repository Variables'));
-      } catch (error) {
-        console.warn(
-          chalk.yellow('⚠️ Failed to save version cache to repository variables:'),
-          error.message
-        );
-        console.log(chalk.gray('   Continuing with local cache only...'));
-      }
-    }
-
-    // Also output as environment variables for same workflow run compatibility
+    // In GitHub Actions, output as environment variables for current workflow run
     if (process.env.GITHUB_ACTIONS && process.env.GITHUB_OUTPUT) {
       console.log(
-        chalk.blue('📋 Setting version environment variables for current workflow:')
+        chalk.blue(
+          '📋 Setting version environment variables for current workflow:'
+        )
       );
 
       const outputFile = process.env.GITHUB_OUTPUT;

@@ -10,9 +10,8 @@ jobs:
   check-versions:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       actions: write
-      variables: write
     outputs:
       has-updates: ${{ steps.version-check.outputs.has-updates }}
       updated-fonts: ${{ steps.version-check.outputs.updated-fonts }}
@@ -38,16 +37,28 @@ jobs:
         id: version-check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Load cached versions from previous runs
+          FONT_IMING_VERSION: ${{ vars.FONT_IMING_VERSION }}
+          FONT_LXGW_VERSION: ${{ vars.FONT_LXGW_VERSION }}
+          FONT_AMSTELVAR_VERSION: ${{ vars.FONT_AMSTELVAR_VERSION }}
         run: pnpm run check-versions
       
-      - name: Update stored versions
+      - name: Update version cache
         if: steps.version-check.outputs.has-updates == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Update repository variables with new versions
-          # This will be used to store the current version state
-          echo "Version update detected, storing new versions..."
+          # Update repository variables to persist version cache
+          if [ -n "${{ steps.version-check.outputs.font_iming_version }}" ]; then
+            gh variable set FONT_IMING_VERSION --body "${{ steps.version-check.outputs.font_iming_version }}"
+          fi
+          if [ -n "${{ steps.version-check.outputs.font_lxgw_version }}" ]; then
+            gh variable set FONT_LXGW_VERSION --body "${{ steps.version-check.outputs.font_lxgw_version }}"
+          fi
+          if [ -n "${{ steps.version-check.outputs.font_amstelvar_version }}" ]; then
+            gh variable set FONT_AMSTELVAR_VERSION --body "${{ steps.version-check.outputs.font_amstelvar_version }}"
+          fi
+          echo "✅ Version cache updated in repository variables"
 
   trigger-build:
     needs: check-versions
