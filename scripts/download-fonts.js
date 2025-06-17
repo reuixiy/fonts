@@ -149,7 +149,7 @@ class FontDownloader {
         );
         return {
           path: outputPath,
-          version: version,
+          version,
           originalName: asset.name,
         };
       }
@@ -179,7 +179,7 @@ class FontDownloader {
 
       return {
         path: outputPath,
-        version: version,
+        version,
         originalName: asset.name,
       };
     } catch (error) {
@@ -325,7 +325,7 @@ class FontDownloader {
 
       return {
         files: downloadedFiles,
-        version: version,
+        version,
         commit: latestCommit.sha,
       };
     } catch (error) {

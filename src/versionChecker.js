@@ -50,7 +50,7 @@ class VersionChecker {
             );
             return parsedCache;
           }
-        } catch (error) {
+        } catch (_error) {
           console.log(
             chalk.gray(
               '📋 No cache branch found, checking environment variables...'
@@ -82,7 +82,7 @@ class VersionChecker {
 
       // Fallback to local file
       return await fs.readJson(this.versionCachePath);
-    } catch (error) {
+    } catch (_error) {
       // File doesn't exist, return empty cache
       console.log(
         chalk.gray('📋 No existing version cache found, starting fresh')

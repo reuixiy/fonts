@@ -137,10 +137,15 @@ class CSSGenerator {
 
   async minifyCSS(css) {
     try {
-      const result = await postcss([cssnano({ preset: 'default' })]).process(css, { from: undefined });
+      const result = await postcss([cssnano({ preset: 'default' })]).process(
+        css,
+        { from: undefined }
+      );
       return result.css;
-    } catch (error) {
-      console.warn(chalk.yellow('⚠️  CSS minification failed, using original CSS'));
+    } catch (_error) {
+      console.warn(
+        chalk.yellow('⚠️  CSS minification failed, using original CSS')
+      );
       return css;
     }
   }
@@ -171,8 +176,14 @@ class CSSGenerator {
     const minifiedCSS = await this.minifyCSS(cssContent);
     await fs.writeFile(minCssPath, minifiedCSS);
 
-    console.log(chalk.green(`  ✅ Generated: ${cssFileName} (${cssContent.length} bytes)`));
-    console.log(chalk.green(`  ✅ Generated: ${minCssFileName} (${minifiedCSS.length} bytes)`));
+    console.log(
+      chalk.green(`  ✅ Generated: ${cssFileName} (${cssContent.length} bytes)`)
+    );
+    console.log(
+      chalk.green(
+        `  ✅ Generated: ${minCssFileName} (${minifiedCSS.length} bytes)`
+      )
+    );
 
     return {
       path: cssPath,
@@ -199,11 +210,13 @@ class CSSGenerator {
  * 
  * Included Fonts:
 `;
-    
+
     for (const [fontId, processResult] of Object.entries(allResults)) {
       if (processResult.error) continue;
       const fontConfig = config.fonts[fontId];
-      const chunkInfo = Array.isArray(processResult) ? ` (${processResult.length} chunks)` : '';
+      const chunkInfo = Array.isArray(processResult)
+        ? ` (${processResult.length} chunks)`
+        : '';
       cssContent += ` * - ${fontConfig.displayName}${chunkInfo} - ${fontConfig.license.type}
 `;
     }
@@ -225,8 +238,16 @@ class CSSGenerator {
     const minifiedCSS = await this.minifyCSS(cssContent);
     await fs.writeFile(minCssPath, minifiedCSS);
 
-    console.log(chalk.green(`  ✅ Generated: ${cssFileName} (unified, ${cssContent.length} bytes)`));
-    console.log(chalk.green(`  ✅ Generated: ${minCssFileName} (unified, ${minifiedCSS.length} bytes)`));
+    console.log(
+      chalk.green(
+        `  ✅ Generated: ${cssFileName} (unified, ${cssContent.length} bytes)`
+      )
+    );
+    console.log(
+      chalk.green(
+        `  ✅ Generated: ${minCssFileName} (unified, ${minifiedCSS.length} bytes)`
+      )
+    );
 
     return {
       path: cssPath,

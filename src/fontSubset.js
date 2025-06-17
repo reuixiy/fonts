@@ -219,7 +219,7 @@ class FontSubset {
           path: outputPath,
           filename: outputFileName,
           size: stats.size,
-          compressionRatio: compressionRatio,
+          compressionRatio,
           unicodeRanges: chunk.unicodeRanges,
           characterCount: chunk.characters.length,
         });
@@ -289,7 +289,7 @@ class FontSubset {
         path: outputPath,
         filename: outputFileName,
         size: stats.size,
-        compressionRatio: compressionRatio,
+        compressionRatio,
       };
     } catch (error) {
       console.error(
@@ -380,7 +380,7 @@ class FontSubset {
             filename: outputFileName,
             style: inputFile.style,
             size: stats.size,
-            compressionRatio: compressionRatio,
+            compressionRatio,
           });
         } catch (error) {
           console.error(
@@ -478,7 +478,7 @@ class FontSubset {
           path: outputPath,
           filename: outputFileName,
           size: stats.size,
-          compressionRatio: compressionRatio,
+          compressionRatio,
           unicodeRanges: chunk.unicodeRanges,
           characterCount: chunk.characters.length,
           style: inputFile.style,
@@ -634,7 +634,7 @@ class FontSubset {
     try {
       const data = await fs.readJson(this.characterFrequencyPath);
       return data;
-    } catch (error) {
+    } catch (_error) {
       console.warn(
         chalk.yellow(
           '⚠️  Character frequency data not found, using basic priorities'
@@ -686,7 +686,7 @@ class FontSubset {
     });
   }
 
-  parseUnicodeOutput(output) {
+  parseUnicodeOutput(_output) {
     // This is a simplified parser - in reality, we'd need more sophisticated parsing
     // For now, we'll return a basic set of common characters
     const basicChars = [];
@@ -799,7 +799,7 @@ class FontSubset {
       const stats = await fs.stat(tempFile);
       await fs.remove(tempFile); // Clean up
       return Math.round(stats.size / 1024); // Return size in KB
-    } catch (error) {
+    } catch (_error) {
       console.warn(
         chalk.yellow(`    ⚠️  Size estimation failed, using default`)
       );
@@ -848,8 +848,6 @@ class FontSubset {
       const shouldFinalizeByCount =
         currentChunk.length >= maxCharactersPerChunk;
       const isLastChunk = chunkIndex >= fontConfig.subset.maxChunks - 1;
-      const hasEnoughChunks =
-        chunks.length >= Math.min(chunkSizes.length - 1, 2); // Ensure at least 2-3 chunks
 
       const shouldFinalize =
         (shouldFinalizeBySize || shouldFinalizeByCount || isLastChunk) &&
