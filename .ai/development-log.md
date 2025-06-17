@@ -311,3 +311,43 @@ This log tracks the development progress of the automated web font subsetting an
 
 **Last Updated**: June 17, 2025  
 **Next Review**: After Phase 5 testing completion
+
+# Development Log
+
+## 2025-06-17 - Final Optimizations and Cleanup
+
+### CLI Argument Parsing Fix
+- **Issue**: `pnpm start -- --build-only` was only showing usage help instead of executing build
+- **Root Cause**: npm/pnpm passes `--` as literal argument, causing `args[0]` to be `--` instead of `--build-only`
+- **Solution**: Updated argument parsing in `src/index.js` to check both `args[0]` and `args[1]` for options
+- **Fix**: Modified module execution detection to properly handle npm/pnpm script execution
+- **Result**: All CLI modes now work correctly: default, `--build-only`, `--fonts <id>`
+
+### Font Subsetting Optimization
+- **Feature**: Skip font subsetting when output files already exist
+- **Implementation**: Added file existence checks in `processChineseFont()` and `processVariableFont()`
+- **Benefits**: 
+  - Dramatically improves workflow speed on subsequent runs (seconds vs minutes)
+  - Perfect for incremental builds and development iterations
+  - Maintains same output structure and metadata generation
+- **Output**: Shows "⏭️ File already exists" message with file size for skipped files
+
+### Code Cleanup
+- **Removed**: Unused temp directory creation and cleanup from download scripts
+- **Updated**: `clean-cache.sh` script to remove temp directory references
+- **Updated**: `.gitignore` to remove temp/ entry
+- **Updated**: Documentation in `.ai/cache-cleaning-guide.md`
+
+### Current Status
+✅ **COMPLETED**: Full automated web font subsetting workflow
+✅ **VERIFIED**: All CLI modes working correctly
+✅ **OPTIMIZED**: Skip processing for existing files
+✅ **CLEANED**: Removed unused code and directories
+✅ **DOCUMENTED**: All changes recorded and committed
+
+The system is now production-ready with:
+- Robust error handling and logging
+- Efficient incremental processing
+- Complete automation via GitHub Actions
+- Modern tooling (pnpm, ESM modules)
+- Comprehensive documentation
