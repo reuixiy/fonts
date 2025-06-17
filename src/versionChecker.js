@@ -194,15 +194,24 @@ class VersionChecker {
         if (process.env.GITHUB_ACTIONS) {
           const fs = await import('fs');
           const path = await import('path');
-          
+
           const outputFile = process.env.GITHUB_OUTPUT;
           if (outputFile) {
             fs.appendFileSync(outputFile, `has_updates=true\n`);
-            fs.appendFileSync(outputFile, `updated_fonts=${JSON.stringify(result.updatedFonts.map((f) => f.id))}\n`);
+            fs.appendFileSync(
+              outputFile,
+              `updated_fonts=${JSON.stringify(
+                result.updatedFonts.map((f) => f.id)
+              )}\n`
+            );
           } else {
             // Fallback for older GitHub Actions
             console.log(`::set-output name=has_updates::true`);
-            console.log(`::set-output name=updated_fonts::${JSON.stringify(result.updatedFonts.map((f) => f.id))}`);
+            console.log(
+              `::set-output name=updated_fonts::${JSON.stringify(
+                result.updatedFonts.map((f) => f.id)
+              )}`
+            );
           }
         }
 
@@ -213,7 +222,7 @@ class VersionChecker {
 
         if (process.env.GITHUB_ACTIONS) {
           const fs = await import('fs');
-          
+
           const outputFile = process.env.GITHUB_OUTPUT;
           if (outputFile) {
             fs.appendFileSync(outputFile, `has_updates=false\n`);
