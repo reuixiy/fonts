@@ -47,11 +47,41 @@ class CSSGenerator {
 
     if (fontConfig.type === 'variable') {
       // Variable font CSS generation
-      processResult.forEach((result) => {
-        const fontStyle = result.style === 'italic' ? 'italic' : 'normal';
-        const fontWeight = fontConfig.weight || '100 900'; // Variable weight range
+      if (fontConfig.subset.type === 'size-based-chunks') {
+        // Chunked variable font: group chunks by style
+        const chunksByStyle = {};
+        processResult.forEach((chunk) => {
+          if (!chunksByStyle[chunk.style]) {
+            chunksByStyle[chunk.style] = [];
+          }
+          chunksByStyle[chunk.style].push(chunk);
+        });
 
-        css += `@font-face {
+        // Generate @font-face rules for each style's chunks
+        Object.entries(chunksByStyle).forEach(([style, chunks]) => {
+          chunks.forEach((chunk) => {
+            const fontStyle = style === 'italic' ? 'italic' : 'normal';
+            const fontWeight = fontConfig.weight || '100 900'; // Variable weight range
+
+            css += `@font-face {
+  font-family: '${fontConfig.displayName}';
+  src: url('${fontPath}/${chunk.filename}') format('woff2');
+  font-display: swap;
+  font-style: ${fontStyle};
+  font-weight: ${fontWeight};
+  unicode-range: ${this.formatUnicodeRanges(chunk.unicodeRanges)};
+}
+
+`;
+          });
+        });
+      } else {
+        // Legacy single-file variable font
+        processResult.forEach((result) => {
+          const fontStyle = result.style === 'italic' ? 'italic' : 'normal';
+          const fontWeight = fontConfig.weight || '100 900'; // Variable weight range
+
+          css += `@font-face {
   font-family: '${fontConfig.displayName}';
   src: url('${fontPath}/${result.filename}') format('woff2');
   font-display: swap;
@@ -61,13 +91,33 @@ class CSSGenerator {
 }
 
 `;
-      });
+        });
+      }
     } else {
-      // Regular font CSS generation
-      const fontStyle = fontConfig.style || 'normal';
-      const fontWeight = fontConfig.weight || 400;
+      // Check if this is chunked output (array) or single file output (object)
+      if (Array.isArray(processResult)) {
+        // Chunked font CSS generation
+        processResult.forEach((chunk) => {
+          const fontStyle = fontConfig.style || 'normal';
+          const fontWeight = fontConfig.weight || 400;
 
-      css += `@font-face {
+          css += `@font-face {
+  font-family: '${fontConfig.displayName}';
+  src: url('${fontPath}/${chunk.filename}') format('woff2');
+  font-display: swap;
+  font-style: ${fontStyle};
+  font-weight: ${fontWeight};
+  unicode-range: ${this.formatUnicodeRanges(chunk.unicodeRanges)};
+}
+
+`;
+        });
+      } else {
+        // Single file font CSS generation (legacy)
+        const fontStyle = fontConfig.style || 'normal';
+        const fontWeight = fontConfig.weight || 400;
+
+        css += `@font-face {
   font-family: '${fontConfig.displayName}';
   src: url('${fontPath}/${processResult.filename}') format('woff2');
   font-display: swap;
@@ -77,6 +127,7 @@ class CSSGenerator {
 }
 
 `;
+      }
     }
 
     return css;
@@ -90,11 +141,75 @@ class CSSGenerator {
     let cssContent = `/* ${
       fontConfig.displayName
     } - Generated on ${new Date().toISOString()} */
+`;
+
+    // Add chunked font metadata if applicable
+    if (Array.isArray(processResult) && fontConfig.subset.type === 'size-based-chunks') {
+      if (fontConfig.type === 'variable') {
+        // Count chunks by style for variable fonts
+        const styleGroups = {};
+        processResult.forEach((chunk) => {
+          if (!styleGroups[chunk.style]) {
+            styleGroups[chunk.style] = 0;
+          }
+          styleGroups[chunk.style]++;
+        });
+        const styleInfo = Object.entries(styleGroups)
+          .map(([style, count]) => `${style}: ${count} chunks`)
+          .join(', ');
+        cssContent += `/* Variable Chunked Font: ${processResult.length} total chunks (${styleInfo}) */
+/* Load chunks in order for optimal performance */
 
 `;
+      } else {
+        cssContent += `/* Chunked Font: ${processResult.length} chunks, progressive loading */
+/* Load chunks in order for optimal performance */
+
+`;
+      }
+    } else {
+      cssContent += `
+`;
+    }
 
     // Add @font-face declarations
     cssContent += this.generateFontFaceCSS(fontId, fontConfig, processResult);
+
+    // Add usage notes for chunked fonts
+    if (Array.isArray(processResult) && fontConfig.subset.type === 'size-based-chunks') {
+      const chunkCount = processResult.length;
+      const isVariable = fontConfig.type === 'variable';
+      
+      cssContent += `/* Usage Notes:
+ * This font is split into ${chunkCount} progressive chunks${isVariable ? ' across multiple styles' : ''}.
+ * - Chunk 0: Critical characters (Latin, basic punctuation)`;
+
+      if (fontConfig.subset.strategy === 'chinese-frequency') {
+        cssContent += `
+ * - Chunk 1+: Common to rare Chinese characters by frequency`;
+      } else if (fontConfig.subset.strategy === 'latin-frequency') {
+        cssContent += `
+ * - Chunk 1+: Extended Latin characters by frequency`;
+      }
+
+      cssContent += `
+ * 
+ * The browser will automatically load chunks as needed based on
+ * the unicode-range declarations above.`;
+
+      if (isVariable) {
+        cssContent += `
+ * 
+ * Variable font features available:
+ * - Font styles: ${fontConfig.styles ? fontConfig.styles.join(', ') : 'multiple'}
+ * - Variable axes: ${fontConfig.variableAxes ? fontConfig.variableAxes.slice(0, 5).join(', ') + (fontConfig.variableAxes.length > 5 ? '...' : '') : 'multiple'}`;
+      }
+
+      cssContent += `
+ */
+
+`;
+    }
 
     // Write CSS file
     await fs.writeFile(cssPath, cssContent);
@@ -114,6 +229,21 @@ class CSSGenerator {
 
     let cssContent = `/* Unified Font CSS - Generated on ${new Date().toISOString()} */
 /* Auto-generated from web-font-auto-subsetting workflow */
+/* https://github.com/user/web-font-auto-subsetting */
+
+`;
+
+    // Add summary of included fonts
+    cssContent += `/* Included Fonts:
+`;
+    for (const [fontId, processResult] of Object.entries(allResults)) {
+      if (processResult.error) continue;
+      const fontConfig = config.fonts[fontId];
+      const chunkInfo = Array.isArray(processResult) ? ` (${processResult.length} chunks)` : '';
+      cssContent += ` * - ${fontConfig.displayName}${chunkInfo}
+`;
+    }
+    cssContent += ` */
 
 `;
 
@@ -122,7 +252,8 @@ class CSSGenerator {
       if (processResult.error) continue;
 
       const fontConfig = config.fonts[fontId];
-      cssContent += `/* ${fontConfig.displayName} */
+      const chunkInfo = Array.isArray(processResult) ? ` (${processResult.length} chunks)` : '';
+      cssContent += `/* ${fontConfig.displayName}${chunkInfo} */
 `;
       cssContent += this.generateFontFaceCSS(fontId, fontConfig, processResult);
     }
@@ -140,6 +271,19 @@ class CSSGenerator {
 
 .font-fallback {
   font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Progressive Loading Utilities */
+.font-loading {
+  font-display: swap;
+  font-variation-settings: normal;
+}
+
+/* High-performance text rendering */
+.text-optimized {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 `;

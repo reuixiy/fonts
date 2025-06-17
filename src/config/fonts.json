@@ -17,21 +17,16 @@
       "weight": 400,
       "style": "normal",
       "subset": {
-        "type": "chinese-common",
-        "ranges": [
-          "U+4E00-9FFF",
-          "U+3400-4DBF",
-          "U+20000-2A6DF",
-          "U+F900-FAFF",
-          "U+2F800-2FA1F",
-          "U+0020-007F",
-          "U+3000-303F",
-          "U+FF00-FFEF"
-        ]
+        "type": "size-based-chunks",
+        "strategy": "chinese-frequency",
+        "chunkSizes": [80, 150, 150, 150, 150, 200, 200, 200, 250, 250, 250],
+        "maxChunks": 30,
+        "ensureCompleteCoverage": true,
+        "priorityData": "traditional-chinese-frequency"
       },
       "output": {
         "formats": ["woff2"],
-        "filename": "imingcp-regular"
+        "filenamePattern": "imingcp-chunk-{index}"
       }
     },
     "lxgwwenkaitc": {
@@ -51,21 +46,16 @@
       "weight": 300,
       "style": "normal",
       "subset": {
-        "type": "chinese-common",
-        "ranges": [
-          "U+4E00-9FFF",
-          "U+3400-4DBF",
-          "U+20000-2A6DF",
-          "U+F900-FAFF",
-          "U+2F800-2FA1F",
-          "U+0020-007F",
-          "U+3000-303F",
-          "U+FF00-FFEF"
-        ]
+        "type": "size-based-chunks",
+        "strategy": "chinese-frequency",
+        "chunkSizes": [80, 150, 150, 150, 150, 200, 200, 200, 250, 250, 250],
+        "maxChunks": 30,
+        "ensureCompleteCoverage": true,
+        "priorityData": "traditional-chinese-frequency"
       },
       "output": {
         "formats": ["woff2"],
-        "filename": "lxgwwenkaitc-light"
+        "filenamePattern": "lxgwwenkaitc-chunk-{index}"
       }
     },
     "amstelvar": {
@@ -94,21 +84,16 @@
       "type": "variable",
       "styles": ["roman", "italic"],
       "subset": {
-        "type": "latin-extended",
-        "ranges": [
-          "U+0020-007F",
-          "U+00A0-00FF",
-          "U+0100-017F",
-          "U+0180-024F",
-          "U+1E00-1EFF",
-          "U+2000-206F",
-          "U+20A0-20CF",
-          "U+2100-214F"
-        ]
+        "type": "size-based-chunks",
+        "strategy": "latin-frequency",
+        "chunkSizes": [80, 150, 200, 250],
+        "maxChunks": 8,
+        "ensureCompleteCoverage": true,
+        "priorityData": "latin-frequency"
       },
       "output": {
         "formats": ["woff2"],
-        "filenames": ["amstelvar-roman", "amstelvar-italic"]
+        "filenamePattern": "amstelvar-{style}-chunk-{index}"
       },
       "variableAxes": ["GRAD", "XOPQ", "XTRA", "YOPQ", "YTAS", "YTDE", "YTFI", "YTLC", "YTUC", "wdth", "wght", "opsz"]
     }
