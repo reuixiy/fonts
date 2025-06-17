@@ -144,7 +144,10 @@ class CSSGenerator {
 `;
 
     // Add chunked font metadata if applicable
-    if (Array.isArray(processResult) && fontConfig.subset.type === 'size-based-chunks') {
+    if (
+      Array.isArray(processResult) &&
+      fontConfig.subset.type === 'size-based-chunks'
+    ) {
       if (fontConfig.type === 'variable') {
         // Count chunks by style for variable fonts
         const styleGroups = {};
@@ -176,12 +179,17 @@ class CSSGenerator {
     cssContent += this.generateFontFaceCSS(fontId, fontConfig, processResult);
 
     // Add usage notes for chunked fonts
-    if (Array.isArray(processResult) && fontConfig.subset.type === 'size-based-chunks') {
+    if (
+      Array.isArray(processResult) &&
+      fontConfig.subset.type === 'size-based-chunks'
+    ) {
       const chunkCount = processResult.length;
       const isVariable = fontConfig.type === 'variable';
-      
+
       cssContent += `/* Usage Notes:
- * This font is split into ${chunkCount} progressive chunks${isVariable ? ' across multiple styles' : ''}.
+ * This font is split into ${chunkCount} progressive chunks${
+        isVariable ? ' across multiple styles' : ''
+      }.
  * - Chunk 0: Critical characters (Latin, basic punctuation)`;
 
       if (fontConfig.subset.strategy === 'chinese-frequency') {
@@ -201,8 +209,15 @@ class CSSGenerator {
         cssContent += `
  * 
  * Variable font features available:
- * - Font styles: ${fontConfig.styles ? fontConfig.styles.join(', ') : 'multiple'}
- * - Variable axes: ${fontConfig.variableAxes ? fontConfig.variableAxes.slice(0, 5).join(', ') + (fontConfig.variableAxes.length > 5 ? '...' : '') : 'multiple'}`;
+ * - Font styles: ${
+   fontConfig.styles ? fontConfig.styles.join(', ') : 'multiple'
+ }
+ * - Variable axes: ${
+   fontConfig.variableAxes
+     ? fontConfig.variableAxes.slice(0, 5).join(', ') +
+       (fontConfig.variableAxes.length > 5 ? '...' : '')
+     : 'multiple'
+ }`;
       }
 
       cssContent += `
@@ -239,7 +254,9 @@ class CSSGenerator {
     for (const [fontId, processResult] of Object.entries(allResults)) {
       if (processResult.error) continue;
       const fontConfig = config.fonts[fontId];
-      const chunkInfo = Array.isArray(processResult) ? ` (${processResult.length} chunks)` : '';
+      const chunkInfo = Array.isArray(processResult)
+        ? ` (${processResult.length} chunks)`
+        : '';
       cssContent += ` * - ${fontConfig.displayName}${chunkInfo}
 `;
     }
@@ -252,7 +269,9 @@ class CSSGenerator {
       if (processResult.error) continue;
 
       const fontConfig = config.fonts[fontId];
-      const chunkInfo = Array.isArray(processResult) ? ` (${processResult.length} chunks)` : '';
+      const chunkInfo = Array.isArray(processResult)
+        ? ` (${processResult.length} chunks)`
+        : '';
       cssContent += `/* ${fontConfig.displayName}${chunkInfo} */
 `;
       cssContent += this.generateFontFaceCSS(fontId, fontConfig, processResult);
