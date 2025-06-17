@@ -193,10 +193,10 @@ class VersionChecker {
         // Set GitHub Actions output
         if (process.env.GITHUB_ACTIONS) {
           const fs = await import('fs');
-          const path = await import('path');
 
           const outputFile = process.env.GITHUB_OUTPUT;
           if (outputFile) {
+            console.log(`Writing to GITHUB_OUTPUT: ${outputFile}`);
             fs.appendFileSync(outputFile, `has_updates=true\n`);
             fs.appendFileSync(
               outputFile,
@@ -204,7 +204,9 @@ class VersionChecker {
                 result.updatedFonts.map((f) => f.id)
               )}\n`
             );
+            console.log('✅ GitHub Actions outputs written successfully');
           } else {
+            console.log('Using fallback set-output method');
             // Fallback for older GitHub Actions
             console.log(`::set-output name=has_updates::true`);
             console.log(
@@ -225,8 +227,11 @@ class VersionChecker {
 
           const outputFile = process.env.GITHUB_OUTPUT;
           if (outputFile) {
+            console.log(`Writing to GITHUB_OUTPUT: ${outputFile}`);
             fs.appendFileSync(outputFile, `has_updates=false\n`);
+            console.log('✅ GitHub Actions outputs written successfully');
           } else {
+            console.log('Using fallback set-output method');
             // Fallback for older GitHub Actions
             console.log(`::set-output name=has_updates::false`);
           }
