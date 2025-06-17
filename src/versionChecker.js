@@ -194,36 +194,41 @@ class VersionChecker {
     await this.saveVersionCache(currentVersions);
 
     // In GitHub Actions, also output as environment variables for next runs
-    if (process.env.GITHUB_ACTIONS) {
+    if (process.env.GITHUB_ACTIONS && process.env.GITHUB_OUTPUT) {
       console.log(
         chalk.blue('📋 Setting version environment variables for future runs:')
       );
 
+      const outputFile = process.env.GITHUB_OUTPUT;
+      const fs = await import('fs/promises');
+      const outputLines = [];
+
       if (currentVersions.iming) {
-        console.log(
-          `::set-output name=font_iming_version::${currentVersions.iming.version}`
-        );
+        outputLines.push(`font_iming_version=${currentVersions.iming.version}`);
         console.log(
           chalk.gray(`  • FONT_IMING_VERSION=${currentVersions.iming.version}`)
         );
       }
       if (currentVersions.lxgw) {
-        console.log(
-          `::set-output name=font_lxgw_version::${currentVersions.lxgw.version}`
-        );
+        outputLines.push(`font_lxgw_version=${currentVersions.lxgw.version}`);
         console.log(
           chalk.gray(`  • FONT_LXGW_VERSION=${currentVersions.lxgw.version}`)
         );
       }
       if (currentVersions.amstelvar) {
-        console.log(
-          `::set-output name=font_amstelvar_version::${currentVersions.amstelvar.version}`
+        outputLines.push(
+          `font_amstelvar_version=${currentVersions.amstelvar.version}`
         );
         console.log(
           chalk.gray(
             `  • FONT_AMSTELVAR_VERSION=${currentVersions.amstelvar.version}`
           )
         );
+      }
+
+      if (outputLines.length > 0) {
+        await fs.appendFile(outputFile, outputLines.join('\n') + '\n');
+        console.log(chalk.green('📝 Version outputs written to GITHUB_OUTPUT'));
       }
     }
 
@@ -251,15 +256,18 @@ class VersionChecker {
         });
 
         // Set GitHub Actions output
-        if (process.env.GITHUB_ACTIONS) {
-          // Use the reliable set-output method for now
-          console.log(`::set-output name=has_updates::true`);
-          console.log(
-            `::set-output name=updated_fonts::${JSON.stringify(
-              result.updatedFonts.map((f) => f.id)
-            )}`
-          );
-          console.log('✅ GitHub Actions outputs set successfully');
+        if (process.env.GITHUB_ACTIONS && process.env.GITHUB_OUTPUT) {
+          // Use the new GITHUB_OUTPUT environment file method
+          const fs = await import('fs/promises');
+          const outputFile = process.env.GITHUB_OUTPUT;
+
+          const outputs = [
+            `has-updates=true`,
+            `updated-fonts=${result.updatedFonts.map((f) => f.id).join(',')}`,
+          ];
+
+          await fs.appendFile(outputFile, outputs.join('\n') + '\n');
+          console.log('✅ GitHub Actions outputs written to GITHUB_OUTPUT');
         }
 
         // Update version cache
@@ -267,9 +275,11 @@ class VersionChecker {
       } else {
         console.log(chalk.yellow('📅 All fonts are up to date'));
 
-        if (process.env.GITHUB_ACTIONS) {
-          console.log(`::set-output name=has_updates::false`);
-          console.log('✅ GitHub Actions outputs set successfully');
+        if (process.env.GITHUB_ACTIONS && process.env.GITHUB_OUTPUT) {
+          const fs = await import('fs/promises');
+          const outputFile = process.env.GITHUB_OUTPUT;
+          await fs.appendFile(outputFile, 'has-updates=false\n');
+          console.log('✅ GitHub Actions outputs written to GITHUB_OUTPUT');
         }
       }
 

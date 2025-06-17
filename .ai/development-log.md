@@ -142,6 +142,16 @@ This log tracks the development progress of the automated web font subsetting an
 - More reliable and maintainable
 - Built-in error handling and retry logic
 
+### Issue #6: GitHub Actions Deprecated Commands
+**Date**: June 17, 2025  
+**Issue**: GitHub Actions `::set-output` command deprecated, causing warnings in workflow runs  
+**Status**: ✅ Resolved  
+**Solution**: Migrated to new Environment Files (`GITHUB_OUTPUT`) method:
+- Replaced `echo "::set-output name=key::value"` with `echo "key=value" >> $GITHUB_OUTPUT`
+- Updated `versionChecker.js` to write outputs to `GITHUB_OUTPUT` file instead of stdout
+- Maintained backward compatibility for local development
+- Fixed all deprecation warnings in GitHub Actions
+
 ## Resolved Issues
 
 ### ✅ Project Structure Setup
