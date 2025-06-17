@@ -87,24 +87,21 @@ Please refer to each font's source repository for complete license terms and att
 ### Manual Usage
 
 ```bash
-# Check for font version updates
-pnpm run check-versions
+# Complete workflows
+pnpm start                    # Full workflow with version checking
+pnpm start -- --build-only   # Build all fonts without version checking
+pnpm start -- --fonts <ids>  # Process specific fonts (e.g., imingcp lxgwwenkaitc)
 
-# Download fonts
-pnpm run download-fonts
-
-# Process and subset fonts
-pnpm run subset-fonts
-
-# Generate CSS files
-pnpm run generate-css
-
-# Generate license information
-pnpm run generate-license
-
-# Complete build process
-pnpm run build
+# Individual steps
+pnpm run check-versions       # Check for font version updates
+pnpm run download-fonts       # Download fonts
+pnpm run subset-fonts         # Process and subset fonts  
+pnpm run generate-css         # Generate CSS files
+pnpm run generate-license     # Generate license information
+pnpm run build               # Complete build process (legacy, use pnpm start instead)
 ```
+
+**Font IDs**: `imingcp`, `lxgwwenkaitc`, `amstelvar`
 
 ### Cache Management
 
@@ -112,9 +109,9 @@ Clean various cache files and build artifacts:
 
 ```bash
 # Clean everything (build, downloads, node_modules, git cache)
-pnpm run clean
+pnpm run clean:all
 
-# Clean only build artifacts
+# Clean only build artifacts (build/, downloads/, cache files)
 pnpm run clean:build
 
 # Clean only dependencies (node_modules, lock files)
@@ -122,6 +119,9 @@ pnpm run clean:deps
 
 # Clean only git cache branch
 pnpm run clean:git
+
+# Default clean (same as clean:all)
+pnpm run clean
 
 # Alternative: use script directly with more options
 ./clean-cache.sh --help
@@ -162,17 +162,26 @@ Font configuration is stored in `src/config/fonts.json`. This file defines:
 
 ### Daily Version Check
 - **Trigger**: Every day at 02:00 UTC (10:00 AM Beijing Time)
-- **Action**: Check for new font releases
+- **Action**: Check for new font releases using GitHub API and git commits
 - **Result**: Triggers build workflow if updates found
+- **Optimization**: Only builds fonts that have actual version changes
 
-### Build and Deploy
+### Selective Build and Deploy
 - **Trigger**: When version check finds updates, or manual dispatch
+- **Intelligence**: Only processes fonts that have version updates (not all fonts)
 - **Process**:
-  1. Download latest font files
-  2. Apply subsetting optimizations
+  1. Download latest font files (skip if already exist and valid)
+  2. Apply subsetting optimizations (skip if output files exist)
   3. Generate WOFF2 files
   4. Create CSS files
-  5. Deploy to `build` branch
+  5. Generate license information
+  6. Deploy to `build` branch
+
+### Performance Optimizations
+- **Smart Caching**: Skip downloads when files already exist and pass validation
+- **Incremental Processing**: Only subset fonts that need updates
+- **Selective Builds**: GitHub Actions only builds changed fonts, not all fonts
+- **Fast Iterations**: Subsequent builds complete in seconds instead of minutes
 
 ## 📁 Output Structure
 
@@ -192,8 +201,13 @@ build/
 │   ├── imingcp.css
 │   ├── lxgwwenkaitc.css
 │   ├── amstelvar.css
-│   └── fonts.css          # Combined CSS file
-└── metadata.json          # Build information
+│   └── fonts.css              # Combined CSS file
+├── FONT_LICENSES.md           # Human-readable license information
+├── font-licenses.json         # Machine-readable license data
+├── metadata.json              # Build information
+├── processing-metadata.json   # Font processing details
+├── css-metadata.json          # CSS generation details
+└── download-metadata.json     # Download information
 ```
 
 ## 🎨 Using the Fonts
@@ -244,13 +258,19 @@ Download the files from the `build` branch and host them yourself.
 ### Local Testing
 
 ```bash
-# Test version checking
-pnpm run check-versions
+# Test complete workflows
+pnpm start                    # Full workflow with version checking
+pnpm start -- --build-only   # Build all fonts (skip version check)
+pnpm start -- --fonts imingcp # Test specific font processing
 
 # Test individual components
-pnpm run download-fonts
-pnpm run subset-fonts
-pnpm run generate-css
+pnpm run check-versions       # Test version checking
+pnpm run download-fonts       # Test font downloads
+pnpm run subset-fonts         # Test font processing
+pnpm run generate-css         # Test CSS generation
+
+# Test cache management
+pnpm run clean:build          # Clean build artifacts for fresh test
 ```
 
 ## 📊 Monitoring
@@ -285,6 +305,21 @@ pip install 'fonttools[woff]'
 - Verify font source URLs are still valid
 - Check if font repositories have moved or changed structure
 
+**Workflow always builds all fonts**
+- Ensure `build-fonts.yml` is updated to use selective building
+- Check that `updated-fonts` parameter is being passed correctly
+- Verify version checker is detecting changes properly
+
+**Build is too slow**
+- Use `pnpm start -- --fonts <specific-id>` for faster testing
+- Clean cache with `pnpm run clean:build` if files are corrupted
+- Check if font subsetting is being skipped for existing files
+
+**Files not being skipped when they should be**
+- Delete corrupted files in `build/` or `downloads/` directories
+- Run `pnpm run clean:build` to force regeneration
+- Check file validation is passing correctly
+
 ## 📄 License
 
 MIT License - see LICENSE file for details.
@@ -306,5 +341,5 @@ Detailed documentation is available in the `.ai/` folder:
 
 ---
 
-**Last Updated**: June 17, 2025
+**Last Updated**: 2025-06-17
 **Version**: 1.0.0

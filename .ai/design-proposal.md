@@ -150,10 +150,11 @@ fonts/
 
 ## 4. Font Configuration Specifications
 
-### I.Ming Font (Weight: 400)
+### I.MingCP Font (Weight: 400)
 ```json
 {
-  "name": "I.Ming",
+  "id": "imingcp",
+  "name": "I.MingCP",
   "weight": 400,
   "style": "normal",
   "subset": "chinese-common",
@@ -162,21 +163,23 @@ fonts/
 }
 ```
 
-### LxgwWenkaiTC Font (Weight: 300)
+### LXGW WenKai TC Font (Weight: 300)
 ```json
 {
-  "name": "LxgwWenkaiTC",
+  "id": "lxgwwenkaitc",
+  "name": "LXGW WenKai TC",
   "weight": 300,
   "style": "normal", 
   "subset": "chinese-common",
   "formats": ["woff2"],
-  "cssClass": "font-lxgw-light"
+  "cssClass": "font-lxgwwenkaitc"
 }
 ```
 
 ### Amstelvar Font (Variable)
 ```json
 {
+  "id": "amstelvar",
   "name": "Amstelvar",
   "type": "variable",
   "styles": ["roman", "italic"],
@@ -206,16 +209,16 @@ fonts/
 ```
 build/ (on build branch)
 ├── fonts/
-│   ├── iming/
-│   │   └── iming-regular.woff2
-│   ├── lxgw/
-│   │   └── lxgw-light.woff2
+│   ├── imingcp/
+│   │   └── imingcp-regular.woff2
+│   ├── lxgwwenkaitc/
+│   │   └── lxgwwenkaitc-light.woff2
 │   └── amstelvar/
 │       ├── amstelvar-roman.woff2
 │       └── amstelvar-italic.woff2
 ├── css/
-│   ├── iming.css
-│   ├── lxgw.css
+│   ├── imingcp.css
+│   ├── lxgwwenkaitc.css
 │   ├── amstelvar.css
 │   └── fonts.css
 └── metadata.json

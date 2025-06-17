@@ -61,14 +61,14 @@ pnpm run clean:git      # Only git cache branch
 # Complete reset for fresh development
 pnpm run clean
 pnpm install
-npm start -- --build-only
+pnpm start -- --build-only
 ```
 
 #### Build Issues
 ```bash
 # Clean only build artifacts and rebuild
 pnpm run clean:build
-npm start -- --build-only
+pnpm start -- --build-only
 ```
 
 #### Dependency Issues
@@ -97,7 +97,7 @@ pnpm run clean:git
 After cleaning, you typically need to:
 
 1. **After cleaning dependencies**: `pnpm install`
-2. **After cleaning build**: `npm start -- --build-only`
+2. **After cleaning build**: `pnpm start -- --build-only`
 3. **After cleaning git cache**: Version checker will recreate on next run
 
 ## Troubleshooting
