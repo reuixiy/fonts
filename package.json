@@ -1,0 +1,38 @@
+{
+  "name": "web-font-auto-subsetting",
+  "version": "1.0.0",
+  "description": "Automated web font subsetting and deployment workflow",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "check-versions": "node src/versionChecker.js",
+    "download-fonts": "node scripts/download-fonts.js",
+    "subset-fonts": "node src/fontSubset.js",
+    "generate-css": "node scripts/generate-css.js",
+    "build": "npm run download-fonts && npm run subset-fonts && npm run generate-css",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "fonts",
+    "subsetting",
+    "web-fonts",
+    "automation",
+    "github-actions"
+  ],
+  "author": "GitHub Copilot",
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/rest": "^20.0.2",
+    "node-fetch": "^3.3.2",
+    "fs-extra": "^11.2.0",
+    "commander": "^11.1.0",
+    "chalk": "^5.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

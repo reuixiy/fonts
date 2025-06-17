@@ -1,0 +1,140 @@
+name: Build and Deploy Fonts
+
+on:
+  workflow_dispatch:
+    inputs:
+      updated-fonts:
+        description: 'Comma-separated list of fonts to update'
+        required: false
+        default: 'all'
+        type: string
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/**'
+      - 'scripts/**'
+      - '.github/workflows/build-fonts.yml'
+
+jobs:
+  build-fonts:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install Node.js dependencies
+        run: npm ci
+      
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install 'fonttools[woff]'
+      
+      - name: Verify fonttools installation
+        run: pyftsubset --help
+      
+      - name: Download fonts
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "📥 Downloading fonts..."
+          npm run download-fonts
+      
+      - name: Subset fonts
+        run: |
+          echo "✂️ Processing and subsetting fonts..."
+          npm run subset-fonts
+      
+      - name: Generate CSS
+        run: |
+          echo "🎨 Generating CSS files..."
+          npm run generate-css
+      
+      - name: Create build metadata
+        run: |
+          echo "📋 Creating build metadata..."
+          cat > build/metadata.json << EOF
+          {
+            "buildDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "buildId": "${{ github.run_id }}",
+            "commit": "${{ github.sha }}",
+            "updatedFonts": "${{ github.event.inputs.updated-fonts || 'all' }}",
+            "fonts": $(cat src/config/fonts.json | jq -c '.fonts')
+          }
+          EOF
+      
+      - name: Deploy to build branch
+        run: |
+          echo "🚀 Deploying to build branch..."
+          
+          # Configure git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # Create orphan build branch if it doesn't exist
+          git fetch origin build || true
+          
+          if git rev-parse --verify origin/build >/dev/null 2>&1; then
+            git checkout -b build origin/build
+            # Clean existing content
+            git rm -rf . || true
+          else
+            git checkout --orphan build
+            # Remove all tracked files
+            git rm -rf . || true
+          fi
+          
+          # Copy build artifacts
+          cp -r build/* . 2>/dev/null || true
+          
+          # Add and commit
+          git add .
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "🔄 Font build $(date -u +%Y-%m-%d) - Run ${{ github.run_id }}
+            
+            Updated fonts: ${{ github.event.inputs.updated-fonts || 'all' }}
+            Source commit: ${{ github.sha }}"
+            
+            # Push to build branch
+            git push origin build
+          fi
+      
+      - name: Summary
+        run: |
+          echo "✅ Font build complete!"
+          echo "📊 Build Summary:"
+          echo "- Build ID: ${{ github.run_id }}"
+          echo "- Updated fonts: ${{ github.event.inputs.updated-fonts || 'all' }}"
+          echo "- Build date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          
+          if [ -f build/metadata.json ]; then
+            echo "📋 Metadata:"
+            cat build/metadata.json | jq '.'
+          fi
+          
+          if [ -d build/fonts ]; then
+            echo "📦 Generated font files:"
+            find build/fonts -name "*.woff2" | head -10
+          fi
+          
+          if [ -d build/css ]; then
+            echo "🎨 Generated CSS files:"
+            ls -la build/css/
+          fi

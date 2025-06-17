@@ -1,0 +1,115 @@
+{
+  "fonts": {
+    "iming": {
+      "name": "I.Ming",
+      "displayName": "I.Ming",
+      "source": {
+        "type": "github-release",
+        "owner": "ichitenfont",
+        "repo": "I.Ming",
+        "filePattern": "I.MingCP-{version}.ttf"
+      },
+      "weight": 400,
+      "style": "normal",
+      "subset": {
+        "type": "chinese-common",
+        "ranges": [
+          "U+4E00-9FFF",
+          "U+3400-4DBF",
+          "U+20000-2A6DF",
+          "U+F900-FAFF",
+          "U+2F800-2FA1F",
+          "U+0020-007F",
+          "U+3000-303F",
+          "U+FF00-FFEF"
+        ]
+      },
+      "output": {
+        "formats": ["woff2"],
+        "filename": "iming-regular",
+        "cssClass": "font-iming"
+      }
+    },
+    "lxgw": {
+      "name": "LxgwWenkaiTC",
+      "displayName": "LXGW WenKai TC",
+      "source": {
+        "type": "github-release",
+        "owner": "lxgw",
+        "repo": "LxgwWenkaiTC",
+        "filePattern": "LXGWWenKaiTC-Light.ttf"
+      },
+      "weight": 300,
+      "style": "normal",
+      "subset": {
+        "type": "chinese-common",
+        "ranges": [
+          "U+4E00-9FFF",
+          "U+3400-4DBF",
+          "U+20000-2A6DF",
+          "U+F900-FAFF",
+          "U+2F800-2FA1F",
+          "U+0020-007F",
+          "U+3000-303F",
+          "U+FF00-FFEF"
+        ]
+      },
+      "output": {
+        "formats": ["woff2"],
+        "filename": "lxgw-light",
+        "cssClass": "font-lxgw-light"
+      }
+    },
+    "amstelvar": {
+      "name": "Amstelvar",
+      "displayName": "Amstelvar",
+      "source": {
+        "type": "github-repo",
+        "owner": "googlefonts",
+        "repo": "amstelvar",
+        "files": [
+          {
+            "path": "fonts/Amstelvar-Roman[GRAD,XOPQ,XTRA,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,wdth,wght,opsz].ttf",
+            "style": "roman"
+          },
+          {
+            "path": "fonts/Amstelvar-Italic[GRAD,YOPQ,YTAS,YTDE,YTFI,YTLC,YTUC,wdth,wght,opsz].ttf",
+            "style": "italic"
+          }
+        ]
+      },
+      "type": "variable",
+      "styles": ["roman", "italic"],
+      "subset": {
+        "type": "latin-extended",
+        "ranges": [
+          "U+0020-007F",
+          "U+00A0-00FF",
+          "U+0100-017F",
+          "U+0180-024F",
+          "U+1E00-1EFF",
+          "U+2000-206F",
+          "U+20A0-20CF",
+          "U+2100-214F"
+        ]
+      },
+      "output": {
+        "formats": ["woff2"],
+        "filenames": ["amstelvar-roman", "amstelvar-italic"],
+        "cssClass": "font-amstelvar"
+      },
+      "variableAxes": ["GRAD", "XOPQ", "XTRA", "YOPQ", "YTAS", "YTDE", "YTFI", "YTLC", "YTUC", "wdth", "wght", "opsz"]
+    }
+  },
+  "build": {
+    "outputDir": "build",
+    "fontsDir": "fonts",
+    "cssDir": "css"
+  },
+  "subsetting": {
+    "formats": ["woff2"],
+    "compression": "brotli",
+    "hinting": true,
+    "desubroutinize": true
+  }
+}
