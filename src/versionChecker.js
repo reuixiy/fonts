@@ -32,16 +32,18 @@ class VersionChecker {
         try {
           const owner = process.env.GITHUB_REPOSITORY_OWNER || 'reuixiy';
           const repo = process.env.GITHUB_REPOSITORY?.split('/')[1] || 'fonts';
-          
+
           const { data } = await this.octokit.rest.repos.getContent({
             owner,
             repo,
             path: 'version-cache.json',
-            ref: 'cache'
+            ref: 'cache',
           });
 
           if (data.content) {
-            const content = Buffer.from(data.content, 'base64').toString('utf-8');
+            const content = Buffer.from(data.content, 'base64').toString(
+              'utf-8'
+            );
             const parsedCache = JSON.parse(content);
             console.log(
               chalk.blue('📋 Loaded version cache from cache branch')
@@ -50,7 +52,9 @@ class VersionChecker {
           }
         } catch (error) {
           console.log(
-            chalk.gray('📋 No cache branch found, checking environment variables...')
+            chalk.gray(
+              '📋 No cache branch found, checking environment variables...'
+            )
           );
         }
 
