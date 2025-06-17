@@ -13,7 +13,6 @@ yarn-error.log*
 
 # Downloaded fonts (temporary)
 downloads/
-temp/
 
 # Build outputs (managed by GitHub Actions)
 build/

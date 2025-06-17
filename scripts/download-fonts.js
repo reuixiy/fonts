@@ -11,16 +11,11 @@ class FontDownloader {
     });
     this.configPath = path.join(process.cwd(), 'src/config/fonts.json');
     this.downloadDir = path.join(process.cwd(), 'downloads');
-    this.tempDir = path.join(process.cwd(), 'temp');
   }
 
   async init() {
-    // Ensure download directories exist
+    // Ensure download directory exists
     await fs.ensureDir(this.downloadDir);
-    await fs.ensureDir(this.tempDir);
-
-    // Clean temp directory
-    await fs.emptyDir(this.tempDir);
   }
 
   async checkExistingFile(filePath, expectedMinSize = 1024) {

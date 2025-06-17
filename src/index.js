@@ -140,16 +140,17 @@ async function main() {
   if (args.length === 0) {
     // No arguments - run full workflow with version checking
     await workflow.runFullWorkflow();
-  } else if (args[0] === '--build-only') {
-    // Build without version checking
+  } else if (args[0] === '--build-only' || args[1] === '--build-only') {
+    // Build without version checking (handle both cases)
     await workflow.runBuildOnly();
-  } else if (args[0] === '--fonts') {
-    // Process specific fonts
-    const fontIds = args.slice(1);
+  } else if (args[0] === '--fonts' || args[1] === '--fonts') {
+    // Process specific fonts (handle both cases)
+    const fontArgsStart = args.indexOf('--fonts') + 1;
+    const fontIds = args.slice(fontArgsStart);
     if (fontIds.length === 0) {
       console.error(chalk.red('❌ Please specify font IDs after --fonts'));
       console.log(
-        chalk.yellow('Example: npm start -- --fonts imingcp lxgwwenkaitc')
+        chalk.yellow('Example: pnpm start -- --fonts imingcp lxgwwenkaitc')
       );
       process.exit(1);
     }
@@ -158,16 +159,16 @@ async function main() {
     console.log(chalk.yellow('Usage:'));
     console.log(
       chalk.cyan(
-        '  npm start                    # Full workflow with version checking'
+        '  pnpm start                    # Full workflow with version checking'
       )
     );
     console.log(
       chalk.cyan(
-        '  npm start -- --build-only   # Build all fonts without version checking'
+        '  pnpm start -- --build-only   # Build all fonts without version checking'
       )
     );
     console.log(
-      chalk.cyan('  npm start -- --fonts <ids>  # Process specific fonts')
+      chalk.cyan('  pnpm start -- --fonts <ids>  # Process specific fonts')
     );
     console.log(
       chalk.gray('\\nAvailable font IDs: imingcp, lxgwwenkaitc, amstelvar')
@@ -176,7 +177,7 @@ async function main() {
 }
 
 // Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === new URL(process.argv[1], 'file:').href) {
   main();
 }
 

@@ -131,6 +131,20 @@ class FontSubset {
     const outputFileName = `${fontConfig.output.filename}.woff2`;
     const outputPath = path.join(fontDir, outputFileName);
 
+    // Check if output file already exists
+    if (await fs.pathExists(outputPath)) {
+      const stats = await fs.stat(outputPath);
+      console.log(chalk.green(`    ⏭️  File already exists: ${outputFileName}`));
+      console.log(chalk.gray(`    Size: ${(stats.size / 1024).toFixed(1)}KB`));
+      
+      return {
+        path: outputPath,
+        filename: outputFileName,
+        size: stats.size,
+        compressionRatio: 'N/A (existing)',
+      };
+    }
+
     // Generate Unicode ranges for Chinese fonts
     const unicodeOptions = this.generateUnicodeRanges(fontConfig.subset.ranges);
 
@@ -181,6 +195,22 @@ class FontSubset {
     for (const inputFile of inputFiles) {
       const outputFileName = `${fontId}-${inputFile.style}.woff2`;
       const outputPath = path.join(fontDir, outputFileName);
+
+      // Check if output file already exists
+      if (await fs.pathExists(outputPath)) {
+        const stats = await fs.stat(outputPath);
+        console.log(chalk.green(`    ⏭️  File already exists: ${outputFileName}`));
+        console.log(chalk.gray(`    Size: ${(stats.size / 1024).toFixed(1)}KB`));
+        
+        results.push({
+          path: outputPath,
+          filename: outputFileName,
+          size: stats.size,
+          compressionRatio: 'N/A (existing)',
+          style: inputFile.style,
+        });
+        continue;
+      }
 
       // Generate Unicode ranges for Latin fonts
       const unicodeOptions = this.generateUnicodeRanges(

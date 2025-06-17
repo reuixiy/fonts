@@ -19,7 +19,6 @@ pnpm run clean:git      # Only git cache branch
 ### Build Artifacts (`--build`)
 - `build/` - Generated fonts and CSS files
 - `downloads/` - Downloaded font files
-- `temp/` - Temporary processing files
 - `.version-cache.json` - Local version cache
 
 ### Dependencies (`--deps`)

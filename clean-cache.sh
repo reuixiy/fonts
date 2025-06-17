@@ -99,8 +99,7 @@ clean_node_modules() {
 clean_build_artifacts() {
     print_status "Cleaning build artifacts..."
     safe_remove "build" "build directory"
-    safe_remove "downloads" "downloads directory" 
-    safe_remove "temp" "temp directory"
+    safe_remove "downloads" "downloads directory"
     safe_remove ".version-cache.json" "local version cache file"
 }
 
