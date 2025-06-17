@@ -82,33 +82,6 @@ class CSSGenerator {
     return css;
   }
 
-  generateUtilityCSS(fontId, fontConfig) {
-    const className = fontConfig.output.cssClass;
-
-    if (fontConfig.type === 'variable') {
-      return `.${className} {
-  font-family: '${fontConfig.displayName}', sans-serif;
-  font-variation-settings: normal;
-}
-
-.${className}-italic {
-  font-family: '${fontConfig.displayName}', sans-serif;
-  font-style: italic;
-  font-variation-settings: normal;
-}
-
-`;
-    } else {
-      return `.${className} {
-  font-family: '${fontConfig.displayName}', serif;
-  font-weight: ${fontConfig.weight};
-  font-style: ${fontConfig.style || 'normal'};
-}
-
-`;
-    }
-  }
-
   async generateIndividualCSS(fontId, fontConfig, processResult) {
     const cssFileName = `${fontId}.css`;
     const cssPath = path.join(this.cssDir, cssFileName);
@@ -122,9 +95,6 @@ class CSSGenerator {
 
     // Add @font-face declarations
     cssContent += this.generateFontFaceCSS(fontId, fontConfig, processResult);
-
-    // Add utility classes
-    cssContent += this.generateUtilityCSS(fontId, fontConfig);
 
     // Write CSS file
     await fs.writeFile(cssPath, cssContent);
@@ -157,22 +127,11 @@ class CSSGenerator {
       cssContent += this.generateFontFaceCSS(fontId, fontConfig, processResult);
     }
 
-    // Add utility classes
-    cssContent += `/* Utility Classes */
-
-`;
-    for (const [fontId, processResult] of Object.entries(allResults)) {
-      if (processResult.error) continue;
-
-      const fontConfig = config.fonts[fontId];
-      cssContent += this.generateUtilityCSS(fontId, fontConfig);
-    }
-
     // Add font stack recommendations
     cssContent += `/* Font Stack Recommendations */
 
 .font-chinese {
-  font-family: 'I.Ming', 'LXGW WenKai TC', 'Noto Serif CJK SC', serif;
+  font-family: 'I.MingCP', 'LXGW WenKai TC', 'Noto Serif CJK SC', serif;
 }
 
 .font-english {

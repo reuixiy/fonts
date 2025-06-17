@@ -2,6 +2,7 @@ import VersionChecker from './versionChecker.js';
 import FontDownloader from '../scripts/download-fonts.js';
 import FontSubset from './fontSubset.js';
 import CSSGenerator from '../scripts/generate-css.js';
+import LicenseGenerator from '../scripts/generate-license.js';
 import chalk from 'chalk';
 
 class FontWorkflow {
@@ -10,6 +11,7 @@ class FontWorkflow {
     this.fontDownloader = new FontDownloader();
     this.fontSubset = new FontSubset();
     this.cssGenerator = new CSSGenerator();
+    this.licenseGenerator = new LicenseGenerator();
   }
 
   async runFullWorkflow() {
@@ -41,6 +43,12 @@ class FontWorkflow {
       console.log(chalk.bold.yellow('\\n📋 Step 4: Generating CSS...'));
       await this.cssGenerator.generateAll();
 
+      // Step 5: Generate license information
+      console.log(
+        chalk.bold.yellow('\\n📋 Step 5: Generating license information...')
+      );
+      await this.licenseGenerator.generateLicenseFile();
+
       console.log(
         chalk.bold.green('\\n🎉 Full workflow completed successfully!')
       );
@@ -65,6 +73,12 @@ class FontWorkflow {
       // Step 3: Generate CSS
       console.log(chalk.bold.yellow('\\n📋 Step 3: Generating CSS...'));
       await this.cssGenerator.generateAll();
+
+      // Step 4: Generate license information
+      console.log(
+        chalk.bold.yellow('\\n📋 Step 4: Generating license information...')
+      );
+      await this.licenseGenerator.generateLicenseFile();
 
       console.log(
         chalk.bold.green('\\n🎉 Build workflow completed successfully!')
@@ -97,6 +111,12 @@ class FontWorkflow {
       console.log(chalk.bold.yellow('\\n📋 Step 4: Updating unified CSS...'));
       await this.cssGenerator.generateAll();
 
+      // Step 5: Generate license information
+      console.log(
+        chalk.bold.yellow('\\n📋 Step 5: Generating license information...')
+      );
+      await this.licenseGenerator.generateLicenseFile();
+
       console.log(
         chalk.bold.green(
           '\\n🎉 Specific font processing completed successfully!'
@@ -128,7 +148,9 @@ async function main() {
     const fontIds = args.slice(1);
     if (fontIds.length === 0) {
       console.error(chalk.red('❌ Please specify font IDs after --fonts'));
-      console.log(chalk.yellow('Example: npm start -- --fonts iming lxgw'));
+      console.log(
+        chalk.yellow('Example: npm start -- --fonts imingcp lxgwwenkaitc')
+      );
       process.exit(1);
     }
     await workflow.runSpecificFonts(fontIds);
@@ -147,7 +169,9 @@ async function main() {
     console.log(
       chalk.cyan('  npm start -- --fonts <ids>  # Process specific fonts')
     );
-    console.log(chalk.gray('\\nAvailable font IDs: iming, lxgw, amstelvar'));
+    console.log(
+      chalk.gray('\\nAvailable font IDs: imingcp, lxgwwenkaitc, amstelvar')
+    );
   }
 }
 

@@ -55,22 +55,12 @@ jobs:
       - name: Verify fonttools installation
         run: pyftsubset --help
       
-      - name: Download fonts
+      - name: Build fonts using unified workflow
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "📥 Downloading fonts..."
-          pnpm run download-fonts
-      
-      - name: Subset fonts
-        run: |
-          echo "✂️ Processing and subsetting fonts..."
-          pnpm run subset-fonts
-      
-      - name: Generate CSS
-        run: |
-          echo "🎨 Generating CSS files..."
-          pnpm run generate-css
+          echo "� Starting font build workflow..."
+          pnpm start -- --build-only
       
       - name: Create build metadata
         run: |

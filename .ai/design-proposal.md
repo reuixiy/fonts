@@ -36,7 +36,7 @@ fonts/
 **Purpose**: Detect font updates and trigger builds only when necessary
 
 **Functionality**:
-- **I.Ming & LxgwWenkaiTC**: Check latest versions via GitHub API releases endpoint
+- **I.MingCP & LXGWWenKaiTC**: Check latest versions via GitHub API releases endpoint
 - **Amstelvar**: Monitor latest commit hash (since it doesn't use releases)
 - Store current version information in GitHub repository variables
 - Compare local records with remote versions to determine build necessity
@@ -52,7 +52,7 @@ fonts/
 
 **Download Strategy**:
 - **I.Ming**: Download `I.MingCP-[version].ttf` from GitHub releases
-- **LxgwWenkaiTC**: Download `LXGWWenKaiTC-Light.ttf` from GitHub releases  
+- **LXGWWenKaiTC**: Download `LXGWWenKaiTC-Light.ttf` from GitHub releases  
 - **Amstelvar**: Clone repository and extract both variable font files from `fonts/` directory
 
 **Error Handling**:
@@ -70,7 +70,7 @@ fonts/
 
 **Processing Strategy**:
 
-#### Chinese Fonts (I.Ming, LxgwWenkaiTC)
+#### Chinese Fonts (I.MingCP, LXGWWenKaiTC)
 - Create subsets for common Chinese characters (基础汉字、扩展A区)
 - Include essential punctuation and symbols
 - Generate multiple subset files if needed for large character sets
@@ -158,7 +158,7 @@ fonts/
   "style": "normal",
   "subset": "chinese-common",
   "formats": ["woff2"],
-  "cssClass": "font-iming"
+  "cssClass": "font-imingcp"
 }
 ```
 

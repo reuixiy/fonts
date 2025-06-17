@@ -10,7 +10,13 @@
     "download-fonts": "node scripts/download-fonts.js",
     "subset-fonts": "node src/fontSubset.js",
     "generate-css": "node scripts/generate-css.js",
-    "build": "pnpm run download-fonts && pnpm run subset-fonts && pnpm run generate-css",
+    "generate-license": "node scripts/generate-license.js",
+    "build": "pnpm run download-fonts && pnpm run subset-fonts && pnpm run generate-css && pnpm run generate-license",
+    "clean": "./clean-cache.sh",
+    "clean:build": "./clean-cache.sh --build",
+    "clean:deps": "./clean-cache.sh --deps",
+    "clean:git": "./clean-cache.sh --git",
+    "clean:all": "./clean-cache.sh --all",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

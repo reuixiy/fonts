@@ -14,11 +14,40 @@ An automated workflow for downloading, subsetting, and deploying web fonts with 
 ## 📦 Supported Fonts
 
 ### Chinese Fonts
-- **I.Ming** (Weight: 400) - Traditional Chinese serif font
-- **LxgwWenkaiTC** (Weight: 300) - Traditional Chinese handwriting-style font
+
+#### I.Ming CP (Traditional Chinese Serif)
+- **Font ID**: `imingcp`
+- **Weight**: 400 (Regular)
+- **Source**: [ichitenfont/I.Ming](https://github.com/ichitenfont/I.Ming)
+- **License**: [IPA Font License Agreement v1.0](https://github.com/ichitenfont/I.Ming/blob/main/LICENSE)
+- **Description**: A high-quality Traditional Chinese serif font based on Mincho style
+
+#### LXGW WenKai TC (Traditional Chinese Handwriting)
+- **Font ID**: `lxgwwenkaitc`
+- **Weight**: 300 (Light)
+- **Source**: [lxgw/LxgwWenkaiTC](https://github.com/lxgw/LxgwWenkaiTC)
+- **License**: [SIL Open Font License 1.1](https://github.com/lxgw/LxgwWenkaiTC/blob/main/OFL.txt)
+- **Description**: A handwriting-style Traditional Chinese font with elegant strokes
 
 ### Variable Fonts
-- **Amstelvar** - English variable font with Roman and Italic variants
+
+#### Amstelvar (Latin Variable Font)
+- **Font ID**: `amstelvar`
+- **Variants**: Roman, Italic
+- **Weight Range**: 100-900 (Variable)
+- **Source**: [googlefonts/amstelvar](https://github.com/googlefonts/amstelvar)
+- **License**: [SIL Open Font License 1.1](https://github.com/googlefonts/amstelvar/blob/main/OFL.txt)
+- **Description**: A parametric variable font with multiple design axes
+
+## 📄 Font Licensing
+
+All fonts included in this project maintain their original licenses:
+
+- **I.Ming CP**: Available under IPA Font License Agreement v1.0
+- **LXGW WenKai TC**: Available under SIL Open Font License 1.1  
+- **Amstelvar**: Available under SIL Open Font License 1.1
+
+Please refer to each font's source repository for complete license terms and attribution requirements.
 
 ## 🚀 Quick Start
 
@@ -70,8 +99,32 @@ pnpm run subset-fonts
 # Generate CSS files
 pnpm run generate-css
 
+# Generate license information
+pnpm run generate-license
+
 # Complete build process
 pnpm run build
+```
+
+### Cache Management
+
+Clean various cache files and build artifacts:
+
+```bash
+# Clean everything (build, downloads, node_modules, git cache)
+pnpm run clean
+
+# Clean only build artifacts
+pnpm run clean:build
+
+# Clean only dependencies (node_modules, lock files)
+pnpm run clean:deps
+
+# Clean only git cache branch
+pnpm run clean:git
+
+# Alternative: use script directly with more options
+./clean-cache.sh --help
 ```
 
 ## ⚙️ Configuration
@@ -88,8 +141,8 @@ Font configuration is stored in `src/config/fonts.json`. This file defines:
 ```json
 {
   "fonts": {
-    "iming": {
-      "name": "I.Ming",
+    "imingcp": {
+      "name": "I.MingCP",
       "source": {
         "type": "github-release",
         "owner": "ichitenfont",
@@ -128,16 +181,16 @@ The build process creates the following structure in the `build` branch:
 ```
 build/
 ├── fonts/
-│   ├── iming/
-│   │   └── iming-regular.woff2
-│   ├── lxgw/
-│   │   └── lxgw-light.woff2
+│   ├── imingcp/
+│   │   └── imingcp-regular.woff2
+│   ├── lxgwwenkaitc/
+│   │   └── lxgwwenkaitc-light.woff2
 │   └── amstelvar/
 │       ├── amstelvar-roman.woff2
 │       └── amstelvar-italic.woff2
 ├── css/
-│   ├── iming.css
-│   ├── lxgw.css
+│   ├── imingcp.css
+│   ├── lxgwwenkaitc.css
 │   ├── amstelvar.css
 │   └── fonts.css          # Combined CSS file
 └── metadata.json          # Build information
@@ -154,7 +207,7 @@ build/
 ### Option 2: Individual Font CSS
 
 ```html
-<link rel="stylesheet" href="https://your-domain.com/path-to-build/css/iming.css">
+<link rel="stylesheet" href="https://your-domain.com/path-to-build/css/imingcp.css">
 ```
 
 ### Option 3: Self-hosted

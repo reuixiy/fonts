@@ -60,11 +60,13 @@ class VersionChecker {
 
         // Fallback to environment variables (legacy support)
         const cacheData = {};
-        if (process.env.FONT_IMING_VERSION) {
-          cacheData.iming = { version: process.env.FONT_IMING_VERSION };
+        if (process.env.FONT_IMINGCP_VERSION) {
+          cacheData.imingcp = { version: process.env.FONT_IMINGCP_VERSION };
         }
-        if (process.env.FONT_LXGW_VERSION) {
-          cacheData.lxgw = { version: process.env.FONT_LXGW_VERSION };
+        if (process.env.FONT_LXGWWENKAITC_VERSION) {
+          cacheData.lxgwwenkaitc = {
+            version: process.env.FONT_LXGWWENKAITC_VERSION,
+          };
         }
         if (process.env.FONT_AMSTELVAR_VERSION) {
           cacheData.amstelvar = { version: process.env.FONT_AMSTELVAR_VERSION };
@@ -235,16 +237,24 @@ class VersionChecker {
       const fs = await import('fs/promises');
       const outputLines = [];
 
-      if (currentVersions.iming) {
-        outputLines.push(`font_iming_version=${currentVersions.iming.version}`);
+      if (currentVersions.imingcp) {
+        outputLines.push(
+          `font_imingcp_version=${currentVersions.imingcp.version}`
+        );
         console.log(
-          chalk.gray(`  • FONT_IMING_VERSION=${currentVersions.iming.version}`)
+          chalk.gray(
+            `  • FONT_IMINGCP_VERSION=${currentVersions.imingcp.version}`
+          )
         );
       }
-      if (currentVersions.lxgw) {
-        outputLines.push(`font_lxgw_version=${currentVersions.lxgw.version}`);
+      if (currentVersions.lxgwwenkaitc) {
+        outputLines.push(
+          `font_lxgwwenkaitc_version=${currentVersions.lxgwwenkaitc.version}`
+        );
         console.log(
-          chalk.gray(`  • FONT_LXGW_VERSION=${currentVersions.lxgw.version}`)
+          chalk.gray(
+            `  • FONT_LXGWWENKAITC_VERSION=${currentVersions.lxgwwenkaitc.version}`
+          )
         );
       }
       if (currentVersions.amstelvar) {
