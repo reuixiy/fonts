@@ -825,17 +825,26 @@ class FontSubset {
     const chunkSizes = fontConfig.subset.chunkSizes;
     let currentChunk = [];
     let chunkIndex = 0;
+    const maxCharactersPerChunk = Math.ceil(prioritizedChars.length / Math.min(fontConfig.subset.maxChunks, chunkSizes.length));
+
+    console.log(chalk.gray(`    📊 Total characters: ${prioritizedChars.length}, max per chunk: ${maxCharactersPerChunk}`));
 
     for (const char of prioritizedChars) {
       currentChunk.push(char);
 
-      // Check if we should finalize this chunk
-      const shouldFinalize =
-        chunkIndex < chunkSizes.length &&
-        (await this.estimateChunkSize(fontPath, currentChunk)) >=
-          chunkSizes[chunkIndex];
+      // Check if we should finalize this chunk based on multiple criteria
+      const currentSize = await this.estimateChunkSize(fontPath, currentChunk);
+      const targetSize = chunkSizes[chunkIndex] || chunkSizes[chunkSizes.length - 1];
+      
+      const shouldFinalizeBySize = currentSize >= targetSize;
+      const shouldFinalizeByCount = currentChunk.length >= maxCharactersPerChunk;
+      const isLastChunk = chunkIndex >= fontConfig.subset.maxChunks - 1;
+      const hasEnoughChunks = chunks.length >= Math.min(chunkSizes.length - 1, 2); // Ensure at least 2-3 chunks
+      
+      const shouldFinalize = (shouldFinalizeBySize || shouldFinalizeByCount || isLastChunk) && 
+                           (currentChunk.length >= 10 || isLastChunk); // Minimum 10 chars per chunk
 
-      if (shouldFinalize || chunkIndex >= fontConfig.subset.maxChunks - 1) {
+      if (shouldFinalize) {
         const unicodeRanges = this.calculateUnicodeRanges(currentChunk);
         chunks.push({
           index: chunkIndex,
@@ -847,9 +856,9 @@ class FontSubset {
 
         console.log(
           chalk.gray(
-            `    📄 Chunk ${chunkIndex}: ${
-              currentChunk.length
-            } characters, target ${chunkSizes[chunkIndex] || 'default'}KB`
+            `    📄 Chunk ${chunkIndex}: ${currentChunk.length} characters, ` +
+            `estimated ${currentSize}KB, target ${targetSize}KB ` +
+            `(${shouldFinalizeBySize ? 'size' : shouldFinalizeByCount ? 'count' : 'forced'})`
           )
         );
 
