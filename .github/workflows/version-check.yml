@@ -48,15 +48,17 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # Create/checkout cache branch
-          git fetch origin cache || git checkout --orphan cache
+          # Create/checkout orphan cache branch (clean branch with only cache file)
+          git fetch origin cache || true
           git checkout cache 2>/dev/null || git checkout --orphan cache
           
-          # Create/update version cache file
-          echo "Updating version cache..."
-          cp .version-cache.json version-cache.json 2>/dev/null || echo "{}" > version-cache.json
+          # Clear everything except our cache file
+          git rm -rf . 2>/dev/null || true
           
-          # Commit and push if there are changes
+          # Copy the updated cache file
+          cp .version-cache.json version-cache.json
+          
+          # Commit and push the single cache file
           git add version-cache.json
           if git diff --staged --quiet; then
             echo "No cache changes to commit"
