@@ -27,9 +27,30 @@ class VersionChecker {
 
   async loadVersionCache() {
     try {
+      // In GitHub Actions, try to load from environment variables first
+      if (process.env.GITHUB_ACTIONS) {
+        const cacheData = {};
+        if (process.env.FONT_IMING_VERSION) {
+          cacheData.iming = { version: process.env.FONT_IMING_VERSION };
+        }
+        if (process.env.FONT_LXGW_VERSION) {
+          cacheData.lxgw = { version: process.env.FONT_LXGW_VERSION };
+        }
+        if (process.env.FONT_AMSTELVAR_VERSION) {
+          cacheData.amstelvar = { version: process.env.FONT_AMSTELVAR_VERSION };
+        }
+        
+        if (Object.keys(cacheData).length > 0) {
+          console.log(chalk.blue('📋 Loaded version cache from environment variables'));
+          return cacheData;
+        }
+      }
+      
+      // Fallback to local file
       return await fs.readJson(this.versionCachePath);
     } catch (error) {
       // File doesn't exist, return empty cache
+      console.log(chalk.gray('📋 No existing version cache found, starting fresh'));
       return {};
     }
   }
@@ -167,6 +188,25 @@ class VersionChecker {
 
   async updateVersionCache(currentVersions) {
     await this.saveVersionCache(currentVersions);
+    
+    // In GitHub Actions, also output as environment variables for next runs
+    if (process.env.GITHUB_ACTIONS) {
+      console.log(chalk.blue('📋 Setting version environment variables for future runs:'));
+      
+      if (currentVersions.iming) {
+        console.log(`::set-output name=font_iming_version::${currentVersions.iming.version}`);
+        console.log(chalk.gray(`  • FONT_IMING_VERSION=${currentVersions.iming.version}`));
+      }
+      if (currentVersions.lxgw) {
+        console.log(`::set-output name=font_lxgw_version::${currentVersions.lxgw.version}`);
+        console.log(chalk.gray(`  • FONT_LXGW_VERSION=${currentVersions.lxgw.version}`));
+      }
+      if (currentVersions.amstelvar) {
+        console.log(`::set-output name=font_amstelvar_version::${currentVersions.amstelvar.version}`);
+        console.log(chalk.gray(`  • FONT_AMSTELVAR_VERSION=${currentVersions.amstelvar.version}`));
+      }
+    }
+    
     console.log(chalk.green('✅ Version cache updated'));
   }
 
@@ -192,29 +232,14 @@ class VersionChecker {
 
         // Set GitHub Actions output
         if (process.env.GITHUB_ACTIONS) {
-          const fs = await import('fs');
-
-          const outputFile = process.env.GITHUB_OUTPUT;
-          if (outputFile) {
-            console.log(`Writing to GITHUB_OUTPUT: ${outputFile}`);
-            fs.appendFileSync(outputFile, `has_updates=true\n`);
-            fs.appendFileSync(
-              outputFile,
-              `updated_fonts=${JSON.stringify(
-                result.updatedFonts.map((f) => f.id)
-              )}\n`
-            );
-            console.log('✅ GitHub Actions outputs written successfully');
-          } else {
-            console.log('Using fallback set-output method');
-            // Fallback for older GitHub Actions
-            console.log(`::set-output name=has_updates::true`);
-            console.log(
-              `::set-output name=updated_fonts::${JSON.stringify(
-                result.updatedFonts.map((f) => f.id)
-              )}`
-            );
-          }
+          // Use the reliable set-output method for now
+          console.log(`::set-output name=has_updates::true`);
+          console.log(
+            `::set-output name=updated_fonts::${JSON.stringify(
+              result.updatedFonts.map((f) => f.id)
+            )}`
+          );
+          console.log('✅ GitHub Actions outputs set successfully');
         }
 
         // Update version cache
@@ -223,18 +248,8 @@ class VersionChecker {
         console.log(chalk.yellow('📅 All fonts are up to date'));
 
         if (process.env.GITHUB_ACTIONS) {
-          const fs = await import('fs');
-
-          const outputFile = process.env.GITHUB_OUTPUT;
-          if (outputFile) {
-            console.log(`Writing to GITHUB_OUTPUT: ${outputFile}`);
-            fs.appendFileSync(outputFile, `has_updates=false\n`);
-            console.log('✅ GitHub Actions outputs written successfully');
-          } else {
-            console.log('Using fallback set-output method');
-            // Fallback for older GitHub Actions
-            console.log(`::set-output name=has_updates::false`);
-          }
+          console.log(`::set-output name=has_updates::false`);
+          console.log('✅ GitHub Actions outputs set successfully');
         }
       }
 
