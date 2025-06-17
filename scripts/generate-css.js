@@ -1,6 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
 import chalk from 'chalk';
+import postcss from 'postcss';
+import cssnano from 'cssnano';
 
 class CSSGenerator {
   constructor() {
@@ -41,7 +43,7 @@ class CSSGenerator {
       .join(', ');
   }
 
-  generateFontFaceCSS(fontId, fontConfig, processResult, baseUrl = './fonts') {
+  generateFontFaceCSS(fontId, fontConfig, processResult, baseUrl = '../fonts') {
     const fontPath = `${baseUrl}/${fontId}`;
     let css = '';
 
@@ -133,189 +135,108 @@ class CSSGenerator {
     return css;
   }
 
+  async minifyCSS(css) {
+    try {
+      const result = await postcss([cssnano({ preset: 'default' })]).process(css, { from: undefined });
+      return result.css;
+    } catch (error) {
+      console.warn(chalk.yellow('⚠️  CSS minification failed, using original CSS'));
+      return css;
+    }
+  }
+
   async generateIndividualCSS(fontId, fontConfig, processResult) {
     const cssFileName = `${fontId}.css`;
+    const minCssFileName = `${fontId}.min.css`;
     const cssPath = path.join(this.cssDir, cssFileName);
+    const minCssPath = path.join(this.cssDir, minCssFileName);
 
-    // Generate CSS content
-    let cssContent = `/* ${
-      fontConfig.displayName
-    } - Generated on ${new Date().toISOString()} */
-`;
-
-    // Add chunked font metadata if applicable
-    if (
-      Array.isArray(processResult) &&
-      fontConfig.subset.type === 'size-based-chunks'
-    ) {
-      if (fontConfig.type === 'variable') {
-        // Count chunks by style for variable fonts
-        const styleGroups = {};
-        processResult.forEach((chunk) => {
-          if (!styleGroups[chunk.style]) {
-            styleGroups[chunk.style] = 0;
-          }
-          styleGroups[chunk.style]++;
-        });
-        const styleInfo = Object.entries(styleGroups)
-          .map(([style, count]) => `${style}: ${count} chunks`)
-          .join(', ');
-        cssContent += `/* Variable Chunked Font: ${processResult.length} total chunks (${styleInfo}) */
-/* Load chunks in order for optimal performance */
+    // Generate license header
+    let cssContent = `/*!
+ * ${fontConfig.displayName}
+ * License: ${fontConfig.license.type}
+ * Source: ${fontConfig.source.url}
+ * Generated: ${new Date().toISOString()}
+ */
 
 `;
-      } else {
-        cssContent += `/* Chunked Font: ${processResult.length} chunks, progressive loading */
-/* Load chunks in order for optimal performance */
-
-`;
-      }
-    } else {
-      cssContent += `
-`;
-    }
 
     // Add @font-face declarations
     cssContent += this.generateFontFaceCSS(fontId, fontConfig, processResult);
 
-    // Add usage notes for chunked fonts
-    if (
-      Array.isArray(processResult) &&
-      fontConfig.subset.type === 'size-based-chunks'
-    ) {
-      const chunkCount = processResult.length;
-      const isVariable = fontConfig.type === 'variable';
-
-      cssContent += `/* Usage Notes:
- * This font is split into ${chunkCount} progressive chunks${
-        isVariable ? ' across multiple styles' : ''
-      }.
- * - Chunk 0: Critical characters (Latin, basic punctuation)`;
-
-      if (fontConfig.subset.strategy === 'chinese-frequency') {
-        cssContent += `
- * - Chunk 1+: Common to rare Chinese characters by frequency`;
-      } else if (fontConfig.subset.strategy === 'latin-frequency') {
-        cssContent += `
- * - Chunk 1+: Extended Latin characters by frequency`;
-      }
-
-      cssContent += `
- * 
- * The browser will automatically load chunks as needed based on
- * the unicode-range declarations above.`;
-
-      if (isVariable) {
-        cssContent += `
- * 
- * Variable font features available:
- * - Font styles: ${
-   fontConfig.styles ? fontConfig.styles.join(', ') : 'multiple'
- }
- * - Variable axes: ${
-   fontConfig.variableAxes
-     ? fontConfig.variableAxes.slice(0, 5).join(', ') +
-       (fontConfig.variableAxes.length > 5 ? '...' : '')
-     : 'multiple'
- }`;
-      }
-
-      cssContent += `
- */
-
-`;
-    }
-
-    // Write CSS file
+    // Write original CSS file
     await fs.writeFile(cssPath, cssContent);
 
-    console.log(chalk.green(`  ✅ Generated: ${cssFileName}`));
+    // Generate and write minified CSS file
+    const minifiedCSS = await this.minifyCSS(cssContent);
+    await fs.writeFile(minCssPath, minifiedCSS);
+
+    console.log(chalk.green(`  ✅ Generated: ${cssFileName} (${cssContent.length} bytes)`));
+    console.log(chalk.green(`  ✅ Generated: ${minCssFileName} (${minifiedCSS.length} bytes)`));
 
     return {
       path: cssPath,
       filename: cssFileName,
       size: cssContent.length,
+      minified: {
+        path: minCssPath,
+        filename: minCssFileName,
+        size: minifiedCSS.length,
+      },
     };
   }
 
   async generateUnifiedCSS(allResults, config) {
     const cssFileName = 'fonts.css';
+    const minCssFileName = 'fonts.min.css';
     const cssPath = path.join(this.cssDir, cssFileName);
+    const minCssPath = path.join(this.cssDir, minCssFileName);
 
-    let cssContent = `/* Unified Font CSS - Generated on ${new Date().toISOString()} */
-/* Auto-generated from web-font-auto-subsetting workflow */
-/* https://github.com/user/web-font-auto-subsetting */
-
+    // Generate license header for all fonts
+    let cssContent = `/*!
+ * Web Font Auto-Subsetting Collection
+ * Generated: ${new Date().toISOString()}
+ * 
+ * Included Fonts:
 `;
-
-    // Add summary of included fonts
-    cssContent += `/* Included Fonts:
-`;
+    
     for (const [fontId, processResult] of Object.entries(allResults)) {
       if (processResult.error) continue;
       const fontConfig = config.fonts[fontId];
-      const chunkInfo = Array.isArray(processResult)
-        ? ` (${processResult.length} chunks)`
-        : '';
-      cssContent += ` * - ${fontConfig.displayName}${chunkInfo}
+      const chunkInfo = Array.isArray(processResult) ? ` (${processResult.length} chunks)` : '';
+      cssContent += ` * - ${fontConfig.displayName}${chunkInfo} - ${fontConfig.license.type}
 `;
     }
     cssContent += ` */
 
 `;
 
-    // Add all @font-face declarations
+    // Generate individual @import statements for each font
     for (const [fontId, processResult] of Object.entries(allResults)) {
       if (processResult.error) continue;
-
-      const fontConfig = config.fonts[fontId];
-      const chunkInfo = Array.isArray(processResult)
-        ? ` (${processResult.length} chunks)`
-        : '';
-      cssContent += `/* ${fontConfig.displayName}${chunkInfo} */
+      cssContent += `@import url('${fontId}.css');
 `;
-      cssContent += this.generateFontFaceCSS(fontId, fontConfig, processResult);
     }
 
-    // Add font stack recommendations
-    cssContent += `/* Font Stack Recommendations */
-
-.font-chinese {
-  font-family: 'I.MingCP', 'LXGW WenKai TC', 'Noto Serif CJK SC', serif;
-}
-
-.font-english {
-  font-family: 'Amstelvar', 'Inter', system-ui, sans-serif;
-}
-
-.font-fallback {
-  font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-}
-
-/* Progressive Loading Utilities */
-.font-loading {
-  font-display: swap;
-  font-variation-settings: normal;
-}
-
-/* High-performance text rendering */
-.text-optimized {
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-`;
-
-    // Write unified CSS file
+    // Write original unified CSS file
     await fs.writeFile(cssPath, cssContent);
 
-    console.log(chalk.green(`  ✅ Generated: ${cssFileName} (unified)`));
+    // Generate and write minified unified CSS file
+    const minifiedCSS = await this.minifyCSS(cssContent);
+    await fs.writeFile(minCssPath, minifiedCSS);
+
+    console.log(chalk.green(`  ✅ Generated: ${cssFileName} (unified, ${cssContent.length} bytes)`));
+    console.log(chalk.green(`  ✅ Generated: ${minCssFileName} (unified, ${minifiedCSS.length} bytes)`));
 
     return {
       path: cssPath,
       filename: cssFileName,
       size: cssContent.length,
+      minified: {
+        path: minCssPath,
+        filename: minCssFileName,
+        size: minifiedCSS.length,
+      },
     };
   }
 
