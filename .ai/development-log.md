@@ -338,6 +338,21 @@ This log tracks the development progress of the automated web font subsetting an
 - **Updated**: `.gitignore` to remove temp/ entry
 - **Updated**: Documentation in `.ai/cache-cleaning-guide.md`
 
+### Selective Font Building Fix
+- **Critical Issue**: `build-fonts.yml` was always building all fonts, ignoring `updated-fonts` parameter
+- **Problem**: Version check workflow correctly identified updated fonts but build workflow ignored this
+- **Impact**: Wasteful - every version check triggered full rebuild of all fonts instead of just updated ones
+- **Solution**: 
+  - Modified build step to check `updated-fonts` parameter
+  - Use `--fonts <ids>` for selective builds when specific fonts updated
+  - Use `--build-only` for full builds when parameter is "all" or empty
+  - Added comma-to-space conversion for multiple font IDs
+- **Benefits**:
+  - Dramatically reduced build time and resource usage
+  - Only processes fonts that actually have updates
+  - Maintains full functionality for manual builds
+- **Enhanced Logging**: Better metadata tracking and commit messages showing build type
+
 ### Current Status
 ✅ **COMPLETED**: Full automated web font subsetting workflow
 ✅ **VERIFIED**: All CLI modes working correctly
