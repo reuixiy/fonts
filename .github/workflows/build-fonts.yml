@@ -60,7 +60,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "🔄 Starting font build workflow..."
-          pnpm start -- --build-only
+          UPDATED_FONTS="${{ github.event.inputs.updated-fonts || 'all' }}"
+          echo "📋 Updated fonts parameter: '$UPDATED_FONTS'"
+          
+          if [ "$UPDATED_FONTS" = "all" ] || [ -z "$UPDATED_FONTS" ]; then
+            echo "🎯 Building all fonts (full build)..."
+            pnpm start -- --build-only
+          else
+            echo "🎯 Building specific fonts: $UPDATED_FONTS"
+            # Convert comma-separated list to space-separated for CLI
+            FONT_IDS=$(echo "$UPDATED_FONTS" | tr ',' ' ')
+            echo "🎯 Converted to CLI format: '$FONT_IDS'"
+            pnpm start -- --fonts $FONT_IDS
+          fi
+          echo "✅ Font build completed"
       
       - name: Verify build output
         run: |
@@ -84,17 +97,28 @@ jobs:
           mkdir -p build/fonts
           mkdir -p build/css
           
+          UPDATED_FONTS="${{ github.event.inputs.updated-fonts || 'all' }}"
+          if [ "$UPDATED_FONTS" = "all" ] || [ -z "$UPDATED_FONTS" ]; then
+            BUILD_TYPE="full"
+            PROCESSED_FONTS="all"
+          else
+            BUILD_TYPE="selective"
+            PROCESSED_FONTS="$UPDATED_FONTS"
+          fi
+          
           cat > build/metadata.json << EOF
           {
             "buildDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "buildId": "${{ github.run_id }}",
             "commit": "${{ github.sha }}",
-            "updatedFonts": "${{ github.event.inputs.updated-fonts || 'all' }}",
+            "buildType": "$BUILD_TYPE",
+            "updatedFonts": "$UPDATED_FONTS",
+            "processedFonts": "$PROCESSED_FONTS",
             "fonts": $(cat src/config/fonts.json | jq -c '.fonts')
           }
           EOF
           
-          echo "✅ Build metadata created"
+          echo "✅ Build metadata created (type: $BUILD_TYPE)"
       
       - name: Get current date
         id: date
@@ -107,14 +131,25 @@ jobs:
           publish_dir: ./build
           force_orphan: true
           publish_branch: build
-          commit_message: "🔄 Font build ${{ github.run_id }} - ${{ steps.date.outputs.date }} | Fonts: ${{ github.event.inputs.updated-fonts || 'all' }} | Source: ${{ github.sha }}"
+          commit_message: |
+            🔄 Font build ${{ github.run_id }} - ${{ steps.date.outputs.date }}
+            
+            Build type: ${{ github.event.inputs.updated-fonts == 'all' || github.event.inputs.updated-fonts == '' && 'Full build (all fonts)' || format('Selective build: {0}', github.event.inputs.updated-fonts) }}
+            Source commit: ${{ github.sha }}
+            Triggered by: ${{ github.event_name }}
       
       - name: Summary
         run: |
           echo "✅ Font build and deployment complete!"
           echo "📊 Build Summary:"
           echo "- Build ID: ${{ github.run_id }}"
-          echo "- Updated fonts: ${{ github.event.inputs.updated-fonts || 'all' }}"
+          UPDATED_FONTS="${{ github.event.inputs.updated-fonts || 'all' }}"
+          if [ "$UPDATED_FONTS" = "all" ] || [ -z "$UPDATED_FONTS" ]; then
+            echo "- Build type: Full build (all fonts)"
+          else
+            echo "- Build type: Selective build"
+            echo "- Updated fonts: $UPDATED_FONTS"
+          fi
           echo "- Build date: $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           echo "- Deployed to: build branch"
           
