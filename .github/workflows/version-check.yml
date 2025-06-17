@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: read
       actions: write
+      variables: write
     outputs:
       has-updates: ${{ steps.version-check.outputs.has-updates }}
       updated-fonts: ${{ steps.version-check.outputs.updated-fonts }}
