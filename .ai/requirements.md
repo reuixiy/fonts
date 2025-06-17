@@ -7,9 +7,11 @@ This repository aims to design a web font auto-subsetting workflow that provides
 ## Core Functionality Requirements
 
 ### 1. Font Subsetting and Processing
-- Automatically split font files into web-appropriate formats through font subsetting tools
-- Generate corresponding CSS files for usage
+- Automatically split font files into multiple optimized chunks using size-based splitting
+- Generate Google Fonts-style font chunking for improved loading performance
+- Create priority-based character distribution (Latin first, then frequency-ranked Chinese characters)
 - Output format: WOFF2 only (modern browser support focus)
+- Ensure complete character coverage - no characters lost during chunking process
 
 ### 2. Automated GitHub Actions Build
 - Automatically run the font processing program through GitHub Actions
@@ -58,9 +60,11 @@ This repository aims to design a web font auto-subsetting workflow that provides
 - **Amstelvar**: Monitor repository commits since it doesn't use releases
 
 ### Font Processing Strategy
-- **Chinese Fonts**: Apply subsetting for common Chinese characters to reduce file size
-- **Variable Fonts**: Maintain full variable font capabilities while optimizing for web delivery
-- **Output Formats**: Prioritize WOFF2, with WOFF and TTF fallbacks
+- **Chinese Fonts**: Apply size-based chunking with frequency-prioritized character distribution
+- **Variable Fonts**: Maintain full variable font capabilities while creating optimized chunks
+- **Output Formats**: Multiple WOFF2 files per font family (chunk-based loading)
+- **Progressive Loading**: Critical characters (Latin, punctuation) in first chunk for fast rendering
+- **Complete Coverage**: Ensure all original font characters are preserved across chunks
 
 ### Deployment Strategy
 - Use orphan commits to keep build artifacts separate from source code

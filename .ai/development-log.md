@@ -358,3 +358,40 @@ The system is now production-ready with:
 - Complete automation via GitHub Actions
 - Modern tooling (pnpm, ESM modules)
 - Comprehensive documentation
+
+## 2025-06-17 - Size-Based Font Chunking Implementation
+
+### Major Feature Addition: Google Fonts-Style Chunking
+- **Challenge**: Current single-file subsetting doesn't optimize web loading performance
+- **Solution**: Implement size-based font chunking similar to Google Fonts approach
+- **Strategy**: Split fonts into multiple chunks based on target file sizes and character frequency
+
+### Size-Based Chunking Design
+- **Algorithm**: Character frequency analysis + size-based splitting
+- **Chinese Font Strategy**:
+  - Chunk 0 (80KB): Critical characters (Latin, punctuation) for immediate rendering
+  - Chunks 1-5 (150KB each): High-frequency Chinese characters (80%+ coverage)
+  - Chunks 6-15 (200KB each): Medium-frequency characters
+  - Remaining chunks (250KB each): Rare and specialized characters
+- **Progressive Loading**: Browsers automatically load only needed character ranges
+- **Complete Coverage**: Validation ensures no characters are lost during chunking
+
+### Technical Implementation Plan
+1. **Font Analysis**: Extract all supported characters from original fonts
+2. **Priority Ranking**: Apply frequency-based character sorting for Chinese fonts
+3. **Size-Based Splitting**: Create chunks targeting specific file sizes
+4. **CSS Generation**: Multiple @font-face rules with unicode-range declarations
+5. **Coverage Validation**: Ensure all original characters are preserved
+
+### Configuration Updates
+- New chunking configuration in `fonts.json`
+- Configurable chunk sizes and strategies
+- Character frequency data integration
+- Complete coverage validation flags
+
+### Expected Benefits
+- ✅ **Faster Initial Loading**: Critical characters render immediately
+- ✅ **Progressive Enhancement**: Additional characters load on-demand
+- ✅ **Bandwidth Optimization**: Only downloads needed character ranges
+- ✅ **Better Mobile Performance**: Smaller initial payload
+- ✅ **Google Fonts Parity**: Industry-standard chunking approach

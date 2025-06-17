@@ -62,25 +62,36 @@ fonts/
 
 ### C. Font Subsetting Module (`fontSubset.js`)
 
-**Purpose**: Process fonts for optimal web delivery
+**Purpose**: Process fonts for optimal web delivery using size-based chunking
 
 **Technology Stack**:
 - Primary: `fonttools` (Python) with `pyftsubset`
-- Alternative: Node.js wrapper for font processing libraries
+- Character analysis: Font coverage extraction and priority ranking
 
 **Processing Strategy**:
 
+#### Size-Based Chunking System
+All fonts are split into multiple files based on target chunk sizes rather than predefined character ranges:
+
+- **Analysis Phase**: Extract all supported characters from original font
+- **Priority Ranking**: Apply frequency-based character sorting (Latin first, then high-frequency Chinese)
+- **Size-Based Splitting**: Create chunks targeting specific file sizes (80KB-250KB per chunk)
+- **Complete Coverage Validation**: Ensure no characters are lost during chunking
+
 #### Chinese Fonts (I.MingCP, LXGWWenKaiTC)
-- Create subsets for common Chinese characters (基础汉字、扩展A区)
-- Include essential punctuation and symbols
-- Generate multiple subset files if needed for large character sets
-- Output format: WOFF2 only (modern web standard)
+- **Chunk 0** (80KB): Critical characters - Basic Latin, punctuation, symbols
+- **Chunks 1-5** (150KB each): Most frequent Chinese characters (covers 80%+ of daily usage)
+- **Chunks 6-15** (200KB each): Medium frequency Chinese characters
+- **Remaining chunks** (250KB each): Rare and specialized characters
+- **Total chunks**: ~15-30 chunks per font depending on font size
+- **Loading priority**: Frequency-based character distribution
 
 #### Variable Fonts (Amstelvar)
-- Preserve full variable font capabilities
-- Optimize file size while maintaining all axes functionality
-- Output format: WOFF2 (with variable font support)
-- Generate static fallbacks for older browsers
+- **Chunk 0** (80KB): Basic Latin and common punctuation
+- **Chunks 1-3** (150KB each): Extended Latin character sets
+- **Remaining chunks**: Symbols and specialized characters
+- **Total chunks**: ~3-8 chunks per variant
+- **Variable axes**: Preserved in all chunks
 
 **Configuration**:
 - Configurable character sets via JSON configuration
@@ -89,18 +100,40 @@ fonts/
 
 ### D. CSS Generation Module (`generate-css.js`)
 
-**Purpose**: Create ready-to-use CSS files for font integration
+**Purpose**: Create ready-to-use CSS files for chunked font integration
 
 **Output**:
-- Individual CSS files for each font family
+- Individual CSS files for each font family with multiple @font-face declarations
 - Unified `fonts.css` file combining all fonts
-- `@font-face` declarations with proper font-display and fallback chains
+- Progressive loading with `unicode-range` declarations for each chunk
+- Loading priority optimization using `font-display: swap`
 
 **CSS Features**:
-- Font-display: swap for better loading performance
-- Unicode-range declarations for subset optimization
-- Font-weight and font-style specifications
-- Fallback font stacks
+- **Multiple @font-face rules**: One per chunk with specific unicode-range
+- **Progressive loading**: Critical chunks load first, others load on-demand
+- **Unicode-range declarations**: Browser automatically selects needed chunks
+- **Font-display optimization**: Immediate text rendering with fallback fonts
+- **Loading priorities**: Critical chunks marked for preload
+- **Fallback font stacks**: Graceful degradation for unsupported browsers
+
+**Example Output Structure**:
+```css
+/* Critical chunk - loads first */
+@font-face {
+  font-family: 'I.MingCP';
+  src: url('fonts/imingcp/imingcp-chunk-0.woff2') format('woff2');
+  unicode-range: U+0020-007F, U+3000-303F;
+  font-display: swap;
+}
+
+/* High-frequency Chinese characters */
+@font-face {
+  font-family: 'I.MingCP';
+  src: url('fonts/imingcp/imingcp-chunk-1.woff2') format('woff2');
+  unicode-range: U+4E00-4EFF, U+5000-50FF;
+  font-display: swap;
+}
+```
 
 ## 3. GitHub Actions Workflows
 
@@ -210,14 +243,23 @@ fonts/
 build/ (on build branch)
 ├── fonts/
 │   ├── imingcp/
-│   │   └── imingcp-regular.woff2
+│   │   ├── imingcp-chunk-0.woff2    # Critical chars (80KB)
+│   │   ├── imingcp-chunk-1.woff2    # High-freq chars (150KB)
+│   │   ├── imingcp-chunk-2.woff2    # High-freq chars (150KB)
+│   │   ├── ...
+│   │   └── imingcp-chunk-N.woff2    # Remaining chars
 │   ├── lxgwwenkaitc/
-│   │   └── lxgwwenkaitc-light.woff2
+│   │   ├── lxgwwenkaitc-chunk-0.woff2
+│   │   ├── lxgwwenkaitc-chunk-1.woff2
+│   │   ├── ...
+│   │   └── lxgwwenkaitc-chunk-M.woff2
 │   └── amstelvar/
-│       ├── amstelvar-roman.woff2
-│       └── amstelvar-italic.woff2
+│       ├── amstelvar-roman-chunk-0.woff2
+│       ├── amstelvar-roman-chunk-1.woff2
+│       ├── amstelvar-italic-chunk-0.woff2
+│       └── amstelvar-italic-chunk-1.woff2
 ├── css/
-│   ├── imingcp.css
+│   ├── imingcp.css                  # Multiple @font-face with unicode-range
 │   ├── lxgwwenkaitc.css
 │   ├── amstelvar.css
 │   └── fonts.css

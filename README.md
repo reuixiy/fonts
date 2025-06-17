@@ -5,9 +5,11 @@ An automated workflow for downloading, subsetting, and deploying web fonts with 
 ## 🎯 Features
 
 - **Automated Version Detection**: Daily checks for font updates from multiple sources
-- **Smart Font Subsetting**: Optimized subsetting for Chinese and variable fonts
+- **Size-Based Font Chunking**: Google Fonts-style splitting with optimized chunk sizes
+- **Progressive Loading**: Critical characters load first, others load on-demand
 - **WOFF2 Output**: Modern compression for optimal web performance
-- **CSS Generation**: Ready-to-use CSS files with proper @font-face declarations
+- **Smart CSS Generation**: Multiple @font-face rules with unicode-range declarations
+- **Complete Coverage**: Ensures no characters are lost during chunking process
 - **GitHub Actions Integration**: Fully automated CI/CD pipeline
 - **Orphan Branch Deployment**: Clean separation between source and build artifacts
 
@@ -132,9 +134,10 @@ pnpm run clean
 Font configuration is stored in `src/config/fonts.json`. This file defines:
 
 - Font sources and release patterns
-- Subsetting strategies
+- Size-based chunking strategies
+- Character priority rankings
 - Output specifications
-- CSS class names
+- CSS generation parameters
 
 ### Example Configuration
 
@@ -151,12 +154,25 @@ Font configuration is stored in `src/config/fonts.json`. This file defines:
       },
       "weight": 400,
       "subset": {
-        "type": "chinese-common"
+        "type": "size-based-chunks",
+        "strategy": "chinese-frequency", 
+        "chunkSizes": [80, 150, 150, 150, 200, 200, 250],
+        "maxChunks": 30,
+        "ensureCompleteCoverage": true,
+        "priorityData": "traditional-chinese-frequency"
       }
     }
   }
 }
 ```
+
+### Chunking Configuration Options
+
+- **chunkSizes**: Array of target sizes in KB for each chunk
+- **strategy**: Character priority algorithm (`chinese-frequency`, `latin-basic`)
+- **maxChunks**: Maximum number of chunks to prevent excessive splitting
+- **ensureCompleteCoverage**: Validate that all original characters are preserved
+- **priorityData**: Character frequency data source for optimization
 
 ## 🔄 Automated Workflow
 
@@ -166,67 +182,115 @@ Font configuration is stored in `src/config/fonts.json`. This file defines:
 - **Result**: Triggers build workflow if updates found
 - **Optimization**: Only builds fonts that have actual version changes
 
-### Selective Build and Deploy
+### Build and Deploy
 - **Trigger**: When version check finds updates, or manual dispatch
 - **Intelligence**: Only processes fonts that have version updates (not all fonts)
 - **Process**:
   1. Download latest font files (skip if already exist and valid)
-  2. Apply subsetting optimizations (skip if output files exist)
-  3. Generate WOFF2 files
-  4. Create CSS files
-  5. Generate license information
-  6. Deploy to `build` branch
+  2. Analyze font character coverage and apply frequency-based priority ranking
+  3. Generate size-based chunks (80KB-250KB per chunk) with complete coverage validation
+  4. Create multiple WOFF2 files per font with progressive loading optimization
+  5. Generate CSS files with unicode-range declarations for each chunk
+  6. Generate license information
+  7. Deploy to `build` branch
 
 ### Performance Optimizations
 - **Smart Caching**: Skip downloads when files already exist and pass validation
 - **Incremental Processing**: Only subset fonts that need updates
 - **Selective Builds**: GitHub Actions only builds changed fonts, not all fonts
-- **Fast Iterations**: Subsequent builds complete in seconds instead of minutes
+- **Chunked Loading**: Progressive font loading with critical characters first
+- **Size-Based Splitting**: Optimal chunk sizes for fast loading and efficient caching
 
 ## 📁 Output Structure
 
-The build process creates the following structure in the `build` branch:
+The build process creates the following structure in the `build` branch with chunked fonts:
 
 ```
 build/
 ├── fonts/
 │   ├── imingcp/
-│   │   └── imingcp-regular.woff2
+│   │   ├── imingcp-chunk-0.woff2     # Critical chars (80KB)
+│   │   ├── imingcp-chunk-1.woff2     # High-freq chars (150KB)
+│   │   ├── imingcp-chunk-2.woff2     # High-freq chars (150KB)
+│   │   ├── imingcp-chunk-3.woff2     # Medium-freq chars (200KB)
+│   │   ├── ...
+│   │   └── imingcp-chunk-N.woff2     # Remaining chars (250KB)
 │   ├── lxgwwenkaitc/
-│   │   └── lxgwwenkaitc-light.woff2
+│   │   ├── lxgwwenkaitc-chunk-0.woff2
+│   │   ├── lxgwwenkaitc-chunk-1.woff2
+│   │   ├── ...
+│   │   └── lxgwwenkaitc-chunk-M.woff2
 │   └── amstelvar/
-│       ├── amstelvar-roman.woff2
-│       └── amstelvar-italic.woff2
+│       ├── amstelvar-roman-chunk-0.woff2
+│       ├── amstelvar-roman-chunk-1.woff2
+│       ├── amstelvar-italic-chunk-0.woff2
+│       └── amstelvar-italic-chunk-1.woff2
 ├── css/
-│   ├── imingcp.css
-│   ├── lxgwwenkaitc.css
+│   ├── imingcp.css                   # Multiple @font-face rules
+│   ├── lxgwwenkaitc.css             # with unicode-range per chunk
 │   ├── amstelvar.css
-│   └── fonts.css              # Combined CSS file
-├── FONT_LICENSES.md           # Human-readable license information
-├── font-licenses.json         # Machine-readable license data
-├── metadata.json              # Build information
-├── processing-metadata.json   # Font processing details
-├── css-metadata.json          # CSS generation details
-└── download-metadata.json     # Download information
+│   └── fonts.css                     # Combined CSS file
+├── FONT_LICENSES.md                  # Human-readable license information
+├── font-licenses.json                # Machine-readable license data
+├── metadata.json                     # Build information
+├── processing-metadata.json          # Font processing details
+├── css-metadata.json                 # CSS generation details
+└── download-metadata.json            # Download information
 ```
 
-## 🎨 Using the Fonts
+## 🎨 Using the Chunked Fonts
 
-### Option 1: Direct CSS Import
+The chunked fonts provide progressive loading with optimal performance:
+
+### Option 1: Direct CSS Import (Recommended)
 
 ```html
+<!-- Loads all chunks with progressive loading -->
 <link rel="stylesheet" href="https://your-domain.com/path-to-build/css/fonts.css">
 ```
 
 ### Option 2: Individual Font CSS
 
 ```html
+<!-- Loads specific font family with all its chunks -->
 <link rel="stylesheet" href="https://your-domain.com/path-to-build/css/imingcp.css">
 ```
 
-### Option 3: Self-hosted
+### Option 3: Preload Critical Chunks
 
-Download the files from the `build` branch and host them yourself.
+```html
+<!-- Preload critical chunk for faster initial render -->
+<link rel="preload" href="https://your-domain.com/path-to-build/fonts/imingcp/imingcp-chunk-0.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="https://your-domain.com/path-to-build/css/imingcp.css">
+```
+
+### CSS Example Output
+
+```css
+/* Critical chunk - loads immediately */
+@font-face {
+  font-family: 'I.MingCP';
+  src: url('fonts/imingcp/imingcp-chunk-0.woff2') format('woff2');
+  unicode-range: U+0020-007F, U+3000-303F, U+FF00-FFEF;
+  font-display: swap;
+}
+
+/* High-frequency Chinese characters - loads on demand */
+@font-face {
+  font-family: 'I.MingCP';
+  src: url('fonts/imingcp/imingcp-chunk-1.woff2') format('woff2');
+  unicode-range: U+4E00-4EFF, U+5000-50FF;
+  font-display: swap;
+}
+
+/* Additional chunks load progressively as needed */
+@font-face {
+  font-family: 'I.MingCP';
+  src: url('fonts/imingcp/imingcp-chunk-2.woff2') format('woff2');
+  unicode-range: U+5100-51FF, U+5200-52FF;
+  font-display: swap;
+}
+```
 
 ## 🔧 Development
 
