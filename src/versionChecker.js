@@ -192,12 +192,18 @@ class VersionChecker {
 
         // Set GitHub Actions output
         if (process.env.GITHUB_ACTIONS) {
-          console.log(`::set-output name=has_updates::true`);
-          console.log(
-            `::set-output name=updated_fonts::${JSON.stringify(
-              result.updatedFonts.map((f) => f.id)
-            )}`
-          );
+          const fs = await import('fs');
+          const path = await import('path');
+          
+          const outputFile = process.env.GITHUB_OUTPUT;
+          if (outputFile) {
+            fs.appendFileSync(outputFile, `has_updates=true\n`);
+            fs.appendFileSync(outputFile, `updated_fonts=${JSON.stringify(result.updatedFonts.map((f) => f.id))}\n`);
+          } else {
+            // Fallback for older GitHub Actions
+            console.log(`::set-output name=has_updates::true`);
+            console.log(`::set-output name=updated_fonts::${JSON.stringify(result.updatedFonts.map((f) => f.id))}`);
+          }
         }
 
         // Update version cache
@@ -206,7 +212,15 @@ class VersionChecker {
         console.log(chalk.yellow('📅 All fonts are up to date'));
 
         if (process.env.GITHUB_ACTIONS) {
-          console.log(`::set-output name=has_updates::false`);
+          const fs = await import('fs');
+          
+          const outputFile = process.env.GITHUB_OUTPUT;
+          if (outputFile) {
+            fs.appendFileSync(outputFile, `has_updates=false\n`);
+          } else {
+            // Fallback for older GitHub Actions
+            console.log(`::set-output name=has_updates::false`);
+          }
         }
       }
 

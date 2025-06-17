@@ -9,6 +9,9 @@ on:
 jobs:
   check-versions:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     outputs:
       has-updates: ${{ steps.version-check.outputs.has-updates }}
       updated-fonts: ${{ steps.version-check.outputs.updated-fonts }}
@@ -34,19 +37,7 @@ jobs:
         id: version-check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pnpm run check-versions
-          
-          # Read the version check results
-          if [ -f .version-check-result.json ]; then
-            HAS_UPDATES=$(cat .version-check-result.json | jq -r '.hasUpdates')
-            UPDATED_FONTS=$(cat .version-check-result.json | jq -r '.updatedFonts | join(",")')
-            echo "has-updates=$HAS_UPDATES" >> $GITHUB_OUTPUT
-            echo "updated-fonts=$UPDATED_FONTS" >> $GITHUB_OUTPUT
-          else
-            echo "has-updates=false" >> $GITHUB_OUTPUT
-            echo "updated-fonts=" >> $GITHUB_OUTPUT
-          fi
+        run: pnpm run check-versions
       
       - name: Update stored versions
         if: steps.version-check.outputs.has-updates == 'true'
