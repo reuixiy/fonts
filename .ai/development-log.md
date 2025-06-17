@@ -152,6 +152,68 @@ This log tracks the development progress of the automated web font subsetting an
 - Maintained backward compatibility for local development
 - Fixed all deprecation warnings in GitHub Actions
 
+### Issue #7: Version Cache Persistence
+**Date**: June 17, 2025  
+**Issue**: Version cache lost between GitHub Actions runs, causing unnecessary rebuilds  
+**Status**: ✅ Resolved  
+**Solution**: Implemented git-based orphan `cache` branch for persistent version cache:
+- Created dedicated orphan branch containing only `version-cache.json`
+- Version checker now fetches/updates cache from this branch automatically
+- Ensures persistent cache across workflow runs without affecting main branch
+- Proper error handling for missing cache or branch scenarios
+
+### Issue #8: Font File Download Validation
+**Date**: June 17, 2025  
+**Issue**: Downloaded font files sometimes empty due to API rate limits or network issues  
+**Status**: ✅ Resolved  
+**Solution**: Added comprehensive file validation to download process:
+- File size validation (minimum thresholds for different font types)
+- Font file format validation (checking headers for TTF/OTF signatures)
+- Automatic cleanup of invalid files
+- Detailed error reporting for debugging
+- Enhanced logging for successful validations
+
+### Issue #9: Octokit File Path Handling
+**Date**: June 17, 2025  
+**Issue**: Special characters in font file paths causing download failures  
+**Status**: ✅ Resolved  
+**Solution**: Maintained Octokit-based approach with improved error handling:
+- Proper base64 decoding for repo file downloads
+- Enhanced path validation and error messages
+- Better handling of GitHub API responses
+- Confirmed working approach for complex file paths
+
+### Issue #10: Node.js Buffer Deprecation Warning
+**Date**: June 17, 2025  
+**Issue**: `response.buffer()` method deprecated in node-fetch, causing warnings  
+**Status**: ✅ Resolved  
+**Solution**: Migrated to modern `response.arrayBuffer()` method:
+- Replaced `response.buffer()` with `response.arrayBuffer()` and `Buffer.from(arrayBuffer)`
+- Updated both GitHub release and repository download methods
+- Eliminated deprecation warnings while maintaining functionality
+
+### Issue #11: Large Font File Download Limitation
+**Date**: June 17, 2025  
+**Issue**: GitHub API content endpoint limited to 1MB, causing empty downloads for large font files like Amstelvar (1.4MB)  
+**Status**: ✅ Resolved  
+**Solution**: Implemented hybrid download strategy:
+- Automatic detection of large files (>1MB) or Git LFS files
+- Fallback to direct raw GitHub URLs for large files
+- Proper URL encoding for special characters in file paths
+- Maintained base64 decoding for smaller files
+- Enhanced debugging information for troubleshooting
+
+### Issue #12: Redundant File Downloads
+**Date**: June 17, 2025  
+**Issue**: Script re-downloading existing valid font files on every run  
+**Status**: ✅ Resolved  
+**Solution**: Added comprehensive file existence checking:
+- Pre-download validation of existing files
+- Reuse of existing `validateDownloadedFile` method for consistency
+- Skip download if valid file already exists
+- Clear logging when files are skipped
+- Maintains download metadata consistency
+
 ## Resolved Issues
 
 ### ✅ Project Structure Setup
@@ -171,6 +233,24 @@ This log tracks the development progress of the automated web font subsetting an
 - Automated build and deployment pipeline
 - Orphan branch deployment strategy
 - Proper environment setup and dependency installation
+
+### ✅ Version Cache Management
+- Implemented persistent version cache using git orphan branch
+- Automatic cache fetch/update mechanism in version checker
+- Clean branch management (only version-cache.json file)
+- Robust error handling for cache operations
+
+### ✅ Download Reliability
+- Added file validation for downloaded fonts
+- Proper cleanup of invalid/corrupted files
+- Enhanced error messages for debugging
+- Maintained Octokit approach for reliable GitHub API integration
+
+### ✅ Download Performance and Reliability
+- Eliminated redundant downloads through file existence checking
+- Fixed large file download limitations with hybrid approach
+- Resolved deprecation warnings for future Node.js compatibility
+- Enhanced error handling and debugging information for download issues
 
 ## Performance Metrics
 *To be recorded during development*

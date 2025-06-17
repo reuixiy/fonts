@@ -23,6 +23,71 @@ class FontDownloader {
     await fs.emptyDir(this.tempDir);
   }
 
+  async checkExistingFile(filePath, expectedMinSize = 1024) {
+    try {
+      // Check if file exists
+      if (!(await fs.pathExists(filePath))) {
+        return false;
+      }
+
+      // Use existing validation logic
+      await this.validateDownloadedFile(filePath, expectedMinSize);
+      return true;
+    } catch (error) {
+      // If validation fails, file is invalid or missing
+      console.log(chalk.gray(`    File check failed: ${error.message}`));
+      return false;
+    }
+  }
+
+  async validateDownloadedFile(filePath, expectedMinSize = 1024) {
+    try {
+      const stats = await fs.stat(filePath);
+
+      if (stats.size === 0) {
+        throw new Error(`Downloaded file is empty: ${filePath}`);
+      }
+
+      if (stats.size < expectedMinSize) {
+        throw new Error(
+          `Downloaded file is too small (${stats.size} bytes, expected at least ${expectedMinSize}): ${filePath}`
+        );
+      }
+
+      // Check if it's a valid font file by reading the first few bytes
+      const buffer = await fs.readFile(filePath, { start: 0, end: 4 });
+      const header = buffer.toString('ascii');
+
+      // Check for common font file signatures
+      const validHeaders = [
+        'OTTO', // OpenType/CFF
+        'ttcf', // TrueType Collection
+        'true', // TrueType (Mac)
+        'typ1', // PostScript Type 1
+      ];
+
+      // Check for TrueType signature (first 4 bytes should be version number)
+      const isTrueType = buffer.readUInt32BE(0) === 0x00010000;
+      const isValidHeader = validHeaders.includes(header) || isTrueType;
+
+      if (!isValidHeader) {
+        throw new Error(
+          `Invalid font file format: ${filePath} (header: ${header})`
+        );
+      }
+
+      console.log(
+        chalk.green(`    ✓ File validation passed (${stats.size} bytes)`)
+      );
+      return true;
+    } catch (error) {
+      console.error(
+        chalk.red(`    ❌ File validation failed: ${error.message}`)
+      );
+      throw error;
+    }
+  }
+
   async loadConfig() {
     try {
       const config = await fs.readJson(this.configPath);
@@ -77,20 +142,45 @@ class FontDownloader {
         )
       );
 
+      const outputPath = path.join(
+        this.downloadDir,
+        `${fontId}-${version}.ttf`
+      );
+
+      // Check if file already exists and is valid
+      if (await this.checkExistingFile(outputPath, 100 * 1024)) {
+        console.log(
+          chalk.yellow(`  ⏭ File already exists and is valid: ${outputPath}`)
+        );
+        return {
+          path: outputPath,
+          version: version,
+          originalName: asset.name,
+        };
+      }
+
       // Download the font file
       const response = await fetch(asset.browser_download_url);
       if (!response.ok) {
         throw new Error(`Download failed: ${response.statusText}`);
       }
 
-      const buffer = await response.buffer();
-      const outputPath = path.join(
-        this.downloadDir,
-        `${fontId}-${version}.ttf`
-      );
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
       await fs.writeFile(outputPath, buffer);
-      console.log(chalk.green(`  ✅ Downloaded to: ${outputPath}`));
+
+      // Validate the downloaded file
+      try {
+        await this.validateDownloadedFile(outputPath, 100 * 1024); // Expect at least 100KB for font files
+        console.log(
+          chalk.green(`  ✅ Downloaded and validated to: ${outputPath}`)
+        );
+      } catch (validationError) {
+        // Clean up invalid file
+        await fs.remove(outputPath);
+        throw validationError;
+      }
 
       return {
         path: outputPath,
@@ -130,33 +220,112 @@ class FontDownloader {
       for (const fileConfig of source.files) {
         console.log(chalk.cyan(`  Downloading ${fileConfig.style} variant...`));
 
-        // Get file content from repository
-        const { data: fileData } = await this.octokit.rest.repos.getContent({
-          owner: source.owner,
-          repo: source.repo,
-          path: fileConfig.path,
-          ref: latestCommit.sha,
-        });
+        try {
+          // Use Octokit to get file content (this properly handles special characters in file paths)
+          console.log(chalk.gray(`    Fetching: ${fileConfig.path}`));
+          const { data: fileData } = await this.octokit.rest.repos.getContent({
+            owner: source.owner,
+            repo: source.repo,
+            path: fileConfig.path,
+            ref: latestCommit.sha,
+          });
 
-        if (fileData.type !== 'file') {
-          throw new Error(`Path is not a file: ${fileConfig.path}`);
+          if (fileData.type !== 'file') {
+            throw new Error(`Path is not a file: ${fileConfig.path}`);
+          }
+
+          console.log(
+            chalk.gray(`    File size from API: ${fileData.size} bytes`)
+          );
+
+          const outputPath = path.join(
+            this.downloadDir,
+            `${fontId}-${fileConfig.style}-${version}.ttf`
+          );
+
+          // Check if file already exists and is valid BEFORE attempting download
+          if (await this.checkExistingFile(outputPath, 50 * 1024)) {
+            console.log(
+              chalk.yellow(
+                `    ⏭ File already exists and is valid: ${outputPath}`
+              )
+            );
+            downloadedFiles.push({
+              path: outputPath,
+              style: fileConfig.style,
+              originalPath: fileConfig.path,
+            });
+            continue;
+          }
+
+          // Now proceed with download
+          let buffer;
+
+          if (
+            fileData.size > 1024 * 1024 ||
+            !fileData.content ||
+            fileData.download_url
+          ) {
+            console.log(
+              chalk.gray(
+                `    File too large or uses Git LFS, using direct download...`
+              )
+            );
+
+            // Use raw GitHub URL for large files or Git LFS files
+            const encodedPath = encodeURIComponent(fileConfig.path);
+            const rawUrl = `https://github.com/${source.owner}/${source.repo}/raw/${latestCommit.sha}/${encodedPath}`;
+            console.log(chalk.gray(`    Download URL: ${rawUrl}`));
+
+            const response = await fetch(rawUrl);
+            if (!response.ok) {
+              throw new Error(`Direct download failed: ${response.statusText}`);
+            }
+
+            const arrayBuffer = await response.arrayBuffer();
+            buffer = Buffer.from(arrayBuffer);
+            console.log(
+              chalk.gray(`    Downloaded buffer size: ${buffer.length} bytes`)
+            );
+          } else {
+            // Use base64 content for smaller files
+            if (fileData.content.length === 0) {
+              throw new Error('File content is empty');
+            }
+
+            buffer = Buffer.from(fileData.content, 'base64');
+            console.log(
+              chalk.gray(`    Decoded buffer size: ${buffer.length} bytes`)
+            );
+          }
+
+          await fs.writeFile(outputPath, buffer);
+
+          // Validate the downloaded file
+          try {
+            await this.validateDownloadedFile(outputPath, 50 * 1024); // Expect at least 50KB for font files
+            console.log(
+              chalk.green(`    ✅ Downloaded and validated: ${outputPath}`)
+            );
+          } catch (validationError) {
+            // Clean up invalid file
+            await fs.remove(outputPath);
+            throw validationError;
+          }
+
+          downloadedFiles.push({
+            path: outputPath,
+            style: fileConfig.style,
+            originalPath: fileConfig.path,
+          });
+        } catch (error) {
+          console.error(
+            chalk.red(
+              `    ❌ Failed to download ${fileConfig.style}: ${error.message}`
+            )
+          );
+          throw error;
         }
-
-        // Decode base64 content
-        const buffer = Buffer.from(fileData.content, 'base64');
-        const outputPath = path.join(
-          this.downloadDir,
-          `${fontId}-${fileConfig.style}-${version}.ttf`
-        );
-
-        await fs.writeFile(outputPath, buffer);
-        console.log(chalk.green(`    ✅ Downloaded to: ${outputPath}`));
-
-        downloadedFiles.push({
-          path: outputPath,
-          style: fileConfig.style,
-          originalPath: fileConfig.path,
-        });
       }
 
       return {
