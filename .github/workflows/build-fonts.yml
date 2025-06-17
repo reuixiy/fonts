@@ -29,7 +29,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
       
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -37,7 +41,7 @@ jobs:
           python-version: '3.11'
       
       - name: Install Node.js dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
       
       - name: Install Python dependencies
         run: |
@@ -52,17 +56,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "📥 Downloading fonts..."
-          npm run download-fonts
+          pnpm run download-fonts
       
       - name: Subset fonts
         run: |
           echo "✂️ Processing and subsetting fonts..."
-          npm run subset-fonts
+          pnpm run subset-fonts
       
       - name: Generate CSS
         run: |
           echo "🎨 Generating CSS files..."
-          npm run generate-css
+          pnpm run generate-css
       
       - name: Create build metadata
         run: |

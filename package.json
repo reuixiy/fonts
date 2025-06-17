@@ -10,7 +10,7 @@
     "download-fonts": "node scripts/download-fonts.js",
     "subset-fonts": "node src/fontSubset.js",
     "generate-css": "node scripts/generate-css.js",
-    "build": "npm run download-fonts && npm run subset-fonts && npm run generate-css",
+    "build": "pnpm run download-fonts && pnpm run subset-fonts && pnpm run generate-css",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

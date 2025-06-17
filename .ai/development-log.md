@@ -122,6 +122,16 @@ This log tracks the development progress of the automated web font subsetting an
 **Status**: Expected behavior - fonts need to be downloaded first  
 **Solution**: Ensure proper workflow order: download → subset → generate CSS
 
+### Issue #4: GitHub Actions Package Manager Mismatch
+**Date**: June 17, 2025  
+**Issue**: GitHub Actions failing with "Dependencies lock file is not found" - looking for package-lock.json but project uses pnpm  
+**Status**: ✅ Resolved  
+**Solution**: Updated GitHub Actions workflows to use pnpm instead of npm:
+- Added pnpm/action-setup@v4 
+- Changed `npm ci` to `pnpm install --frozen-lockfile`
+- Updated all `npm run` commands to `pnpm run`
+- Ensured pnpm-lock.yaml is committed to repository
+
 ## Resolved Issues
 
 ### ✅ Project Structure Setup
