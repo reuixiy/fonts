@@ -164,11 +164,7 @@ The project is built with **TypeScript** for enhanced type safety and developer 
       "weight": 400,
       "subset": {
         "type": "size-based-chunks",
-        "strategy": "chinese-frequency", 
-        "chunkSizes": [80, 150, 150, 150, 200, 200, 250],
-        "maxChunks": 30,
-        "ensureCompleteCoverage": true,
-        "priorityData": "traditional-chinese-frequency"
+        "maxChunkSizeKB": 60
       }
     }
   }
@@ -177,11 +173,7 @@ The project is built with **TypeScript** for enhanced type safety and developer 
 
 ### Chunking Configuration Options
 
-- **chunkSizes**: Array of target sizes in KB for each chunk
-- **strategy**: Character priority algorithm (`chinese-frequency`, `latin-basic`)
-- **maxChunks**: Maximum number of chunks to prevent excessive splitting
-- **ensureCompleteCoverage**: Validate that all original characters are preserved
-- **priorityData**: Character frequency data source for optimization
+- **maxChunkSizeKB**: Maximum size for each chunk in KB (e.g., 60)
 
 ## 🔄 Automated Workflow
 
@@ -199,8 +191,8 @@ The project is built with **TypeScript** for enhanced type safety and developer 
   - **Selective Builds**: Preserves existing fonts while updating only changed ones
 - **Process**:
   1. Download latest font files (skip if already exist and valid)
-  2. Analyze font character coverage and apply frequency-based priority ranking
-  3. Generate size-based chunks (80KB-250KB per chunk) with complete coverage validation
+  2. Extract all characters present in the font using fontTools
+  3. Generate size-based chunks (≤60KB per chunk) with complete coverage validation
   4. Create multiple WOFF2 files per font with progressive loading optimization
   5. Generate CSS files with unicode-range declarations for each chunk
   6. Generate license information
@@ -327,7 +319,7 @@ The chunked fonts provide progressive loading with optimal performance and inclu
   font-style: normal;
 }
 
-/* High-frequency Chinese characters - loads on demand */
+/* Base characters - loads immediately */
 @font-face {
   font-family: 'I.MingCP';
   src: url('../fonts/imingcp/imingcp-chunk-1.woff2') format('woff2');

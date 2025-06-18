@@ -37,13 +37,17 @@
     "@octokit/rest": "^22.0.0",
     "chalk": "^5.4.1",
     "commander": "^14.0.0",
+    "fontkit": "^2.0.4",
     "fs-extra": "^11.3.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "subset-font": "^2.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",
+    "@types/fontkit": "^2.0.8",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^24.0.3",
+    "@types/subset-font": "^2.3.0",
     "@typescript-eslint/eslint-plugin": "^8.34.1",
     "@typescript-eslint/parser": "^8.34.1",
     "cssnano": "^7.0.7",

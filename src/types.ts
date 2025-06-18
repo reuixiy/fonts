@@ -37,12 +37,8 @@ export interface FontConfig {
   type?: string;
   styles?: string[];
   subset: {
-    type: string;
-    strategy: string;
-    chunkSizes: number[];
-    maxChunks: number;
-    ensureCompleteCoverage: boolean;
-    priorityData: string;
+    type: 'size-based-chunks';
+    maxChunkSizeKB: number;
   };
   output: {
     formats: string[];
