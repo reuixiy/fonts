@@ -48,6 +48,10 @@ export interface FontConfig {
     formats: string[];
     filenamePattern: string;
   };
+  css?: {
+    fontStretch?: string;
+    srcFormat?: string;
+  };
   variableAxes?: string[];
 }
 

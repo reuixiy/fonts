@@ -98,12 +98,26 @@ class CSSGenerator {
             const fontStyle = style === 'italic' ? 'italic' : 'normal';
             const fontWeight = fontConfig.weight ?? '100 900'; // Variable weight range
 
+            // Use custom src format if specified, otherwise default
+            const srcFormat = fontConfig.css?.srcFormat
+              ? fontConfig.css.srcFormat
+                  .replace(/{fontId}/g, fontId)
+                  .replace(/{filename}/g, chunk.filename)
+              : `url('${fontPath}/${chunk.filename}') format('woff2')`;
+
             css += `@font-face {
   font-family: '${fontConfig.displayName}';
-  src: url('${fontPath}/${chunk.filename}') format('woff2');
+  src: ${srcFormat};
   font-display: swap;
   font-style: ${fontStyle};
-  font-weight: ${fontWeight};
+  font-weight: ${fontWeight};`;
+
+            // Add font-stretch if specified
+            if (fontConfig.css?.fontStretch) {
+              css += `\n  font-stretch: ${fontConfig.css.fontStretch};`;
+            }
+
+            css += `
   unicode-range: ${this.formatUnicodeRanges(chunk.unicodeRanges)};
 }
 
@@ -116,12 +130,26 @@ class CSSGenerator {
           const fontStyle = result.style === 'italic' ? 'italic' : 'normal';
           const fontWeight = fontConfig.weight ?? '100 900'; // Variable weight range
 
+          // Use custom src format if specified, otherwise default
+          const srcFormat = fontConfig.css?.srcFormat
+            ? fontConfig.css.srcFormat
+                .replace(/{fontId}/g, fontId)
+                .replace(/{filename}/g, result.filename)
+            : `url('${fontPath}/${result.filename}') format('woff2')`;
+
           css += `@font-face {
   font-family: '${fontConfig.displayName}';
-  src: url('${fontPath}/${result.filename}') format('woff2');
+  src: ${srcFormat};
   font-display: swap;
   font-style: ${fontStyle};
-  font-weight: ${fontWeight};
+  font-weight: ${fontWeight};`;
+
+          // Add font-stretch if specified
+          if (fontConfig.css?.fontStretch) {
+            css += `\n  font-stretch: ${fontConfig.css.fontStretch};`;
+          }
+
+          css += `
   unicode-range: ${this.formatUnicodeRanges(result.unicodeRanges ?? [])};
 }
 
@@ -140,12 +168,26 @@ class CSSGenerator {
           const fontStyle = fontConfig.style ?? 'normal';
           const fontWeight = fontConfig.weight ?? 400;
 
+          // Use custom src format if specified, otherwise default
+          const srcFormat = fontConfig.css?.srcFormat
+            ? fontConfig.css.srcFormat
+                .replace(/{fontId}/g, fontId)
+                .replace(/{filename}/g, chunk.filename)
+            : `url('${fontPath}/${chunk.filename}') format('woff2')`;
+
           css += `@font-face {
   font-family: '${fontConfig.displayName}';
-  src: url('${fontPath}/${chunk.filename}') format('woff2');
+  src: ${srcFormat};
   font-display: swap;
   font-style: ${fontStyle};
-  font-weight: ${fontWeight};
+  font-weight: ${fontWeight};`;
+
+          // Add font-stretch if specified
+          if (fontConfig.css?.fontStretch) {
+            css += `\n  font-stretch: ${fontConfig.css.fontStretch};`;
+          }
+
+          css += `
   unicode-range: ${this.formatUnicodeRanges(chunk.unicodeRanges)};
 }
 
@@ -157,12 +199,26 @@ class CSSGenerator {
         const fontStyle = fontConfig.style ?? 'normal';
         const fontWeight = fontConfig.weight ?? 400;
 
+        // Use custom src format if specified, otherwise default
+        const srcFormat = fontConfig.css?.srcFormat
+          ? fontConfig.css.srcFormat
+              .replace(/{fontId}/g, fontId)
+              .replace(/{filename}/g, result.filename)
+          : `url('${fontPath}/${result.filename}') format('woff2')`;
+
         css += `@font-face {
   font-family: '${fontConfig.displayName}';
-  src: url('${fontPath}/${result.filename}') format('woff2');
+  src: ${srcFormat};
   font-display: swap;
   font-style: ${fontStyle};
-  font-weight: ${fontWeight};
+  font-weight: ${fontWeight};`;
+
+        // Add font-stretch if specified
+        if (fontConfig.css?.fontStretch) {
+          css += `\n  font-stretch: ${fontConfig.css.fontStretch};`;
+        }
+
+        css += `
   unicode-range: ${this.formatUnicodeRanges(result.unicodeRanges ?? [])};
 }
 
@@ -288,13 +344,14 @@ class CSSGenerator {
  * Generator: Web Font Auto-Subsetting Workflow
  */
 
-/* Available fonts: ${Object.keys(allResults).join(', ')} */
+/* Available fonts: ${Object.keys(config.fonts).join(', ')} */
 
 `;
 
-      Object.entries(allResults).forEach(([fontId, result]) => {
+      Object.keys(config.fonts).forEach((fontId) => {
+        const result = allResults[fontId];
         const fontConfig = config.fonts[fontId];
-        if (!fontConfig || 'error' in result) {
+        if (!fontConfig || !result || 'error' in result) {
           console.log(
             chalk.yellow(
               `⚠️  Skipping ${fontId} due to error or missing config`
@@ -331,13 +388,14 @@ class CSSGenerator {
  * Generator: Web Font Auto-Subsetting Workflow
  */
 
-/* Available fonts: ${Object.keys(allResults).join(', ')} */
+/* Available fonts: ${Object.keys(config.fonts).join(', ')} */
 
 `;
 
-      Object.entries(allResults).forEach(([fontId, result]) => {
+      Object.keys(config.fonts).forEach((fontId) => {
+        const result = allResults[fontId];
         const fontConfig = config.fonts[fontId];
-        if (!fontConfig || 'error' in result) {
+        if (!fontConfig || !result || 'error' in result) {
           return;
         }
         minImportUnifiedCSS += `@import './${fontId}.min.css';\n`;

@@ -26,7 +26,10 @@
       },
       "output": {
         "formats": ["woff2"],
-        "filenamePattern": "imingcp-chunk-{index}"
+        "filenamePattern": "imingcp-regular-chunk-{index}"
+      },
+      "css": {
+        "srcFormat": "url('../fonts/{fontId}/{filename}') format('woff2')"
       }
     },
     "lxgwwenkaitc": {
@@ -55,7 +58,10 @@
       },
       "output": {
         "formats": ["woff2"],
-        "filenamePattern": "lxgwwenkaitc-chunk-{index}"
+        "filenamePattern": "lxgwwenkaitc-light-chunk-{index}"
+      },
+      "css": {
+        "srcFormat": "url('../fonts/{fontId}/{filename}') format('woff2')"
       }
     },
     "amstelvar": {
@@ -94,6 +100,10 @@
       "output": {
         "formats": ["woff2"],
         "filenamePattern": "amstelvar-{style}-chunk-{index}"
+      },
+      "css": {
+        "fontStretch": "50% 125%",
+        "srcFormat": "url('../fonts/{fontId}/{filename}') format('woff2-variations'), url('../fonts/{fontId}/{filename}') format('woff2')"
       },
       "variableAxes": ["GRAD", "XOPQ", "XTRA", "YOPQ", "YTAS", "YTDE", "YTFI", "YTLC", "YTUC", "wdth", "wght", "opsz"]
     }
