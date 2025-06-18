@@ -637,3 +637,88 @@ The system is now production-ready with:
 - **Path Encoding**: `encodeURIComponent(path).replace(/%2F/g, '/')`
 - **License Headers**: CSS comments with `/*!` to prevent minification removal
 - **Import Structure**: Relative paths with `./` prefix for better portability
+
+## 2025-06-18 - Deployment Strategy & Scheduling Fixes
+
+### Problem: Selective Build Font Loss ❌
+**Issue**: When using selective builds (updating only specific fonts), the deployment was using `force_orphan: true`, which creates a completely new orphan branch and discards all existing fonts that weren't being updated.
+
+**Impact**: Build branch would only contain the updated fonts, losing all other fonts that should be preserved.
+
+### Problem: Incorrect Schedule Timing ❌
+**Issue**: Version check was scheduled for 02:00 UTC (10:00 AM Beijing Time) instead of Hong Kong time.
+
+### Solution: Smart Deployment Strategy ✅
+**Fixed Issues**:
+
+#### 1. Scheduling Correction
+- **Updated**: `version-check.yml` to run at 16:00 UTC (00:00 AM Hong Kong Time)
+- **Previous**: 02:00 UTC (10:00 AM Beijing Time)
+- **Current**: 16:00 UTC (00:00 AM Hong Kong Time)
+
+#### 2. Removed Force Orphan Deployment
+- **Previous Strategy**: Always used `force_orphan: true` - created new orphan branch every time
+- **New Strategy**: Always use `force_orphan: false` - incremental updates with content preservation
+- **Benefits**: 
+  - Full builds: Still rebuilds completely when building all fonts
+  - Selective builds: Preserves all existing fonts while updating only changed ones
+
+#### 3. Enhanced Selective Build Logic
+**Implementation Details**:
+```yaml
+# Added comprehensive selective build preservation
+- name: Checkout build branch for selective updates
+  if: github.event.inputs.updated-fonts != 'all' && github.event.inputs.updated-fonts != ''
+  
+- name: Merge selective build with existing content  
+  if: github.event.inputs.updated-fonts != 'all' && github.event.inputs.updated-fonts != ''
+  
+- name: Verify selective build preservation
+  if: github.event.inputs.updated-fonts != 'all' && github.event.inputs.updated-fonts != ''
+```
+
+**Key Features**:
+- **Fetch Existing Content**: Retrieves current build branch content before deployment
+- **Preserve Non-Updated Fonts**: Only removes fonts that are being updated
+- **Multiple Fallback Methods**: Robust error handling for various Git scenarios
+- **Content Verification**: Confirms all expected fonts are present after build
+- **Enhanced Logging**: Detailed output for debugging selective builds
+
+#### 4. Deployment Process Flow
+**Full Builds (all fonts)**:
+1. Build all fonts from scratch
+2. Deploy complete rebuild to build branch
+3. Result: Clean, complete font collection
+
+**Selective Builds (specific fonts)**:
+1. Fetch existing build branch content
+2. Copy existing fonts as base
+3. Remove only the fonts being updated
+4. Build and add updated fonts
+5. Deploy merged content (old + new fonts)
+6. Verify all fonts are present
+7. Result: Complete font collection with only specified fonts updated
+
+### Results ✅
+- **Scheduling**: Version checks now run at correct Hong Kong time (00:00 AM)
+- **Selective Builds**: All existing fonts preserved during selective updates
+- **Full Builds**: Complete rebuild when building all fonts
+- **Content Integrity**: Build branch always contains complete font collection
+- **Performance**: Faster selective builds with content preservation
+- **Reliability**: Robust error handling and verification steps
+
+### Technical Implementation
+**Workflow Changes**:
+- Updated cron schedule: `'0 16 * * *'` (Hong Kong 00:00)
+- Removed `force_orphan: true` from deployment
+- Added comprehensive selective build logic with 3 new workflow steps
+- Enhanced verification and logging throughout process
+
+**Content Preservation Logic**:
+- Fetches existing build branch using `git worktree` or fallback methods
+- Preserves all existing fonts before building new ones
+- Only removes/replaces fonts that are specifically being updated
+- Validates final output contains all expected fonts
+
+**Version**: 2.0.1 (Deployment Strategy Fix)
+**Date**: June 18, 2025

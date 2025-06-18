@@ -22,7 +22,7 @@ pnpm run clean:git      # Only git cache branch
 - `downloads/` - Downloaded font files (organized in subdirectories)
 - `.version-cache.json` - Local version cache
 
-**Note**: As of v2.0.1, the build directory includes improved CSS structure with import-based unified files and proper license headers.
+**Note**: As of v2.0.1, the build directory includes improved CSS structure with import-based unified files and proper license headers. The deployment strategy has also been updated to preserve all fonts during selective builds.
 
 ### Dependencies (`--deps`)
 - `node_modules/` - Node.js packages

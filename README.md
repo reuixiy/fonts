@@ -4,14 +4,14 @@ An automated workflow for downloading, subsetting, and deploying web fonts with 
 
 ## 🎯 Features
 
-- **Automated Version Detection**: Daily checks for font updates from multiple sources
+- **Automated Version Detection**: Daily checks for font updates from multiple sources (HK Time 00:00)
 - **Size-Based Font Chunking**: Google Fonts-style splitting with optimized chunk sizes
 - **Progressive Loading**: Critical characters load first, others load on-demand
 - **WOFF2 Output**: Modern compression for optimal web performance
 - **Smart CSS Generation**: Multiple @font-face rules with unicode-range declarations
 - **Complete Coverage**: Ensures no characters are lost during chunking process
 - **GitHub Actions Integration**: Fully automated CI/CD pipeline
-- **Orphan Branch Deployment**: Clean separation between source and build artifacts
+- **Incremental Deployment**: Selective builds preserve all existing fonts while updating only changed ones
 
 ## 📦 Supported Fonts
 
@@ -186,7 +186,7 @@ The project is built with **TypeScript** for enhanced type safety and developer 
 ## 🔄 Automated Workflow
 
 ### Daily Version Check
-- **Trigger**: Every day at 02:00 UTC (10:00 AM Beijing Time)
+- **Trigger**: Every day at 16:00 UTC (00:00 AM Hong Kong Time)
 - **Action**: Check for new font releases using GitHub API and git commits
 - **Result**: Triggers build workflow if updates found
 - **Optimization**: Only builds fonts that have actual version changes
@@ -194,6 +194,9 @@ The project is built with **TypeScript** for enhanced type safety and developer 
 ### Build and Deploy
 - **Trigger**: When version check finds updates, or manual dispatch
 - **Intelligence**: Only processes fonts that have version updates (not all fonts)
+- **Deployment Strategy**: 
+  - **Full Builds**: Complete rebuild when building all fonts
+  - **Selective Builds**: Preserves existing fonts while updating only changed ones
 - **Process**:
   1. Download latest font files (skip if already exist and valid)
   2. Analyze font character coverage and apply frequency-based priority ranking
@@ -201,12 +204,12 @@ The project is built with **TypeScript** for enhanced type safety and developer 
   4. Create multiple WOFF2 files per font with progressive loading optimization
   5. Generate CSS files with unicode-range declarations for each chunk
   6. Generate license information
-  7. Deploy to `build` branch
+  7. Deploy to `build` branch with incremental updates
 
 ### Performance Optimizations
 - **Smart Caching**: Skip downloads when files already exist and pass validation
 - **Incremental Processing**: Only subset fonts that need updates
-- **Selective Builds**: GitHub Actions only builds changed fonts, not all fonts
+- **Selective Builds**: GitHub Actions only builds changed fonts, preserves all existing fonts in build branch
 - **Chunked Loading**: Progressive font loading with critical characters first
 - **Size-Based Splitting**: Optimal chunk sizes for fast loading and efficient caching
 
@@ -464,6 +467,21 @@ ls -la downloads/amstelvar/
 head -n 10 build/css/imingcp.css
 ```
 
+**Selective builds lose existing fonts**
+```bash
+# Fixed in v2.0.1 - selective builds now preserve all existing fonts
+# Deployment now uses force_orphan: false with content preservation
+# Check GitHub Actions logs for: "Selective build - preserving existing fonts"
+# Verify all fonts present in build branch after selective updates
+```
+
+**Version check runs at wrong time**
+```bash
+# Fixed in v2.0.1 - now runs at 16:00 UTC (00:00 AM Hong Kong Time)
+# Previous: 02:00 UTC (10:00 AM Beijing Time)
+# Check .github/workflows/version-check.yml cron schedule
+```
+
 **TypeScript compilation errors**
 ```bash
 # Check type errors
@@ -499,9 +517,17 @@ Detailed documentation is available in the `.ai/` folder:
 **Last Updated**: 2025-06-18
 **Version**: 2.0.1 (CSS & Download Fixes)
 
-## 🔧 Recent Improvements (v2.0.0)
+## 🔧 Recent Improvements (v2.0.1)
 
-### TypeScript Migration & Modernization
+### Deployment Strategy & Scheduling Fixes
+- **Hong Kong Time**: Version checks now run at 00:00 AM Hong Kong Time (16:00 UTC)
+- **Selective Build Preservation**: Fixed deployment to preserve all existing fonts during selective builds
+- **Smart Deployment**: Removed force_orphan strategy, using incremental updates with content preservation
+- **Enhanced Verification**: Added comprehensive verification steps for selective builds
+
+### Previous Improvements (v2.0.0)
+
+#### TypeScript Migration & Modernization
 - **Full TypeScript coverage** with strict type checking
 - **Absolute imports** with `@/` and `@scripts/` path mapping
 - **Modern tooling**: ESLint, TypeScript compiler, tsx for development
