@@ -512,6 +512,7 @@ class FontSubset {
           compressionRatio: 'N/A (existing)',
           unicodeRanges: chunk.unicodeRanges,
           characterCount: chunk.characters.length,
+          style,
         });
         continue;
       }
@@ -559,6 +560,7 @@ class FontSubset {
           compressionRatio: parseFloat(compressionRatio),
           unicodeRanges: chunk.unicodeRanges,
           characterCount: chunk.characters.length,
+          style,
         });
       } catch (error) {
         console.error(
@@ -574,6 +576,7 @@ class FontSubset {
         `    ✅ Completed ${style} chunked processing: ${results.length} chunks`
       )
     );
+
     return results;
   }
 
@@ -655,7 +658,12 @@ class FontSubset {
             continue;
           }
 
-          await this.processFont(fontId, fontConfig, downloadResult);
+          const results = await this.processFont(
+            fontId,
+            fontConfig,
+            downloadResult
+          );
+          await this.saveChunkMetadata(fontId, results);
           console.log(chalk.green(`✅ Completed processing: ${fontId}\\n`));
         } catch (error) {
           console.error(
@@ -704,7 +712,12 @@ class FontSubset {
             continue;
           }
 
-          await this.processFont(fontId, fontConfig, downloadResult);
+          const results = await this.processFont(
+            fontId,
+            fontConfig,
+            downloadResult
+          );
+          await this.saveChunkMetadata(fontId, results);
           console.log(chalk.green(`✅ Completed processing: ${fontId}\\n`));
         } catch (error) {
           console.error(
@@ -1091,6 +1104,38 @@ class FontSubset {
     );
 
     return ranges;
+  }
+
+  async saveChunkMetadata(
+    fontId: string,
+    results: ChunkResult[]
+  ): Promise<void> {
+    try {
+      const metadataDir = path.join(this.outputDir, 'fonts', fontId);
+      await fs.ensureDir(metadataDir);
+
+      const metadataPath = path.join(metadataDir, 'chunks.json');
+      const metadata = {
+        fontId,
+        chunks: results.map((result) => ({
+          chunkIndex: result.chunkIndex,
+          filename: result.filename,
+          style: result.style ?? 'regular',
+          size: result.size,
+          unicodeRanges: result.unicodeRanges,
+          characterCount: result.characterCount,
+        })),
+        generatedAt: new Date().toISOString(),
+      };
+
+      await fs.writeJson(metadataPath, metadata, { spaces: 2 });
+      console.log(chalk.gray(`    💾 Saved chunk metadata: ${metadataPath}`));
+    } catch (error) {
+      console.error(
+        chalk.red(`Failed to save chunk metadata for ${fontId}:`),
+        (error as Error).message
+      );
+    }
   }
 }
 

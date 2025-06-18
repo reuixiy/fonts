@@ -74,6 +74,7 @@ export interface ChunkResult {
   compressionRatio: string | number;
   unicodeRanges: string[];
   characterCount: number;
+  style?: string;
 }
 
 export interface CSSResult {

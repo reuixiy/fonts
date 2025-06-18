@@ -548,7 +548,6 @@ class CSSGenerator {
       return [];
     }
   }
-
   async getProcessingResult(fontId: string): Promise<ChunkResult[] | null> {
     try {
       const fontDir = path.join(this.outputDir, 'fonts', fontId);
@@ -556,6 +555,32 @@ class CSSGenerator {
         return null;
       }
 
+      // Try to read chunk metadata first
+      const metadataPath = path.join(fontDir, 'chunks.json');
+      if (await fs.pathExists(metadataPath)) {
+        const metadata = await fs.readJson(metadataPath);
+        return metadata.chunks.map(
+          (chunk: {
+            chunkIndex: number;
+            filename: string;
+            style: string;
+            size: number;
+            unicodeRanges: string[];
+            characterCount: number;
+          }) => ({
+            chunkIndex: chunk.chunkIndex,
+            path: path.join(fontDir, chunk.filename),
+            filename: chunk.filename,
+            size: chunk.size,
+            compressionRatio: 'N/A',
+            unicodeRanges: chunk.unicodeRanges,
+            characterCount: chunk.characterCount,
+            style: chunk.style,
+          })
+        );
+      }
+
+      // Fallback: scan files in directory (legacy behavior)
       const files = await fs.readdir(fontDir);
       const fontFiles = files.filter((file) => file.endsWith('.woff2'));
 
