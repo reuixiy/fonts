@@ -720,8 +720,6 @@ The system is now production-ready with:
 - Only removes/replaces fonts that are specifically being updated
 - Validates final output contains all expected fonts
 
-**Version**: 2.0.1 (Deployment Strategy Fix)
-
 ## 2025-06-18 - Simplified Character Processing
 
 ### Phase 7: Simplified Character Processing ✅
@@ -776,3 +774,22 @@ The system is now production-ready with:
 - Test simplified chunking algorithm
 - Validate that chunk sizes remain under limits
 - Ensure complete character coverage
+
+### Recent Update: npm Library Migration ✅
+**Date**: June 18, 2025  
+**Status**: Completed
+
+**Changes**:
+- Migrated from Python fonttools to npm libraries (`subset-font`, `fontkit`)
+- Fixed font configuration to use per-font `maxChunkSizeKB` settings
+- Added chunk metadata generation (`chunks.json`) for CSS generator
+- Simplified GitHub Actions workflow (removed Python dependencies)
+- Updated documentation and README
+
+**Technical Details**:
+- All font processing now uses JavaScript/TypeScript
+- Proper TypeScript types for chunk results with style information
+- Command line interface for processing specific fonts
+- Build process simplified to Node.js only
+
+**Result**: Cleaner, faster, more maintainable implementation using modern tools.

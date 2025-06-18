@@ -57,8 +57,6 @@ Please refer to each font's source repository for complete license terms and att
 
 - Node.js 20+ (TypeScript compilation and runtime)
 - pnpm 9+ (package manager)
-- Python 3.8+ (for font processing)
-- `fonttools` with WOFF support
 
 ### Installation
 
@@ -73,16 +71,7 @@ Please refer to each font's source repository for complete license terms and att
    pnpm install
    ```
 
-3. **Install fonttools** (required for font processing)
-   ```bash
-   # macOS with Homebrew
-   brew install fonttools
-   
-   # Or with pip
-   pip install 'fonttools[woff]'
-   ```
-
-4. **Set up GitHub token** (for API access)
+3. **Set up GitHub token** (for API access)
    ```bash
    export GITHUB_TOKEN=your_github_token
    ```
@@ -146,7 +135,7 @@ Font configuration is stored in `src/config/fonts.json`. This file defines:
 - Output specifications
 - CSS generation parameters
 
-The project is built with **TypeScript** for enhanced type safety and developer experience. All source files use absolute imports with path mapping configured in `tsconfig.json`.
+The project is built with **TypeScript** for type safety and uses modern npm libraries (`subset-font`, `fontkit`) for font processing. All source files use absolute imports with path mapping configured in `tsconfig.json`.
 
 ### Example Configuration
 
@@ -405,12 +394,11 @@ pnpm run clean:build          # Clean build artifacts for fresh test
 
 ### Common Issues
 
-**fonttools not found**
+**Build fails with missing dependencies**
 ```bash
-# Install fonttools
-brew install fonttools
-# or
-pip install 'fonttools[woff]'
+# Reinstall dependencies
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
 ```
 
 **GitHub API rate limits**
