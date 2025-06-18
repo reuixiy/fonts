@@ -1,19 +1,16 @@
 {
   "name": "web-font-auto-subsetting",
-  "version": "2.0.0",
-  "description": "Automated web font subsetting and deployment workflow",
+  "version": "3.0.0",
+  "description": "Automated web font subsetting and deployment workflow with modular TypeScript architecture",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
-    "start": "tsx src/index.ts",
+    "start": "pnpm run build && node dist/index.js",
+    "start:dev": "tsx src/index.ts",
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "build:fonts": "pnpm run download-fonts && pnpm run subset-fonts && pnpm run generate-css && pnpm run generate-license",
-    "check-versions": "tsx src/versionChecker.ts",
-    "download-fonts": "tsx scripts/download-fonts.ts",
-    "subset-fonts": "tsx src/fontSubset.ts",
-    "generate-css": "tsx scripts/generate-css.ts",
-    "generate-license": "tsx scripts/generate-license.ts",
+    "build": "tsc && tsc-alias",
+    "build:fonts": "pnpm run build && node dist/index.js -- --build-only",
+    "build:specific": "pnpm run build && node dist/index.js -- --fonts",
     "clean": "./clean-cache.sh",
     "clean:build": "./clean-cache.sh --build",
     "clean:deps": "./clean-cache.sh --deps",
@@ -29,7 +26,7 @@
     "automation",
     "github-actions"
   ],
-  "author": "GitHub Copilot",
+  "author": "reuixiy",
   "license": "MIT",
   "dependencies": {
     "@octokit/rest": "^22.0.0",
@@ -50,6 +47,7 @@
     "cssnano": "^7.0.7",
     "eslint": "^9.29.0",
     "postcss": "^8.5.6",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   },
