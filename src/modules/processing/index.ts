@@ -1,6 +1,6 @@
 // Processing module exports
-export { FontProcessor } from './FontProcessor.js';
-export { CharacterExtractor } from './CharacterExtractor.js';
-export { FontSubsetService } from './FontSubsetService.js';
-export { UnicodeRangeGenerator } from './UnicodeRangeGenerator.js';
-export type * from './types.js';
+export { FontProcessor } from '@/modules/processing/FontProcessor.js';
+export { CharacterExtractor } from '@/modules/processing/CharacterExtractor.js';
+export { FontSubsetService } from '@/modules/processing/FontSubsetService.js';
+export { UnicodeRangeGenerator } from '@/modules/processing/UnicodeRangeGenerator.js';
+export type * from '@/modules/processing/types.js';

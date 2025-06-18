@@ -1,7 +1,7 @@
 // Environment configuration loader
 import type { EnvironmentConfig } from '@/types/config.js';
-import { developmentConfig } from './development.js';
-import { productionConfig } from './production.js';
+import { developmentConfig } from '@/config/environments/development.js';
+import { productionConfig } from '@/config/environments/production.js';
 
 export { developmentConfig, productionConfig };
 

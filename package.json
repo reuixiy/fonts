@@ -3,6 +3,9 @@
   "version": "3.0.0",
   "description": "Automated web font subsetting and deployment workflow with modular TypeScript architecture",
   "main": "dist/index.js",
+  "bin": {
+    "fonts": "dist/cli/bin.js"
+  },
   "type": "module",
   "scripts": {
     "start": "pnpm run build && node dist/index.js",
@@ -11,10 +14,18 @@
     "build": "tsc && tsc-alias",
     "build:fonts": "pnpm run build && node dist/index.js -- --build-only",
     "build:specific": "pnpm run build && node dist/index.js -- --fonts",
-    "clean": "./clean-cache.sh",
-    "clean:build": "./clean-cache.sh --build",
-    "clean:deps": "./clean-cache.sh --deps",
-    "clean:git": "./clean-cache.sh --git",
+    "clean": "pnpm run cli clean --all",
+    "clean:build": "pnpm run cli clean --build",
+    "clean:deps": "pnpm run cli clean --deps",
+    "clean:cache": "pnpm run cli clean --cache",
+    "cli": "node dist/cli/bin.js",
+    "cli:help": "node dist/cli/bin.js --help",
+    "cli:version": "node dist/cli/bin.js --version",
+    "cli:build": "node dist/cli/bin.js build",
+    "cli:check": "node dist/cli/bin.js check",
+    "cli:process": "node dist/cli/bin.js process",
+    "cli:css": "node dist/cli/bin.js css",
+    "cli:clean": "node dist/cli/bin.js clean",
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"

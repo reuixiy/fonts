@@ -5,8 +5,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import { BaseService } from '@/core/base/BaseService.js';
 import type { FontConfig } from '@/types/config.js';
-import type { DownloadResult, GitHubAsset, GitHubRelease } from './types.js';
-import { FileValidator } from './FileValidator.js';
+import type { DownloadResult, GitHubAsset, GitHubRelease } from '@/modules/download/types.js';
+import { FileValidator } from '@/modules/download/FileValidator.js';
 
 export class GitHubDownloadService extends BaseService {
   private octokit: Octokit;

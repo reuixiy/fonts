@@ -6,9 +6,9 @@ import { BaseService } from '@/core/base/BaseService.js';
 import type { IFontDownloader } from '@/core/interfaces/IFontDownloader.js';
 import type { FontConfig } from '@/types/config.js';
 import { ConfigManager } from '@/config/index.js';
-import { GitHubDownloadService } from './GitHubDownloadService.js';
-import { FileValidator } from './FileValidator.js';
-import type { DownloadResult, DownloadResults } from './types.js';
+import { GitHubDownloadService } from '@/modules/download/GitHubDownloadService.js';
+import { FileValidator } from '@/modules/download/FileValidator.js';
+import type { DownloadResult, DownloadResults } from '@/modules/download/types.js';
 
 export class FontDownloader extends BaseService implements IFontDownloader {
   private downloadDir: string;

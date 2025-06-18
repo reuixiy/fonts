@@ -1,5 +1,5 @@
 // Workflow related types
-import type { UpdatedFont } from './common.js';
+import type { UpdatedFont } from '@/types/common.js';
 
 export interface VersionCheckResult {
   hasUpdates: boolean;

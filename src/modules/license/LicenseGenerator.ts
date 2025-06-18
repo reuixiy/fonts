@@ -7,11 +7,11 @@ import type {
   LicenseGenerationOptions,
 } from '@/core/interfaces/ILicenseGenerator.js';
 import type { BuildConfig } from '@/types/config.js';
-import type { LicenseData, FontLicenseData } from './types.js';
-import { LicenseCollector } from './LicenseCollector.js';
-import { MarkdownGenerator } from './MarkdownGenerator.js';
-import { JsonGenerator } from './JsonGenerator.js';
-import { ComplianceValidator } from './ComplianceValidator.js';
+import type { LicenseData, FontLicenseData } from '@/modules/license/types.js';
+import { LicenseCollector } from '@/modules/license/LicenseCollector.js';
+import { MarkdownGenerator } from '@/modules/license/MarkdownGenerator.js';
+import { JsonGenerator } from '@/modules/license/JsonGenerator.js';
+import { ComplianceValidator } from '@/modules/license/ComplianceValidator.js';
 
 export class LicenseGenerator extends BaseService implements ILicenseGenerator {
   private collector: LicenseCollector;
@@ -58,7 +58,7 @@ export class LicenseGenerator extends BaseService implements ILicenseGenerator {
       // Build license data
       const licenseData: LicenseData = {
         generatedAt: new Date().toISOString(),
-        generator: 'Font Auto-Subsetting Workflow v3.0',
+        generator: 'https://github.com/reuixiy/fonts',
         version: '3.0.0',
         fonts: fontLicenseData,
         compliance: complianceResult,

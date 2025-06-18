@@ -37,7 +37,11 @@ jobs:
         id: version-check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm run check-versions
+        run: |
+          # Build TypeScript first
+          pnpm run build
+          # Run version check using CLI
+          pnpm run cli:check
       
       - name: Update version cache
         if: steps.version-check.outputs.has-updates == 'true'

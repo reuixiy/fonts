@@ -5,10 +5,10 @@ import type {
   BuildConfig,
   EnvironmentConfig,
 } from '@/types/config.js';
-import { fontsConfig, allFonts } from './fonts/index.js';
-import { buildConfig } from './build.js';
-import { subsettingConfig } from './subsetting.js';
-import { getEnvironmentConfig } from './environments/index.js';
+import { fontsConfig, allFonts } from '@/config/fonts/index.js';
+import { buildConfig } from '@/config/build.js';
+import { subsettingConfig } from '@/config/subsetting.js';
+import { getEnvironmentConfig } from '@/config/environments/index.js';
 
 export class ConfigManager {
   private static _fontsConfig: FontsConfig;
@@ -121,9 +121,9 @@ export {
   chineseFonts,
   englishFonts,
   variableFonts,
-} from './fonts/index.js';
+} from '@/config/fonts/index.js';
 export {
   getEnvironmentConfig,
   developmentConfig,
   productionConfig,
-} from './environments/index.js';
+} from '@/config/environments/index.js';

@@ -5,7 +5,7 @@ import type {
   FontFaceRule,
   FontProcessingResult,
   ChunkWithUnicodeRanges,
-} from './types.js';
+} from '@/modules/css/types.js';
 
 export class FontFaceGenerator extends BaseService {
   constructor() {
@@ -26,11 +26,21 @@ export class FontFaceGenerator extends BaseService {
 
     if (fontConfig.type === 'variable') {
       rules.push(
-        ...this.generateVariableFontRules(fontConfig, processResults, fontPath)
+        ...this.generateVariableFontRules(
+          fontConfig,
+          processResults,
+          fontPath,
+          fontId
+        )
       );
     } else {
       rules.push(
-        ...this.generateStaticFontRules(fontConfig, processResults, fontPath)
+        ...this.generateStaticFontRules(
+          fontConfig,
+          processResults,
+          fontPath,
+          fontId
+        )
       );
     }
 
@@ -43,7 +53,8 @@ export class FontFaceGenerator extends BaseService {
   private generateVariableFontRules(
     fontConfig: FontConfig,
     processResults: FontProcessingResult[],
-    fontPath: string
+    fontPath: string,
+    fontId: string
   ): FontFaceRule[] {
     const rules: FontFaceRule[] = [];
 
@@ -59,7 +70,8 @@ export class FontFaceGenerator extends BaseService {
             fontConfig,
             chunk,
             fontPath,
-            style
+            style,
+            fontId
           );
           rules.push(rule);
         });
@@ -70,7 +82,8 @@ export class FontFaceGenerator extends BaseService {
         ...this.generateSingleVariableFontRules(
           fontConfig,
           processResults,
-          fontPath
+          fontPath,
+          fontId
         )
       );
     }
@@ -84,7 +97,8 @@ export class FontFaceGenerator extends BaseService {
   private generateStaticFontRules(
     fontConfig: FontConfig,
     processResults: FontProcessingResult[],
-    fontPath: string
+    fontPath: string,
+    fontId: string
   ): FontFaceRule[] {
     const rules: FontFaceRule[] = [];
 
@@ -92,7 +106,12 @@ export class FontFaceGenerator extends BaseService {
       const sortedChunks = result.chunks.sort((a, b) => a.index - b.index);
 
       sortedChunks.forEach((chunk) => {
-        const rule = this.createStaticFontRule(fontConfig, chunk, fontPath);
+        const rule = this.createStaticFontRule(
+          fontConfig,
+          chunk,
+          fontPath,
+          fontId
+        );
         rules.push(rule);
       });
     });
@@ -107,12 +126,18 @@ export class FontFaceGenerator extends BaseService {
     fontConfig: FontConfig,
     chunk: ChunkWithUnicodeRanges,
     fontPath: string,
-    style: string
+    style: string,
+    fontId: string
   ): FontFaceRule {
     const fontStyle = style === 'italic' ? 'italic' : 'normal';
     const fontWeight = fontConfig.weight ?? '100 900';
 
-    const src = this.generateSrcValue(fontConfig, chunk.filename, fontPath);
+    const src = this.generateSrcValue(
+      fontConfig,
+      chunk.filename,
+      fontPath,
+      fontId
+    );
 
     return {
       fontFamily: `'${fontConfig.displayName}'`,
@@ -131,12 +156,18 @@ export class FontFaceGenerator extends BaseService {
   private createStaticFontRule(
     fontConfig: FontConfig,
     chunk: ChunkWithUnicodeRanges,
-    fontPath: string
+    fontPath: string,
+    fontId: string
   ): FontFaceRule {
     const fontStyle = fontConfig.style ?? 'normal';
     const fontWeight = fontConfig.weight ?? 400;
 
-    const src = this.generateSrcValue(fontConfig, chunk.filename, fontPath);
+    const src = this.generateSrcValue(
+      fontConfig,
+      chunk.filename,
+      fontPath,
+      fontId
+    );
 
     return {
       fontFamily: `'${fontConfig.displayName}'`,
@@ -155,12 +186,14 @@ export class FontFaceGenerator extends BaseService {
   private generateSrcValue(
     fontConfig: FontConfig,
     filename: string,
-    fontPath: string
+    fontPath: string,
+    fontId?: string
   ): string {
     if (fontConfig.css?.srcFormat) {
       return fontConfig.css.srcFormat
         .replace(/{filename}/g, filename)
-        .replace(/{fontPath}/g, fontPath);
+        .replace(/{fontPath}/g, fontPath)
+        .replace(/{fontId}/g, fontId ?? '');
     }
 
     return `url('${fontPath}/${filename}') format('woff2')`;
@@ -198,7 +231,8 @@ export class FontFaceGenerator extends BaseService {
   private generateSingleVariableFontRules(
     fontConfig: FontConfig,
     processResults: FontProcessingResult[],
-    fontPath: string
+    fontPath: string,
+    fontId: string
   ): FontFaceRule[] {
     const rules: FontFaceRule[] = [];
 
@@ -214,7 +248,8 @@ export class FontFaceGenerator extends BaseService {
             fontConfig,
             chunk,
             fontPath,
-            style
+            style,
+            fontId
           );
           rules.push({
             ...rule,
@@ -230,7 +265,8 @@ export class FontFaceGenerator extends BaseService {
           fontConfig,
           chunk,
           fontPath,
-          'regular'
+          'regular',
+          fontId
         );
         rules.push({
           ...rule,

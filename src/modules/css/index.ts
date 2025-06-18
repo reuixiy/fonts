@@ -1,6 +1,6 @@
 // CSS module exports
-export { CSSGenerator } from './CSSGenerator.js';
-export { FontFaceGenerator } from './FontFaceGenerator.js';
-export { CSSMinifier } from './CSSMinifier.js';
-export { UnifiedCSSGenerator } from './UnifiedCSSGenerator.js';
-export type * from './types.js';
+export { CSSGenerator } from '@/modules/css/CSSGenerator.js';
+export { FontFaceGenerator } from '@/modules/css/FontFaceGenerator.js';
+export { CSSMinifier } from '@/modules/css/CSSMinifier.js';
+export { UnifiedCSSGenerator } from '@/modules/css/UnifiedCSSGenerator.js';
+export type * from '@/modules/css/types.js';

@@ -1,5 +1,5 @@
 // Base processor class for font operations
-import { BaseService } from './BaseService.js';
+import { BaseService } from '@/core/base/BaseService.js';
 import { readFileSync, existsSync } from 'fs';
 
 export abstract class BaseProcessor extends BaseService {

@@ -1,8 +1,8 @@
 // Combined font configurations
 import type { FontsConfig } from '@/types/config.js';
-import { chineseFonts } from './chinese.js';
-import { englishFonts } from './english.js';
-import { variableFonts } from './variable.js';
+import { chineseFonts } from '@/config/fonts/chinese.js';
+import { englishFonts } from '@/config/fonts/english.js';
+import { variableFonts } from '@/config/fonts/variable.js';
 
 // Combine all font configurations
 export const allFonts = {

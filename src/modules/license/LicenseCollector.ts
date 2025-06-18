@@ -2,7 +2,7 @@
 import { BaseService } from '@/core/base/BaseService.js';
 import { ConfigManager } from '@/config/index.js';
 import type { FontConfig } from '@/types/config.js';
-import type { FontLicenseData, LicenseInfo } from './types.js';
+import type { FontLicenseData, LicenseInfo } from '@/modules/license/types.js';
 
 export class LicenseCollector extends BaseService {
   constructor() {

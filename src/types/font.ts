@@ -1,5 +1,5 @@
 // Font related types
-import type { FontConfig } from './config.js';
+import type { FontConfig } from '@/types/config.js';
 
 export type { FontConfig };
 

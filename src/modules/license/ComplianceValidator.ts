@@ -1,7 +1,7 @@
 // License compliance validator
 import { URL } from 'node:url';
 import { BaseService } from '@/core/base/BaseService.js';
-import type { FontLicenseData } from './types.js';
+import type { FontLicenseData } from '@/modules/license/types.js';
 
 export class ComplianceValidator extends BaseService {
   constructor() {

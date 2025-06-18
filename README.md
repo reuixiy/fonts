@@ -79,17 +79,18 @@ Please refer to each font's source repository for complete license terms and att
 ### Manual Usage
 
 ```bash
-# Complete workflows
-pnpm start                    # Full workflow with version checking
-pnpm start -- --build-only   # Build all fonts without version checking
-pnpm start -- --fonts <ids>  # Process specific fonts (e.g., imingcp lxgwwenkaitc)
+# Complete workflows using CLI
+pnpm run cli:build           # Build all fonts (complete workflow)
+pnpm run cli:build --fonts <ids>  # Build specific fonts (e.g., imingcp lxgwwenkaitc)
 
-# Individual steps (TypeScript)
-pnpm run check-versions       # Check for font version updates
-pnpm run download-fonts       # Download fonts
-pnpm run subset-fonts         # Process and subset fonts
-pnpm run generate-css         # Generate CSS files
-pnpm run generate-license     # Generate license information
+# Individual CLI commands
+pnpm run cli:check           # Check for font version updates
+pnpm run cli:process         # Process fonts with current settings
+
+# Legacy workflows (still available)
+pnpm start                   # Full workflow with version checking
+pnpm start -- --build-only  # Build all fonts without version checking
+pnpm start -- --fonts <ids> # Process specific fonts
 
 # Development and Build Commands
 pnpm run build               # Compile TypeScript to JavaScript (dist/)
@@ -97,40 +98,50 @@ pnpm run type-check          # Type checking without compilation
 pnpm run lint                # ESLint code linting
 pnpm run lint:fix            # Auto-fix linting issues
 pnpm run dev                 # Development mode with watch (tsx watch)
+
+# CLI Help and Version
+pnpm run cli:help            # Show CLI help
+pnpm run cli:version         # Show CLI version
 ```
 
 **Font IDs**: `imingcp`, `lxgwwenkaitc`, `amstelvar`
 
 ### Cache Management
 
-Clean various cache files and build artifacts:
+Clean various cache files and build artifacts using the new CLI:
 
 ```bash
-# Clean everything (dist/, build/, downloads/, node_modules, git cache)
-pnpm run clean:all
+# Clean everything (build/, dist/, downloads/, cache, node_modules)
+pnpm run cli:clean --all
 
-# Clean only build artifacts (dist/, build/, downloads/, cache files)
-pnpm run clean:build
+# Clean only build artifacts (build/, dist/)
+pnpm run cli:clean --build
 
-# Clean only dependencies (node_modules, lock files)
-pnpm run clean:deps
+# Clean only downloads
+pnpm run cli:clean --downloads
 
-# Clean only git cache branch
-pnpm run clean:git
+# Clean only cache files (.cache/, .version-cache.json)
+pnpm run cli:clean --cache
 
-# Default clean (same as clean:all)
-pnpm run clean
+# Clean only dependencies (node_modules)
+pnpm run cli:clean --deps
 
-# Alternative: use script directly with more options
-./clean-cache.sh --help
+# Force clean without confirmation
+pnpm run cli:clean --all --force
+
+# Package.json shortcuts
+pnpm run clean               # Same as cli:clean --all
+pnpm run clean:build         # Same as cli:clean --build
+pnpm run clean:cache         # Same as cli:clean --cache
+pnpm run clean:deps          # Same as cli:clean --deps
 ```
 
 ## ⚙️ Configuration
 
-Font configuration is stored in `src/config/fonts.json`. This file defines:
+Font configuration is stored in `src/config/fonts/fonts.json`. This file defines:
 
 - Font sources and release patterns
-- Size-based chunking strategies
+- Size-based chunking strategies  
 - Character priority rankings
 - Output specifications
 - CSS generation parameters
@@ -329,54 +340,51 @@ The chunked fonts provide progressive loading with optimal performance and inclu
 ├── .github/workflows/      # GitHub Actions workflows
 ├── dist/                   # TypeScript compiled output (build artifacts)
 ├── src/
-│   ├── config/
-│   │   └── fonts.json     # Font configuration
-│   ├── fontSubset.ts      # Font subsetting logic (TypeScript)
-│   ├── versionChecker.ts  # Version checking utility (TypeScript)
-│   ├── types.ts           # TypeScript type definitions
-│   └── index.ts          # Main entry point (TypeScript)
-├── scripts/
-│   ├── download-fonts.ts  # Font download script (TypeScript)
-│   ├── generate-css.ts    # CSS generation script (TypeScript)
-│   └── generate-license.ts # License generation script (TypeScript)
+│   ├── cli/               # CLI commands and utilities
+│   ├── config/           # Configuration files (TypeScript)
+│   │   ├── fonts/        # Font configurations
+│   │   └── environments/ # Environment configurations
+│   ├── core/             # Core interfaces and services
+│   ├── modules/          # Feature modules (version, download, etc.)
+│   ├── types/            # Type definitions
+│   ├── utils/            # Shared utilities
+│   └── index.ts          # Main entry point
 ├── tsconfig.json          # TypeScript configuration
-├── eslint.config.ts       # ESLint configuration (TypeScript)
-├── clean-cache.sh         # Cache cleaning script
+├── eslint.config.js       # ESLint configuration
 └── package.json
 ```
 
 ### Adding New Fonts
 
-1. **Update configuration** in `src/config/fonts.json`
+1. **Update configuration** in `src/config/fonts/fonts.json`
 2. **Add font-specific logic** if needed in the TypeScript processing modules
-3. **Update type definitions** in `src/types.ts` if new configuration options are added
-4. **Test locally** with `pnpm run build` (compile TypeScript) and `pnpm start`
+3. **Update type definitions** in `src/types/` if new configuration options are added
+4. **Test locally** with `pnpm run build` (compile TypeScript) and `pnpm run cli:build`
 5. **Run type checking** with `pnpm run type-check` to ensure type safety
 6. **Commit changes** to trigger automated build
 
 ### Local Testing
 
 ```bash
-# Test complete workflows
-pnpm start                    # Full workflow with version checking
-pnpm start -- --build-only   # Build all fonts (skip version check)
+# Test complete workflows using CLI
+pnpm run cli:build           # Full workflow build
+pnpm run cli:build --fonts imingcp # Test specific font processing
+pnpm run cli:check           # Test version checking
+
+# Legacy workflows (still available)
+pnpm start                   # Full workflow with version checking
+pnpm start -- --build-only  # Build all fonts (skip version check)
 pnpm start -- --fonts imingcp # Test specific font processing
 
 # TypeScript Development
-pnpm run build                # Compile TypeScript to dist/
+pnpm run build               # Compile TypeScript to dist/
 pnpm run type-check          # Check types without compilation
 pnpm run lint                # Lint TypeScript code
 pnpm run lint:fix            # Auto-fix linting issues
 pnpm run dev                 # Development mode with watch
 
-# Test individual components
-pnpm run check-versions       # Test version checking
-pnpm run download-fonts       # Test font downloads
-pnpm run subset-fonts         # Test font processing
-pnpm run generate-css         # Test CSS generation
-
 # Test cache management
-pnpm run clean:build          # Clean build artifacts for fresh test
+pnpm run cli:clean --build   # Clean build artifacts for fresh test
 ```
 
 ## 📊 Monitoring

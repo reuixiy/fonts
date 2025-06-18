@@ -1,4 +1,5 @@
 // Build configuration
+import { cpus } from 'os';
 import type { BuildConfig } from '@/types/config.js';
 
 export const buildConfig: BuildConfig = {
@@ -10,7 +11,7 @@ export const buildConfig: BuildConfig = {
 
   parallel: {
     enabled: true,
-    maxWorkers: 4,
+    maxWorkers: cpus().length,
   },
 
   cleanup: {

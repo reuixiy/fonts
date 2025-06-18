@@ -1,5 +1,5 @@
 // Export version module
-export { VersionChecker } from './VersionChecker.js';
-export { GitHubVersionService } from './GitHubVersionService.js';
-export { VersionCacheService } from './VersionCache.js';
-export type { VersionInfo, GitHubRelease, GitHubCommit } from './types.js';
+export { VersionChecker } from '@/modules/version/VersionChecker.js';
+export { GitHubVersionService } from '@/modules/version/GitHubVersionService.js';
+export { VersionCacheService } from '@/modules/version/VersionCache.js';
+export type { VersionInfo, GitHubRelease, GitHubCommit } from '@/modules/version/types.js';

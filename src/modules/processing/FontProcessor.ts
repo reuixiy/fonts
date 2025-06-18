@@ -4,9 +4,9 @@ import path from 'path';
 import { cpus } from 'os';
 import { BaseService } from '@/core/base/BaseService.js';
 import { ErrorHandler } from '@/core/services/ErrorHandler.js';
-import { CharacterExtractor } from './CharacterExtractor.js';
-import { FontSubsetService } from './FontSubsetService.js';
-import { UnicodeRangeGenerator } from './UnicodeRangeGenerator.js';
+import { CharacterExtractor } from '@/modules/processing/CharacterExtractor.js';
+import { FontSubsetService } from '@/modules/processing/FontSubsetService.js';
+import { UnicodeRangeGenerator } from '@/modules/processing/UnicodeRangeGenerator.js';
 import type { IFontProcessor } from '@/core/interfaces/IFontProcessor.js';
 import type { FontConfig } from '@/types/config.js';
 import type {
@@ -15,7 +15,7 @@ import type {
   ChunkMetadata,
   FontSubsetConfig,
   ChunkWithBuffer,
-} from './types.js';
+} from '@/modules/processing/types.js';
 
 export class FontProcessor extends BaseService implements IFontProcessor {
   private characterExtractor: CharacterExtractor;
@@ -35,8 +35,8 @@ export class FontProcessor extends BaseService implements IFontProcessor {
     super('FontProcessor');
 
     this.options = {
-      maxConcurrentFonts: Math.min(cpus().length, 4),
-      maxConcurrentChunks: Math.min(cpus().length * 2, 8),
+      maxConcurrentFonts: cpus().length,
+      maxConcurrentChunks: cpus().length * 2,
       outputFormat: 'woff2',
       targetChunkSize: 64,
       ...options,

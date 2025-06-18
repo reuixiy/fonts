@@ -12,7 +12,6 @@ on:
     branches: [ main ]
     paths:
       - 'src/**'
-      - 'scripts/**'
       - '.github/workflows/build-fonts.yml'
 
 jobs:
@@ -42,7 +41,7 @@ jobs:
       - name: Install Node.js dependencies
         run: pnpm install
 
-      - name: Build fonts using unified workflow
+      - name: Build fonts using CLI
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -50,15 +49,18 @@ jobs:
           UPDATED_FONTS="${{ github.event.inputs.updated-fonts || 'all' }}"
           echo "📋 Updated fonts parameter: '$UPDATED_FONTS'"
           
+          # Build TypeScript first
+          pnpm run build
+          
           if [ "$UPDATED_FONTS" = "all" ] || [ -z "$UPDATED_FONTS" ]; then
             echo "🎯 Building all fonts (full build)..."
-            pnpm start -- --build-only
+            pnpm run cli:build
           else
             echo "🎯 Building specific fonts: $UPDATED_FONTS"
             # Convert comma-separated list to space-separated for CLI
             FONT_IDS=$(echo "$UPDATED_FONTS" | tr ',' ' ')
             echo "🎯 Converted to CLI format: '$FONT_IDS'"
-            pnpm start -- --fonts $FONT_IDS
+            pnpm run cli:build --fonts $FONT_IDS
           fi
           echo "✅ Font build completed"
       
@@ -93,6 +95,16 @@ jobs:
             PROCESSED_FONTS="$UPDATED_FONTS"
           fi
           
+          # Export fonts config from TypeScript to JSON
+          node -e "
+            import('./dist/config/fonts/index.js').then(config => {
+              console.log(JSON.stringify(config.allFonts, null, 2));
+            }).catch(err => {
+              console.error('Error loading fonts config:', err);
+              process.exit(1);
+            });
+          " > fonts-config.json
+          
           cat > build/metadata.json << EOF
           {
             "buildDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
@@ -101,9 +113,12 @@ jobs:
             "buildType": "$BUILD_TYPE",
             "updatedFonts": "$UPDATED_FONTS",
             "processedFonts": "$PROCESSED_FONTS",
-            "fonts": $(cat src/config/fonts.json | jq '.fonts')
+            "fonts": $(cat fonts-config.json)
           }
           EOF
+          
+          # Clean up temporary file
+          rm fonts-config.json
           
           echo "✅ Build metadata created (type: $BUILD_TYPE)"
       

@@ -5,9 +5,9 @@ import type { VersionCheckResult } from '@/types/workflow.js';
 import type { UpdatedFont } from '@/types/common.js';
 import type { FontConfig } from '@/types/config.js';
 import { ConfigManager } from '@/config/index.js';
-import { GitHubVersionService } from './GitHubVersionService.js';
-import { VersionCacheService } from './VersionCache.js';
-import type { VersionInfo } from './types.js';
+import { GitHubVersionService } from '@/modules/version/GitHubVersionService.js';
+import { VersionCacheService } from '@/modules/version/VersionCache.js';
+import type { VersionInfo } from '@/modules/version/types.js';
 
 export class VersionChecker extends BaseService implements IVersionChecker {
   private githubService: GitHubVersionService;

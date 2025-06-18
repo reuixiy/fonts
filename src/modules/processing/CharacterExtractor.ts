@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import * as fontkit from 'fontkit';
 import { BaseService } from '@/core/base/BaseService.js';
-import type { CharacterExtractionResult, FontMetrics } from './types.js';
+import type { CharacterExtractionResult, FontMetrics } from '@/modules/processing/types.js';
 
 export class CharacterExtractor extends BaseService {
   private metricsCache = new Map<string, FontMetrics>();

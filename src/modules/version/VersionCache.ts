@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { BaseService } from '@/core/base/BaseService.js';
 import type { VersionCache } from '@/types/api.js';
-import { GitHubVersionService } from './GitHubVersionService.js';
+import { GitHubVersionService } from '@/modules/version/GitHubVersionService.js';
 
 export class VersionCacheService extends BaseService {
   private versionCachePath: string;

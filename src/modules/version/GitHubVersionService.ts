@@ -1,7 +1,7 @@
 // GitHub API service for version checking
 import { Octokit } from '@octokit/rest';
 import { BaseService } from '@/core/base/BaseService.js';
-import type { VersionInfo, GitHubRelease, GitHubCommit } from './types.js';
+import type { VersionInfo, GitHubRelease, GitHubCommit } from '@/modules/version/types.js';
 
 export class GitHubVersionService extends BaseService {
   private octokit: Octokit;

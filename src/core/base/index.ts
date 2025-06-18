@@ -1,4 +1,4 @@
 // Export all base classes
-export { BaseService } from './BaseService.js';
-export { BaseProcessor } from './BaseProcessor.js';
-export { ServiceContainer } from './ServiceContainer.js';
+export { BaseService } from '@/core/base/BaseService.js';
+export { BaseProcessor } from '@/core/base/BaseProcessor.js';
+export { ServiceContainer } from '@/core/base/ServiceContainer.js';

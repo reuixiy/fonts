@@ -3,9 +3,9 @@ import fs from 'fs-extra';
 import path from 'path';
 import { BaseService } from '@/core/base/BaseService.js';
 import { ErrorHandler } from '@/core/services/ErrorHandler.js';
-import { FontFaceGenerator } from './FontFaceGenerator.js';
-import { CSSMinifier } from './CSSMinifier.js';
-import { UnifiedCSSGenerator } from './UnifiedCSSGenerator.js';
+import { FontFaceGenerator } from '@/modules/css/FontFaceGenerator.js';
+import { CSSMinifier } from '@/modules/css/CSSMinifier.js';
+import { UnifiedCSSGenerator } from '@/modules/css/UnifiedCSSGenerator.js';
 import { ConfigManager } from '@/config/index.js';
 import type { ICSSGenerator } from '@/core/interfaces/ICSSGenerator.js';
 import type { FontConfig } from '@/types/config.js';
@@ -16,7 +16,7 @@ import type {
   CSSGeneratorConfig,
   ChunkWithUnicodeRanges,
   ProcessingMetadata,
-} from './types.js';
+} from '@/modules/css/types.js';
 
 export class CSSGenerator extends BaseService implements ICSSGenerator {
   private fontFaceGenerator: FontFaceGenerator;
@@ -100,7 +100,7 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
       }
 
       // Generate unified CSS file
-      await this.generateUnified(allResults, fontConfigs);
+      await this.generateUnified(fontConfigs);
 
       this.log('🎉 CSS generation completed!');
     } catch (error) {
@@ -149,9 +149,8 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
         }
       }
 
-      // Regenerate unified CSS with all fonts (including existing ones)
-      const allFontConfigs = ConfigManager.load().fonts;
-      await this.generateUnified(allResults, allFontConfigs);
+      // Don't regenerate unified CSS when generating specific fonts
+      // The unified CSS should only be generated when building all fonts
 
       this.log('🎉 Specific font CSS generation completed!');
     } catch (error) {
@@ -164,19 +163,30 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
    * Generate unified CSS file
    */
   async generateUnified(
-    allResults?: AllResults,
     fontConfigs?: Record<string, FontConfig>
   ): Promise<void> {
     try {
       const configs = fontConfigs ?? ConfigManager.load().fonts;
-      const results = allResults ?? (await this.getAllProcessingResults());
 
       const unifiedPath = path.join(this.config.cssDir, 'fonts.css');
-      await this.unifiedGenerator.generateUnifiedCSS(
-        results,
-        configs,
-        unifiedPath
-      );
+      await this.unifiedGenerator.generateUnifiedCSS(configs, unifiedPath);
+
+      // Generate minified version if enabled
+      if (this.config.minify) {
+        // Create minified version that imports .min.css files
+        const minifiedUnifiedCSS = this.createMinifiedUnifiedCSS(configs);
+        const minifiedMinCSS = await this.minifier.minify(minifiedUnifiedCSS);
+
+        const minUnifiedPath = path.join(this.config.cssDir, 'fonts.min.css');
+        await fs.writeFile(minUnifiedPath, minifiedMinCSS);
+        const minStats = await fs.stat(minUnifiedPath);
+
+        this.log(
+          `Generated minified unified CSS: fonts.min.css (${(
+            minStats.size / 1024
+          ).toFixed(1)}KB)`
+        );
+      }
 
       this.log('Generated unified CSS file');
     } catch (error) {
@@ -262,7 +272,7 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
    * Create CSS header with metadata
    */
   private createCSSHeader(fontId: string, fontConfig: FontConfig): string {
-    const currentDate = new Date().toISOString().split('T')[0];
+    const currentDateTime = new Date().toISOString();
 
     return `/*!
  * ${fontConfig.displayName} - Font CSS
@@ -272,8 +282,8 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
  * License: ${fontConfig.license.type}
  * License URL: ${fontConfig.license.url}
  * 
- * Generated: ${currentDate}
- * Generator: Web Font Auto-Subsetting Workflow v3.0
+ * Generated: ${currentDateTime}
+ * Generator: https://github.com/reuixiy/fonts
  */
 
 `;
@@ -453,21 +463,36 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
   }
 
   /**
-   * Get all processing results for unified CSS generation
+   * Create minified unified CSS content that imports .min.css files
    */
-  private async getAllProcessingResults(): Promise<AllResults> {
-    const allResults: AllResults = {};
-    const processedFonts = await this.getProcessedFonts();
+  private createMinifiedUnifiedCSS(
+    fontConfigs: Record<string, FontConfig>
+  ): string {
+    const currentDateTime = new Date().toISOString();
+    const availableFonts = Object.keys(fontConfigs);
 
-    for (const fontId of processedFonts) {
-      const result = await this.getProcessingResult(fontId);
-      if (result) {
-        allResults[fontId] = result;
-      } else {
-        allResults[fontId] = { error: 'No processing result found' };
-      }
-    }
+    let css = `/*!
+ * Chinese Fonts CSS - Unified Import-Based Stylesheet (Minified)
+ * 
+ * This file imports individual minified font CSS files with their respective licenses.
+ * See individual CSS files for specific font license information.
+ * 
+ * Generated: ${currentDateTime}
+ * Generator: https://github.com/reuixiy/fonts
+ */
 
-    return allResults;
+/* Available fonts: ${availableFonts.join(', ')} */
+
+`;
+
+    // Add imports for each font (using .min.css files, assume all files exist)
+    Object.keys(fontConfigs).forEach((fontId) => {
+      const fontConfig = fontConfigs[fontId];
+      css += `@import './${fontId}.min.css';  /* ${fontConfig.displayName} */\n`;
+    });
+
+    css += `\n/* End of imports */\n`;
+
+    return css;
   }
 }

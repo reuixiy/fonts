@@ -6,7 +6,7 @@ import type {
   IFontProcessor,
   ICSSGenerator,
   ILicenseGenerator,
-} from '../interfaces/index.js';
+} from '@/core/interfaces/index.js';
 
 export class ServiceContainer {
   private static instance: ServiceContainer;

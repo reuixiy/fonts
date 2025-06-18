@@ -3,7 +3,7 @@ import fs from 'fs-extra';
 import path from 'path';
 import { BaseService } from '@/core/base/BaseService.js';
 import type { FontConfig } from '@/types/config.js';
-import type { AllResults, CSSResult } from './types.js';
+import type { AllResults, CSSResult } from '@/modules/css/types.js';
 
 export class UnifiedCSSGenerator extends BaseService {
   constructor() {
@@ -14,14 +14,13 @@ export class UnifiedCSSGenerator extends BaseService {
    * Generate unified CSS file that imports individual font CSS files
    */
   async generateUnifiedCSS(
-    allResults: AllResults,
     fontConfigs: Record<string, FontConfig>,
     outputPath: string
   ): Promise<CSSResult> {
     this.log('Generating unified CSS file...');
 
     try {
-      const unifiedCSS = this.createUnifiedCSSContent(allResults, fontConfigs);
+      const unifiedCSS = this.createUnifiedCSSContent(fontConfigs);
 
       await fs.writeFile(outputPath, unifiedCSS);
       const stats = await fs.stat(outputPath);
@@ -52,10 +51,9 @@ export class UnifiedCSSGenerator extends BaseService {
    * Create the content for unified CSS file
    */
   private createUnifiedCSSContent(
-    allResults: AllResults,
     fontConfigs: Record<string, FontConfig>
   ): string {
-    const currentDate = new Date().toISOString().split('T')[0];
+    const currentDateTime = new Date().toISOString();
     const availableFonts = Object.keys(fontConfigs);
 
     let css = `/*!
@@ -64,26 +62,18 @@ export class UnifiedCSSGenerator extends BaseService {
  * This file imports individual font CSS files with their respective licenses.
  * See individual CSS files for specific font license information.
  * 
- * Generated: ${currentDate}
- * Generator: Web Font Auto-Subsetting Workflow v3.0
+ * Generated: ${currentDateTime}
+ * Generator: https://github.com/reuixiy/fonts
  */
 
 /* Available fonts: ${availableFonts.join(', ')} */
 
 `;
 
-    // Add imports for each font
+    // Add imports for each font (assume all font files exist)
     Object.keys(fontConfigs).forEach((fontId) => {
-      const result = allResults[fontId];
       const fontConfig = fontConfigs[fontId];
-
-      if (!result || 'error' in result) {
-        css += `/* @import './${fontId}.css'; */  /* Error: ${
-          'error' in result ? result.error : 'No processing result'
-        } */\n`;
-      } else {
-        css += `@import './${fontId}.css';  /* ${fontConfig.displayName} */\n`;
-      }
+      css += `@import './${fontId}.css';  /* ${fontConfig.displayName} */\n`;
     });
 
     css += `\n/* End of imports */\n`;
