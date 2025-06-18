@@ -235,10 +235,14 @@ build/
 │       ├── amstelvar-italic-chunk-0.woff2
 │       └── amstelvar-italic-chunk-1.woff2
 ├── css/
-│   ├── imingcp.css                   # Multiple @font-face rules
-│   ├── lxgwwenkaitc.css             # with unicode-range per chunk
-│   ├── amstelvar.css
-│   └── fonts.css                     # Combined CSS file
+│   ├── imingcp.css                   # Individual font CSS with license header
+│   ├── imingcp.min.css              # Minified version
+│   ├── lxgwwenkaitc.css             # Individual font CSS with license header  
+│   ├── lxgwwenkaitc.min.css         # Minified version
+│   ├── amstelvar.css                # Individual font CSS with license header
+│   ├── amstelvar.min.css            # Minified version
+│   ├── fonts.css                    # Import-based unified CSS (@import statements)
+│   └── fonts.min.css                # Import-based minified unified CSS
 ├── FONT_LICENSES.md                  # Human-readable license information
 ├── font-licenses.json                # Machine-readable license data
 ├── metadata.json                     # Build information
@@ -249,20 +253,26 @@ build/
 
 ## 🎨 Using the Chunked Fonts
 
-The chunked fonts provide progressive loading with optimal performance:
+The chunked fonts provide progressive loading with optimal performance and include proper license headers:
 
-### Option 1: Direct CSS Import (Recommended)
+### Option 1: Import-Based Unified CSS (Recommended)
 
 ```html
-<!-- Loads all chunks with progressive loading -->
+<!-- Loads all fonts via import statements -->
 <link rel="stylesheet" href="https://your-domain.com/path-to-build/css/fonts.css">
+
+<!-- Or use minified version -->
+<link rel="stylesheet" href="https://your-domain.com/path-to-build/css/fonts.min.css">
 ```
 
 ### Option 2: Individual Font CSS
 
 ```html
-<!-- Loads specific font family with all its chunks -->
+<!-- Loads specific font family with all its chunks and license info -->
 <link rel="stylesheet" href="https://your-domain.com/path-to-build/css/imingcp.css">
+
+<!-- Or use minified version -->
+<link rel="stylesheet" href="https://your-domain.com/path-to-build/css/imingcp.min.css">
 ```
 
 ### Option 3: Preload Critical Chunks
@@ -273,31 +283,55 @@ The chunked fonts provide progressive loading with optimal performance:
 <link rel="stylesheet" href="https://your-domain.com/path-to-build/css/imingcp.css">
 ```
 
-### CSS Example Output
+### CSS Structure
 
+#### Unified CSS (fonts.css)
 ```css
+/*!
+ * Chinese Fonts CSS - Unified Import-Based Stylesheet
+ * 
+ * This file imports individual font CSS files with their respective licenses.
+ * See individual CSS files for specific font license information.
+ * 
+ * Generated: 2025-06-18
+ * Generator: Web Font Auto-Subsetting Workflow
+ */
+
+@import './imingcp.css';
+@import './lxgwwenkaitc.css';
+@import './amstelvar.css';
+```
+
+#### Individual Font CSS (imingcp.css)
+```css
+/*!
+ * I.MingCP Web Font
+ * 
+ * Licensed under: IPA Font License Agreement v1.0
+ * License URL: https://github.com/ichitenfont/I.Ming/blob/master/LICENSE.md
+ * 
+ * Generated: 2025-06-18
+ * Generator: Web Font Auto-Subsetting Workflow
+ */
+
 /* Critical chunk - loads immediately */
 @font-face {
   font-family: 'I.MingCP';
-  src: url('fonts/imingcp/imingcp-chunk-0.woff2') format('woff2');
+  src: url('../fonts/imingcp/imingcp-chunk-0.woff2') format('woff2');
   unicode-range: U+0020-007F, U+3000-303F, U+FF00-FFEF;
   font-display: swap;
+  font-weight: 400;
+  font-style: normal;
 }
 
 /* High-frequency Chinese characters - loads on demand */
 @font-face {
   font-family: 'I.MingCP';
-  src: url('fonts/imingcp/imingcp-chunk-1.woff2') format('woff2');
+  src: url('../fonts/imingcp/imingcp-chunk-1.woff2') format('woff2');
   unicode-range: U+4E00-4EFF, U+5000-50FF;
   font-display: swap;
-}
-
-/* Additional chunks load progressively as needed */
-@font-face {
-  font-family: 'I.MingCP';
-  src: url('fonts/imingcp/imingcp-chunk-2.woff2') format('woff2');
-  unicode-range: U+5100-51FF, U+5200-52FF;
-  font-display: swap;
+  font-weight: 400;
+  font-style: normal;
 }
 ```
 
@@ -408,6 +442,28 @@ pip install 'fonttools[woff]'
 - Run `pnpm run clean:build` to force regeneration
 - Check file validation is passing correctly
 
+**Amstelvar font download failures**
+```bash
+# Fixed in v2.0.0 - now uses proper GitHub raw URLs
+# If issues persist, check:
+ls -la downloads/amstelvar/
+# Should contain both Roman and Italic .ttf files
+```
+
+**CSS import paths not working**
+```bash
+# Fixed in v2.0.0 - now uses proper import structure
+# fonts.css and fonts.min.css use @import statements
+# Individual CSS files include license headers
+```
+
+**Missing license information in CSS**
+```bash
+# Fixed in v2.0.0 - all CSS files now include license headers
+# Check the top of any .css file for license information
+head -n 10 build/css/imingcp.css
+```
+
 **TypeScript compilation errors**
 ```bash
 # Check type errors
@@ -440,5 +496,33 @@ Detailed documentation is available in the `.ai/` folder:
 
 ---
 
-**Last Updated**: 2025-06-17
-**Version**: 2.0.0 (TypeScript Migration)
+**Last Updated**: 2025-06-18
+**Version**: 2.0.1 (CSS & Download Fixes)
+
+## 🔧 Recent Improvements (v2.0.0)
+
+### TypeScript Migration & Modernization
+- **Full TypeScript coverage** with strict type checking
+- **Absolute imports** with `@/` and `@scripts/` path mapping
+- **Modern tooling**: ESLint, TypeScript compiler, tsx for development
+- **Enhanced developer experience** with type-aware IDE support
+
+### CSS Generation Enhancements
+- **Import-based structure**: `fonts.css` and `fonts.min.css` use `@import` statements
+- **License headers**: All CSS files include proper license information
+- **Clean output**: Removed unnecessary utility classes from unified CSS
+- **Minified versions**: Both individual and unified CSS have minified variants
+
+### Font Download Improvements
+- **Fixed Amstelvar download**: Proper GitHub raw file URL construction
+- **Consistent structure**: All fonts download to subdirectories for organization
+- **URL encoding**: Proper handling of special characters in filenames
+- **Validation**: Enhanced file validation to prevent corrupted downloads
+
+### Development Workflow
+- **Hot reloading**: Development mode with `tsx watch`
+- **Type safety**: Comprehensive error catching during development
+- **Modern dependencies**: All packages updated to latest versions
+- **Node.js 20+**: Leverages modern JavaScript features
+
+### Adding New Fonts

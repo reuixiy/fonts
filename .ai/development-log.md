@@ -599,3 +599,41 @@ The system is now production-ready with:
 - ✅ **Bandwidth Optimization**: Only downloads needed character ranges
 - ✅ **Better Mobile Performance**: Smaller initial payload
 - ✅ **Google Fonts Parity**: Industry-standard chunking approach
+
+## 2025-06-18 - CSS Generation & Download Fixes
+
+### CSS Generation Improvements ✅
+**Problem**: CSS output had inconsistent structure and missing license information
+**Solutions Implemented**:
+- **Import-Based Structure**: 
+  - `fonts.css` now uses `@import './fontname.css'` statements
+  - `fonts.min.css` uses `@import './fontname.min.css'` statements
+  - Clean import-only structure without inline CSS
+- **License Headers**: 
+  - All individual CSS files include proper license headers
+  - Font name, license type, license URL, generation date
+  - Unified files reference individual file licenses
+- **Removed Utility Classes**: 
+  - Eliminated unwanted `.font-chinese`, `.font-{fontname}` utility classes
+  - Clean CSS focused only on @font-face declarations
+
+### Font Download System Fixes ✅
+**Problem**: Amstelvar font downloads failing with corrupted/empty files
+**Root Cause**: Inconsistent URL construction for GitHub raw files
+**Solutions Implemented**:
+- **Fixed GitHub Raw URLs**: Proper `raw.githubusercontent.com` URL construction
+- **URL Encoding**: Proper encoding for special characters (square brackets in filenames)
+- **Consistent Structure**: All fonts download to `downloads/{fontId}/` subdirectories
+- **Enhanced Validation**: Better file validation to detect corrupted downloads
+
+### Results ✅
+- **Amstelvar**: Both Roman and Italic variants download correctly
+- **CSS Structure**: Clean import-based CSS with proper licensing
+- **File Organization**: Consistent subdirectory structure for all fonts
+- **Documentation**: Updated README and development log
+
+### Technical Details
+- **URL Construction**: `https://raw.githubusercontent.com/{owner}/{repo}/main/{path}`
+- **Path Encoding**: `encodeURIComponent(path).replace(/%2F/g, '/')`
+- **License Headers**: CSS comments with `/*!` to prevent minification removal
+- **Import Structure**: Relative paths with `./` prefix for better portability

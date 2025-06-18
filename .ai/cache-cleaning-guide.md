@@ -18,9 +18,11 @@ pnpm run clean:git      # Only git cache branch
 
 ### Build Artifacts (`--build`)
 - `dist/` - TypeScript compiled output
-- `build/` - Generated fonts and CSS files
-- `downloads/` - Downloaded font files
+- `build/` - Generated fonts and CSS files (with improved structure)
+- `downloads/` - Downloaded font files (organized in subdirectories)
 - `.version-cache.json` - Local version cache
+
+**Note**: As of v2.0.1, the build directory includes improved CSS structure with import-based unified files and proper license headers.
 
 ### Dependencies (`--deps`)
 - `node_modules/` - Node.js packages
@@ -125,5 +127,7 @@ If git cache cleaning fails:
 - Manually delete: `git branch -D cache`
 
 ---
+
+**Last Updated**: 2025-06-18 (CSS & Download Fixes - v2.0.1)
 
 **Last Updated**: June 17, 2025 (TypeScript Migration - v2.0.0)
