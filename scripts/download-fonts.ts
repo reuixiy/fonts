@@ -178,10 +178,11 @@ class FontDownloader {
         )
       );
 
-      const outputPath = path.join(
-        this.downloadDir,
-        `${fontId}-${version}.ttf`
-      );
+      // Create subdirectory for consistency with repo downloads
+      const fontDir = path.join(this.downloadDir, fontId);
+      await fs.ensureDir(fontDir);
+
+      const outputPath = path.join(fontDir, `${fontId}-${version}.ttf`);
 
       // Check if file already exists and is valid
       if (await this.checkExistingFile(outputPath, 100 * 1024)) {
@@ -269,9 +270,14 @@ class FontDownloader {
           continue;
         }
 
-        // Construct download URL
-        const downloadUrl = source.url.replace('{path}', fileConfig.path);
+        // Construct download URL for GitHub raw files
+        const encodedPath = encodeURIComponent(fileConfig.path).replace(
+          /%2F/g,
+          '/'
+        );
+        const downloadUrl = `https://raw.githubusercontent.com/${source.owner}/${source.repo}/main/${encodedPath}`;
         console.log(chalk.cyan(`  Downloading: ${fileName}`));
+        console.log(chalk.gray(`    URL: ${downloadUrl}`));
 
         const response = await fetch(downloadUrl);
         if (!response.ok) {
@@ -326,8 +332,12 @@ class FontDownloader {
     );
 
     try {
+      // Create subdirectory for consistency
+      const fontDir = path.join(this.downloadDir, fontId);
+      await fs.ensureDir(fontDir);
+
       const fileName = `${fontId}.ttf`;
-      const outputPath = path.join(this.downloadDir, fileName);
+      const outputPath = path.join(fontDir, fileName);
 
       // Check if file already exists and is valid
       if (await this.checkExistingFile(outputPath, 100 * 1024)) {

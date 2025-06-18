@@ -31,7 +31,7 @@ jobs:
           version: latest
       
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
       
       - name: Check font versions
         id: version-check

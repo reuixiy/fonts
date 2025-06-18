@@ -45,7 +45,7 @@ jobs:
           python-version: '3.11'
       
       - name: Install Node.js dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
       
       - name: Install Python dependencies
         run: |

@@ -164,6 +164,20 @@ class CSSGenerator {
     return css;
   }
 
+  generateLicenseHeader(fontConfig: FontConfig): string {
+    return `/*!
+ * ${fontConfig.displayName} Web Font
+ * 
+ * Licensed under: ${fontConfig.license.type}
+ * License URL: ${fontConfig.license.url}
+ * 
+ * Generated: ${new Date().toISOString().split('T')[0]}
+ * Generator: Web Font Auto-Subsetting Workflow
+ */
+
+`;
+  }
+
   async minifyCSS(css: string): Promise<{ css: string; map?: unknown }> {
     try {
       const result = await postcss([cssnano({ preset: 'default' })]).process(
@@ -191,8 +205,11 @@ class CSSGenerator {
     );
 
     try {
-      // Generate the CSS content
-      const css = this.generateFontFaceCSS(fontId, fontConfig, processResult);
+      // Generate the CSS content with license header
+      const licenseHeader = this.generateLicenseHeader(fontConfig);
+      const css =
+        licenseHeader +
+        this.generateFontFaceCSS(fontId, fontConfig, processResult);
 
       // Individual font CSS file
       const cssFileName = `${fontId}.css`;
@@ -251,12 +268,21 @@ class CSSGenerator {
     console.log(chalk.blue(`📝 Generating unified CSS file...`));
 
     try {
-      let unifiedCSS = `/* Chinese Fonts CSS - Generated automatically */
+      // Generate import-based unified CSS (fonts.css imports *.css)
+      let unifiedCSS = `/*!
+ * Chinese Fonts CSS - Unified Import-Based Stylesheet
+ * 
+ * This file imports individual font CSS files with their respective licenses.
+ * See individual CSS files for specific font license information.
+ * 
+ * Generated: ${new Date().toISOString().split('T')[0]}
+ * Generator: Web Font Auto-Subsetting Workflow
+ */
+
 /* Available fonts: ${Object.keys(allResults).join(', ')} */
 
 `;
 
-      // Generate CSS for each font
       Object.entries(allResults).forEach(([fontId, result]) => {
         const fontConfig = config.fonts[fontId];
         if (!fontConfig || 'error' in result) {
@@ -267,34 +293,7 @@ class CSSGenerator {
           );
           return;
         }
-
-        unifiedCSS += `/* ${fontConfig.displayName} */
-${this.generateFontFaceCSS(fontId, fontConfig, result as ChunkResult[])}
-`;
-      });
-
-      // Add utility classes
-      unifiedCSS += `/* Utility classes */
-.font-chinese {
-  font-feature-settings: 'liga' on, 'calt' on;
-  text-rendering: optimizeLegibility;
-}
-
-`;
-
-      // Add font family classes for each font
-      Object.entries(allResults).forEach(([fontId, result]) => {
-        const fontConfig = config.fonts[fontId];
-        if (!fontConfig || 'error' in result) {
-          return;
-        }
-
-        const className = fontId.replace(/[^a-zA-Z0-9-]/g, '-');
-        unifiedCSS += `.font-${className} {
-  font-family: '${fontConfig.displayName}', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-`;
+        unifiedCSS += `@import './${fontId}.css';\n`;
       });
 
       // Write unified CSS file
@@ -312,17 +311,38 @@ ${this.generateFontFaceCSS(fontId, fontConfig, result as ChunkResult[])}
         )
       );
 
-      // Generate minified unified CSS
-      const minifiedResult = await this.minifyCSS(unifiedCSS);
+      // Generate import-based minified unified CSS (fonts.min.css imports *.min.css)
+      let minImportUnifiedCSS = `/*!
+ * Chinese Fonts CSS - Unified Minified Import-Based Stylesheet
+ * 
+ * This file imports individual minified font CSS files with their respective licenses.
+ * See individual CSS files for specific font license information.
+ * 
+ * Generated: ${new Date().toISOString().split('T')[0]}
+ * Generator: Web Font Auto-Subsetting Workflow
+ */
+
+/* Available fonts: ${Object.keys(allResults).join(', ')} */
+
+`;
+
+      Object.entries(allResults).forEach(([fontId, result]) => {
+        const fontConfig = config.fonts[fontId];
+        if (!fontConfig || 'error' in result) {
+          return;
+        }
+        minImportUnifiedCSS += `@import './${fontId}.min.css';\n`;
+      });
+
       const minUnifiedCssFileName = 'fonts.min.css';
       const minUnifiedCssPath = path.join(this.cssDir, minUnifiedCssFileName);
 
-      await fs.writeFile(minUnifiedCssPath, minifiedResult.css, 'utf8');
+      await fs.writeFile(minUnifiedCssPath, minImportUnifiedCSS, 'utf8');
 
       const minCssStats = await fs.stat(minUnifiedCssPath);
       console.log(
         chalk.green(
-          `✅ Generated minified unified CSS: ${minUnifiedCssFileName} (${(
+          `✅ Generated import-based minified unified CSS: ${minUnifiedCssFileName} (${(
             minCssStats.size / 1024
           ).toFixed(1)}KB)`
         )
