@@ -89,7 +89,12 @@ class CSSGenerator {
 
         // Generate @font-face rules for each style's chunks
         Object.entries(chunksByStyle).forEach(([style, chunks]) => {
-          chunks.forEach((chunk) => {
+          // Sort chunks by index for proper order
+          const sortedChunks = chunks.sort(
+            (a, b) => a.chunkIndex - b.chunkIndex
+          );
+
+          sortedChunks.forEach((chunk) => {
             const fontStyle = style === 'italic' ? 'italic' : 'normal';
             const fontWeight = fontConfig.weight ?? '100 900'; // Variable weight range
 
@@ -126,8 +131,12 @@ class CSSGenerator {
     } else {
       // Check if this is chunked output (array) or single file output (object)
       if (Array.isArray(processResult)) {
-        // Chunked font output
-        (processResult as ChunkResult[]).forEach((chunk) => {
+        // Chunked font output - sort by chunk index for proper order
+        const sortedChunks = (processResult as ChunkResult[]).sort(
+          (a, b) => a.chunkIndex - b.chunkIndex
+        );
+
+        sortedChunks.forEach((chunk) => {
           const fontStyle = fontConfig.style ?? 'normal';
           const fontWeight = fontConfig.weight ?? 400;
 
@@ -561,6 +570,20 @@ class CSSGenerator {
         const filePath = path.join(fontDir, file);
         const stats = await fs.stat(filePath);
 
+        // Extract style and chunk index from filename
+        let style = 'regular';
+        const lowerFile = file.toLowerCase();
+
+        if (lowerFile.includes('italic')) {
+          style = 'italic';
+        } else if (lowerFile.includes('roman')) {
+          style = 'roman';
+        } else if (lowerFile.includes('bold')) {
+          style = 'bold';
+        } else if (lowerFile.includes('light')) {
+          style = 'light';
+        }
+
         // Extract chunk index from filename if it's a chunked font
         const chunkMatch = file.match(/-(\d+)\.woff2$/);
         const chunkIndex = chunkMatch ? parseInt(chunkMatch[1]!, 10) : 0;
@@ -573,7 +596,8 @@ class CSSGenerator {
           compressionRatio: 'N/A',
           unicodeRanges: ['U+4E00-9FFF'], // Default Chinese range
           characterCount: 0,
-        });
+          style, // Add the extracted style
+        } as ChunkResult & { style: string });
       }
 
       return results;

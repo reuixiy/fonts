@@ -180,7 +180,8 @@ class FontSubset {
   async processChunkedFont(
     fontId: string,
     fontConfig: FontConfig,
-    inputPath: string
+    inputPath: string,
+    styleOverride?: string
   ): Promise<ChunkResult[]> {
     console.log(chalk.blue(`    🧩 Using chunked processing...`));
 
@@ -190,11 +191,14 @@ class FontSubset {
     // Generate optimal chunks
     const chunks = await this.generateOptimalChunks(inputPath, fontConfig);
 
+    // Determine the style to use for output filename
+    const style = styleOverride ?? fontConfig.style ?? 'regular';
+
     for (const chunk of chunks) {
       const outputFileName =
         fontConfig.output.filenamePattern
           .replace('{index}', chunk.index.toString())
-          .replace('{style}', 'regular') + '.woff2';
+          .replace('{style}', style) + '.woff2';
       const outputPath = path.join(fontDir, outputFileName);
 
       // Check if chunk file already exists
@@ -367,92 +371,100 @@ class FontSubset {
     const fontDir = path.join(this.outputDir, 'fonts', fontId);
     await fs.ensureDir(fontDir);
 
-    // For variable fonts, process one input file
-    const inputFile = inputFiles.files[0];
-    if (!inputFile) {
-      throw new Error(`No input file found for variable font ${fontId}`);
-    }
+    const allResults: ChunkResult[] = [];
 
-    // Check if this is a chunked font configuration
-    if (fontConfig.subset.type === 'size-based-chunks') {
-      return await this.processChunkedVariableFont(
-        fontId,
-        fontConfig,
-        inputFile
-      );
-    }
-
-    // Single variable font file
-    const outputFileName =
-      fontConfig.output.filenamePattern.replace('{style}', 'variable') +
-      '.woff2';
-    const outputPath = path.join(fontDir, outputFileName);
-
-    // Check if output file already exists
-    if (await fs.pathExists(outputPath)) {
-      const stats = await fs.stat(outputPath);
+    // Process each style separately
+    for (const inputFile of inputFiles.files) {
       console.log(
-        chalk.green(`    ⏭️  Variable font already exists: ${outputFileName}`)
+        chalk.blue(`    🎨 Processing style: ${inputFile.style ?? 'default'}`)
       );
-      console.log(chalk.gray(`    Size: ${(stats.size / 1024).toFixed(1)}KB`));
 
-      return [
-        {
-          chunkIndex: 0,
-          path: outputPath,
-          filename: outputFileName,
-          size: stats.size,
-          compressionRatio: 'N/A (existing)',
-          unicodeRanges: ['U+0000-FFFF'],
-          characterCount: 0,
-        },
-      ];
+      // Check if this is a chunked font configuration
+      if (fontConfig.subset.type === 'size-based-chunks') {
+        const styleResults = await this.processChunkedVariableFont(
+          fontId,
+          fontConfig,
+          inputFile
+        );
+        allResults.push(...styleResults);
+      } else {
+        // Single variable font file
+        const style = inputFile.style ?? 'variable';
+        const outputFileName =
+          fontConfig.output.filenamePattern.replace('{style}', style) +
+          '.woff2';
+        const outputPath = path.join(fontDir, outputFileName);
+
+        // Check if output file already exists
+        if (await fs.pathExists(outputPath)) {
+          const stats = await fs.stat(outputPath);
+          console.log(
+            chalk.green(
+              `    ⏭️  Variable font already exists: ${outputFileName}`
+            )
+          );
+          console.log(
+            chalk.gray(`    Size: ${(stats.size / 1024).toFixed(1)}KB`)
+          );
+
+          allResults.push({
+            chunkIndex: 0,
+            path: outputPath,
+            filename: outputFileName,
+            size: stats.size,
+            compressionRatio: 'N/A (existing)',
+            unicodeRanges: ['U+0000-FFFF'],
+            characterCount: 0,
+          });
+          continue;
+        }
+
+        try {
+          // Variable fonts often need different subsetting
+          const subsetOptions = [
+            '--unicodes=*', // Keep all characters for variable fonts
+          ];
+
+          await this.runPyftsubset(inputFile.path, outputPath, subsetOptions);
+
+          const stats = await fs.stat(outputPath);
+          const originalStats = await fs.stat(inputFile.path);
+          const compressionRatio = (
+            (1 - stats.size / originalStats.size) *
+            100
+          ).toFixed(1);
+
+          console.log(
+            chalk.green(`    ✅ Created variable font: ${outputFileName}`)
+          );
+          console.log(
+            chalk.gray(
+              `    Size: ${(stats.size / 1024).toFixed(
+                1
+              )}KB (${compressionRatio}% smaller)`
+            )
+          );
+
+          allResults.push({
+            chunkIndex: 0,
+            path: outputPath,
+            filename: outputFileName,
+            size: stats.size,
+            compressionRatio: parseFloat(compressionRatio),
+            unicodeRanges: ['U+0000-FFFF'],
+            characterCount: 0,
+          });
+        } catch (error) {
+          console.error(
+            chalk.red(`    ❌ Failed to process variable font ${style}:`),
+            (error as Error).message
+          );
+          throw error;
+        }
+      }
     }
 
-    try {
-      // Variable fonts often need different subsetting
-      const subsetOptions = [
-        '--unicodes=*', // Keep all characters for variable fonts
-      ];
-
-      await this.runPyftsubset(inputFile.path, outputPath, subsetOptions);
-
-      const stats = await fs.stat(outputPath);
-      const originalStats = await fs.stat(inputFile.path);
-      const compressionRatio = (
-        (1 - stats.size / originalStats.size) *
-        100
-      ).toFixed(1);
-
-      console.log(
-        chalk.green(`    ✅ Created variable font: ${outputFileName}`)
-      );
-      console.log(
-        chalk.gray(
-          `    Size: ${(stats.size / 1024).toFixed(
-            1
-          )}KB (${compressionRatio}% smaller)`
-        )
-      );
-
-      return [
-        {
-          chunkIndex: 0,
-          path: outputPath,
-          filename: outputFileName,
-          size: stats.size,
-          compressionRatio: parseFloat(compressionRatio),
-          unicodeRanges: ['U+0000-FFFF'],
-          characterCount: 0,
-        },
-      ];
-    } catch (error) {
-      console.error(
-        chalk.red(`    ❌ Failed to process variable font:`),
-        (error as Error).message
-      );
-      throw error;
-    }
+    return allResults;
   }
 
   async processChunkedVariableFont(
@@ -460,7 +472,12 @@ class FontSubset {
     fontConfig: FontConfig,
     inputFile: { path: string; style?: string }
   ): Promise<ChunkResult[]> {
-    console.log(chalk.blue(`    🧩 Using chunked variable font processing...`));
+    const style = inputFile.style ?? 'variable';
+    console.log(
+      chalk.blue(
+        `    🧩 Using chunked variable font processing for ${style}...`
+      )
+    );
 
     const fontDir = path.join(this.outputDir, 'fonts', fontId);
     const results: ChunkResult[] = [];
@@ -472,7 +489,7 @@ class FontSubset {
       const outputFileName =
         fontConfig.output.filenamePattern
           .replace('{index}', chunk.index.toString())
-          .replace('{style}', 'variable') + '.woff2';
+          .replace('{style}', style) + '.woff2';
       const outputPath = path.join(fontDir, outputFileName);
 
       // Check if chunk file already exists
@@ -480,7 +497,7 @@ class FontSubset {
         const stats = await fs.stat(outputPath);
         console.log(
           chalk.green(
-            `    ⏭️  Variable chunk ${chunk.index} already exists: ${outputFileName}`
+            `    ⏭️  ${style} chunk ${chunk.index} already exists: ${outputFileName}`
           )
         );
         console.log(
@@ -521,7 +538,7 @@ class FontSubset {
 
         console.log(
           chalk.green(
-            `    ✅ Created variable chunk ${chunk.index}: ${outputFileName}`
+            `    ✅ Created ${style} chunk ${chunk.index}: ${outputFileName}`
           )
         );
         console.log(
@@ -545,7 +562,7 @@ class FontSubset {
         });
       } catch (error) {
         console.error(
-          chalk.red(`    ❌ Failed to process variable chunk ${chunk.index}:`),
+          chalk.red(`    ❌ Failed to process ${style} chunk ${chunk.index}:`),
           (error as Error).message
         );
         throw error;
@@ -554,7 +571,7 @@ class FontSubset {
 
     console.log(
       chalk.green(
-        `    ✅ Completed variable font chunked processing: ${results.length} chunks`
+        `    ✅ Completed ${style} chunked processing: ${results.length} chunks`
       )
     );
     return results;
@@ -751,10 +768,26 @@ class FontSubset {
             file.endsWith('.otf') ||
             file.endsWith('.woff2')
         )
-        .map((file) => ({
-          path: path.join(fontDir, file),
-          style: file.includes('italic') ? 'italic' : 'regular',
-        }));
+        .map((file) => {
+          // Extract style from filename
+          let style = 'regular';
+          const lowerFile = file.toLowerCase();
+
+          if (lowerFile.includes('italic')) {
+            style = 'italic';
+          } else if (lowerFile.includes('roman')) {
+            style = 'roman';
+          } else if (lowerFile.includes('bold')) {
+            style = 'bold';
+          } else if (lowerFile.includes('light')) {
+            style = 'light';
+          }
+
+          return {
+            path: path.join(fontDir, file),
+            style,
+          };
+        });
 
       return {
         files: fontFiles,
@@ -780,50 +813,109 @@ class FontSubset {
     // Get all available characters from the font (simplified approach)
     const availableChars = Object.keys(characterFrequency);
 
+    console.log(
+      chalk.blue(
+        `    📊 Found ${availableChars.length} characters in frequency data`
+      )
+    );
+
     // Sort by frequency (most frequent first)
     const sortedChars = availableChars.sort(
       (a, b) => (characterFrequency[b] ?? 0) - (characterFrequency[a] ?? 0)
     );
 
     const chunks: ChunkData[] = [];
-    const chunkSizes = fontConfig.subset.chunkSizes ?? [50000, 30000, 20000];
+    const chunkSizes = fontConfig.subset.chunkSizes ?? [50, 80, 100, 120];
     const maxChunks = fontConfig.subset.maxChunks ?? 10;
 
+    console.log(
+      chalk.blue(`    📦 Target chunk sizes (KB): ${chunkSizes.join(', ')}`)
+    );
+    console.log(chalk.blue(`    🎯 Max chunks: ${maxChunks}`));
+
     let currentIndex = 0;
-    let currentChunkSize = 0;
-    let currentChunk: string[] = [];
+    let remainingChars = [...sortedChars];
 
-    for (const char of sortedChars) {
-      currentChunk.push(char);
-      currentChunkSize += this.estimateCharacterSize(char);
+    while (remainingChars.length > 0 && currentIndex < maxChunks) {
+      // Determine target size for current chunk (in KB, convert to bytes)
+      const targetSizeKB =
+        chunkSizes[Math.min(currentIndex, chunkSizes.length - 1)] ?? 50;
+      const targetSizeBytes = targetSizeKB * 1024; // Convert KB to bytes
 
-      // Check if we should create a new chunk
-      const targetSize =
-        chunkSizes[Math.min(currentIndex, chunkSizes.length - 1)] ?? 50000;
-      if (currentChunkSize >= targetSize || currentChunk.length >= 1000) {
-        chunks.push({
-          index: currentIndex,
-          characters: [...currentChunk],
-          unicodeRanges: this.generateUnicodeRangesFromChars(currentChunk),
-        });
+      // Take characters until we reach target size or run out
+      const charsInThisChunk: string[] = [];
+      let chunkSizeBytes = 0;
 
-        currentIndex++;
-        currentChunk = [];
-        currentChunkSize = 0;
+      for (const char of remainingChars) {
+        const charSizeBytes = this.estimateCharacterSize(char);
 
-        if (currentIndex >= maxChunks) {
+        // If adding this character would exceed target size and we already have some chars, stop
+        if (
+          chunkSizeBytes + charSizeBytes > targetSizeBytes &&
+          charsInThisChunk.length > 0
+        ) {
+          break;
+        }
+
+        charsInThisChunk.push(char);
+        chunkSizeBytes += charSizeBytes;
+
+        // If we've reached a reasonable chunk size, stop
+        if (chunkSizeBytes >= targetSizeBytes) {
           break;
         }
       }
-    }
 
-    // Add remaining characters to the last chunk
-    if (currentChunk.length > 0 && currentIndex < maxChunks) {
+      if (charsInThisChunk.length === 0) {
+        // This shouldn't happen, but if it does, take at least one character
+        const firstChar = remainingChars[0];
+        if (firstChar) {
+          charsInThisChunk.push(firstChar);
+        }
+      }
+
+      // Remove characters we've used from remaining chars
+      remainingChars = remainingChars.filter(
+        (char) => !charsInThisChunk.includes(char)
+      );
+
+      // Create chunk
       chunks.push({
         index: currentIndex,
-        characters: currentChunk,
-        unicodeRanges: this.generateUnicodeRangesFromChars(currentChunk),
+        characters: charsInThisChunk,
+        unicodeRanges: this.generateUnicodeRangesFromChars(charsInThisChunk),
+        size: chunkSizeBytes,
       });
+
+      console.log(
+        chalk.gray(
+          `    📦 Chunk ${currentIndex}: ${charsInThisChunk.length} chars, ~${(
+            chunkSizeBytes / 1024
+          ).toFixed(1)}KB`
+        )
+      );
+
+      currentIndex++;
+    }
+
+    // If there are still remaining characters and we haven't reached max chunks, add them to last chunk
+    if (
+      remainingChars.length > 0 &&
+      chunks.length > 0 &&
+      chunks.length < maxChunks
+    ) {
+      const lastChunk = chunks[chunks.length - 1];
+      if (lastChunk) {
+        lastChunk.characters.push(...remainingChars);
+        lastChunk.unicodeRanges = this.generateUnicodeRangesFromChars(
+          lastChunk.characters
+        );
+        console.log(
+          chalk.gray(
+            `    📦 Added ${remainingChars.length} remaining chars to last chunk`
+          )
+        );
+      }
     }
 
     console.log(
@@ -835,7 +927,9 @@ class FontSubset {
   async loadCharacterFrequency(): Promise<Record<string, number>> {
     try {
       if (await fs.pathExists(this.characterFrequencyPath)) {
-        return await fs.readJson(this.characterFrequencyPath);
+        const data = await fs.readJson(this.characterFrequencyPath);
+        // Convert the nested structure to flat character frequency map
+        return this.convertFrequencyData(data);
       }
       // Return default frequency data
       return this.getDefaultCharacterFrequency();
@@ -845,24 +939,116 @@ class FontSubset {
     }
   }
 
-  getDefaultCharacterFrequency(): Record<string, number> {
-    // Basic frequency data for common Chinese characters
-    const commonChars =
-      '的一是在不了有和人这中大为上个国我以要他时来用你年生会自然后能对立事三之通此为也之'.split(
-        ''
-      );
+  convertFrequencyData(data: Record<string, unknown>): Record<string, number> {
     const frequency: Record<string, number> = {};
 
-    commonChars.forEach((char, index) => {
-      frequency[char] = 1000 - index;
+    // Handle traditional Chinese frequency data
+    if (data['traditional-chinese-frequency']) {
+      const tcData = data['traditional-chinese-frequency'] as Record<
+        string,
+        unknown
+      >;
+
+      // Add high frequency characters with decreasing weights
+      if (tcData.high_frequency && Array.isArray(tcData.high_frequency)) {
+        (tcData.high_frequency as string[]).forEach(
+          (char: string, index: number) => {
+            frequency[char] = 10000 - index;
+          }
+        );
+      }
+    }
+
+    // Handle Latin frequency data
+    if (data['latin-frequency']) {
+      const latinData = data['latin-frequency'] as Record<string, unknown>;
+
+      if (latinData.high_frequency && Array.isArray(latinData.high_frequency)) {
+        (latinData.high_frequency as string[]).forEach(
+          (char: string, index: number) => {
+            frequency[char] = 5000 - index;
+          }
+        );
+      }
+    }
+
+    // Add comprehensive Chinese character range if not enough characters
+    if (Object.keys(frequency).length < 1000) {
+      this.addCJKCharacterRange(frequency);
+    }
+
+    return frequency;
+  }
+
+  addCJKCharacterRange(frequency: Record<string, number>): void {
+    // Add CJK Unified Ideographs (U+4E00-U+9FFF)
+    for (let code = 0x4e00; code <= 0x9fff; code++) {
+      const char = String.fromCharCode(code);
+      frequency[char] ??= 100;
+    }
+
+    // Add CJK Extension A (U+3400-U+4DBF) with even lower frequency
+    for (let code = 0x3400; code <= 0x4dbf; code++) {
+      const char = String.fromCharCode(code);
+      frequency[char] ??= 50;
+    }
+
+    // Add basic punctuation and symbols
+    const punctuation = '，。！？；：「」『』（）【】〈〉《》〔〕．‧…、～－—–';
+    punctuation.split('').forEach((char, index) => {
+      frequency[char] = 8000 - index;
+    });
+
+    // Add Arabic numerals and basic Latin
+    for (let code = 0x20; code <= 0x7e; code++) {
+      const char = String.fromCharCode(code);
+      frequency[char] ??= 7000;
+    }
+  }
+
+  getDefaultCharacterFrequency(): Record<string, number> {
+    console.log(
+      chalk.yellow('⚠️  Using comprehensive default character frequency data')
+    );
+
+    const frequency: Record<string, number> = {};
+
+    // Start with a comprehensive set of characters
+    this.addCJKCharacterRange(frequency);
+
+    // Add some very high frequency characters
+    const veryCommonChars =
+      '的一是在不了有和人這中大為上個國我以要他時來用你年生會自然後能對立事三之通'.split(
+        ''
+      );
+    veryCommonChars.forEach((char, index) => {
+      frequency[char] = 15000 - index;
     });
 
     return frequency;
   }
 
-  estimateCharacterSize(_char: string): number {
-    // Simplified character size estimation
-    return 100; // bytes per character (rough estimate)
+  estimateCharacterSize(char: string): number {
+    // More realistic character size estimation based on Unicode range
+    const code = char.charCodeAt(0);
+
+    // Basic Latin and ASCII - lighter
+    if (code <= 0x7f) {
+      return 50; // bytes
+    }
+
+    // CJK characters are typically heavier in fonts
+    if (
+      (code >= 0x4e00 && code <= 0x9fff) || // CJK Unified Ideographs
+      (code >= 0x3400 && code <= 0x4dbf) || // CJK Extension A
+      (code >= 0xf900 && code <= 0xfaff)
+    ) {
+      // CJK Compatibility Ideographs
+      return 200; // bytes per CJK character
+    }
+
+    // Other Unicode characters (punctuation, symbols, etc.)
+    return 100; // bytes
   }
 
   generateUnicodeRangesFromChars(chars: string[]): string[] {
