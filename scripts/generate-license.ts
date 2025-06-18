@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
+import { URL } from 'url';
 
 import type { FontConfig, FontsConfig } from '@/types.js';
 

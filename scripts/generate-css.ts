@@ -3,6 +3,7 @@ import cssnano from 'cssnano';
 import fs from 'fs-extra';
 import path from 'path';
 import postcss from 'postcss';
+import { URL } from 'url';
 
 import type {
   ChunkResult,
@@ -135,8 +136,7 @@ class CSSGenerator {
             // Find the corresponding chunk for this style
             const styleChunk = (processResult as ChunkResult[]).find(
               (chunk) => {
-                const chunkStyle =
-                  'style' in chunk ? (chunk as any).style : 'roman';
+                const chunkStyle = chunk.style ?? 'roman';
                 return chunkStyle === style;
               }
             );

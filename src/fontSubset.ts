@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import * as fontkit from 'fontkit';
 import subsetFont from 'subset-font';
 import { cpus } from 'os';
+import { URL } from 'url';
 
 import type { ChunkResult, FontConfig, FontsConfig } from '@/types.js';
 

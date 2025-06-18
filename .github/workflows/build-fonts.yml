@@ -101,7 +101,7 @@ jobs:
             "buildType": "$BUILD_TYPE",
             "updatedFonts": "$UPDATED_FONTS",
             "processedFonts": "$PROCESSED_FONTS",
-            "fonts": $(cat src/config/fonts.json | jq -c '.fonts')
+            "fonts": $(cat src/config/fonts.json | jq '.fonts')
           }
           EOF
           
@@ -146,7 +146,7 @@ jobs:
           
           if [ -d build/fonts ]; then
             echo "📦 Generated font files:"
-            find build/fonts -name "*.woff2" | head -10
+            ls -la build/fonts/
           fi
           
           if [ -d build/css ]; then

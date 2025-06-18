@@ -14,9 +14,6 @@ importers:
       chalk:
         specifier: ^5.4.1
         version: 5.4.1
-      commander:
-        specifier: ^14.0.0
-        version: 14.0.0
       fontkit:
         specifier: ^2.0.4
         version: 2.0.4
@@ -57,9 +54,6 @@ importers:
       eslint:
         specifier: ^9.29.0
         version: 9.29.0(jiti@2.4.2)
-      jiti:
-        specifier: ^2.4.2
-        version: 2.4.2
       postcss:
         specifier: ^8.5.6
         version: 8.5.6
@@ -516,10 +510,6 @@ packages:
 
   colord@2.9.3:
     resolution: {integrity: sha512-jeC1axXpnb0/2nn/Y1LPuLdgXBLH7aDcHu4KEKfqw3CUhX7ZpfBSlPKyqXE6btIgEzfWtrX3/tyBCaCvXvMkOw==}
-
-  commander@14.0.0:
-    resolution: {integrity: sha512-2uM9rYjPvyq39NwLRqaiLtWHyDC1FvryJDa2ATTVims5YAS4PupsEQsDvP14FqhFr0P49CYDugi59xaxJlTXRA==}
-    engines: {node: '>=20'}
 
   commander@7.2.0:
     resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
@@ -1661,8 +1651,6 @@ snapshots:
 
   colord@2.9.3: {}
 
-  commander@14.0.0: {}
-
   commander@7.2.0: {}
 
   concat-map@0.0.1: {}
@@ -1998,7 +1986,8 @@ snapshots:
 
   isexe@2.0.0: {}
 
-  jiti@2.4.2: {}
+  jiti@2.4.2:
+    optional: true
 
   js-yaml@4.1.0:
     dependencies:

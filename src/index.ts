@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { URL } from 'url';
 
 import CSSGenerator from '@scripts/generate-css.js';
 import LicenseGenerator from '@scripts/generate-license.js';

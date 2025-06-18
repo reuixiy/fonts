@@ -2,6 +2,7 @@ import { Octokit } from '@octokit/rest';
 import chalk from 'chalk';
 import fs from 'fs-extra';
 import path from 'path';
+import { URL } from 'url';
 
 import type { FontsConfig, UpdatedFont, VersionCheckResult } from '@/types.js';
 
@@ -87,7 +88,7 @@ class VersionChecker {
             );
             return parsedCache;
           }
-        } catch (_error) {
+        } catch {
           console.log(
             chalk.gray(
               '📋 No cache branch found, checking environment variables...'
@@ -119,7 +120,7 @@ class VersionChecker {
 
       // Fallback to local file
       return (await fs.readJson(this.versionCachePath)) as VersionCache;
-    } catch (_error) {
+    } catch {
       // File doesn't exist, return empty cache
       console.log(
         chalk.gray('📋 No existing version cache found, starting fresh')
