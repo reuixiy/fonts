@@ -1,7 +1,6 @@
 // Documentation command implementation
 import chalk from 'chalk';
 import { DocsGenerator } from '@/modules/docs/DocsGenerator.js';
-import { ReadmeGenerator } from '@/modules/docs/ReadmeGenerator.js';
 import { ConfigManager } from '@/config/index.js';
 import { PathUtils } from '@/utils/PathUtils.js';
 import { CLIValidator } from '@/cli/utils/validation.js';
@@ -22,30 +21,21 @@ export const docsCommand: CLICommand = {
       const options = parseDocsOptions(args);
       await validateDocsOptions(options);
 
-      // Initialize generators
+      // Initialize generator
       const buildConfig = ConfigManager.getBuildConfig();
       const docsGenerator = new DocsGenerator(buildConfig);
-      const readmeGenerator = new ReadmeGenerator();
 
       const outputDir = PathUtils.resolve(process.cwd(), options.outputDir);
 
-      // Generate license information
-      if (options.includeLicense) {
-        console.log(chalk.yellow('📋 Generating license information...'));
-
-        await docsGenerator.generateDocumentation({
-          formats: ['markdown', 'json'],
-          outputDir,
-          validateLicenses: options.validateLicenses,
-          includeCompliance: options.includeCompliance,
-        });
-      }
-
-      // Generate build README
-      if (options.includeReadme) {
-        console.log(chalk.yellow('📋 Generating build README...'));
-        await readmeGenerator.generateReadme(outputDir);
-      }
+      // Generate documentation using integrated DocsGenerator
+      await docsGenerator.generateDocumentation({
+        formats: ['markdown', 'json'],
+        outputDir,
+        validateLicenses: options.validateLicenses,
+        includeCompliance: options.includeCompliance,
+        includeReadme: options.includeReadme,
+        includeLicense: options.includeLicense,
+      });
 
       console.log(
         chalk.bold.green('\n🎉 Documentation generated successfully!')

@@ -24,15 +24,11 @@ export class ReadmeGenerator extends BaseService {
   }
 
   private generateReadmeContent(): string {
-    const currentDate = new Date().toLocaleDateString('zh-TW', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
+    const currentDateTime = new Date().toISOString();
 
     return `# Web Font CDN
 
-Generated on: ${currentDate}
+Generated on: ${currentDateTime}
 Source: [reuixiy/fonts](https://github.com/reuixiy/fonts)
 
 ## Quick Start

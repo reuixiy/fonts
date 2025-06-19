@@ -8,27 +8,24 @@ import type {
 } from '@/core/interfaces/IDocsGenerator.js';
 import type { BuildConfig } from '@/types/config.js';
 import type { LicenseData, FontLicenseData } from '@/modules/docs/types.js';
-import { LicenseCollector } from '@/modules/docs/LicenseCollector.js';
-import { MarkdownGenerator } from '@/modules/docs/MarkdownGenerator.js';
-import { JsonGenerator } from '@/modules/docs/JsonGenerator.js';
-import { ComplianceValidator } from '@/modules/docs/ComplianceValidator.js';
+import { LicenseService } from '@/modules/docs/LicenseService.js';
+import { LicenseGenerator } from '@/modules/docs/LicenseGenerator.js';
+import { ReadmeGenerator } from '@/modules/docs/ReadmeGenerator.js';
 
 export class DocsGenerator extends BaseService implements IDocsGenerator {
-  private collector: LicenseCollector;
-  private markdownGenerator: MarkdownGenerator;
-  private jsonGenerator: JsonGenerator;
-  private complianceValidator: ComplianceValidator;
+  private licenseService: LicenseService;
+  private licenseGenerator: LicenseGenerator;
+  private readmeGenerator: ReadmeGenerator;
 
   constructor(private buildConfig: BuildConfig) {
     super('DocsGenerator');
-    this.collector = new LicenseCollector();
-    this.markdownGenerator = new MarkdownGenerator();
-    this.jsonGenerator = new JsonGenerator();
-    this.complianceValidator = new ComplianceValidator();
+    this.licenseService = new LicenseService();
+    this.licenseGenerator = new LicenseGenerator();
+    this.readmeGenerator = new ReadmeGenerator();
   }
 
   /**
-   * Generate documentation files (license files, etc.)
+   * Generate documentation files (license files, README, etc.)
    */
   async generateDocumentation(
     options: DocsGenerationOptions = {}
@@ -41,32 +38,42 @@ export class DocsGenerator extends BaseService implements IDocsGenerator {
         formats = ['markdown', 'json'],
         includeCompliance = true,
         validateLicenses = true,
+        includeReadme = true,
+        includeLicense = true,
       } = options;
 
       // Ensure output directory exists
       await mkdir(outputDir, { recursive: true });
 
-      // Collect license information
-      const fontLicenseData = await this.collectLicenseInfo();
+      // Generate license files if requested
+      if (includeLicense) {
+        // Collect license information
+        const fontLicenseData = await this.collectLicenseInfo();
 
-      // Validate licenses if requested
-      let complianceResult = { checked: false, issues: [] as string[] };
-      if (validateLicenses || includeCompliance) {
-        complianceResult = await this.validateLicenses(fontLicenseData);
+        // Validate licenses if requested
+        let complianceResult = { checked: false, issues: [] as string[] };
+        if (validateLicenses || includeCompliance) {
+          complianceResult = await this.validateLicenses(fontLicenseData);
+        }
+
+        // Build license data
+        const licenseData: LicenseData = {
+          generatedAt: new Date().toISOString(),
+          generator: 'https://github.com/reuixiy/fonts',
+          version: '3.0.0',
+          fonts: fontLicenseData,
+          compliance: complianceResult,
+        };
+
+        // Generate files in requested formats
+        for (const format of formats) {
+          await this.generateFormat(licenseData, format, outputDir);
+        }
       }
 
-      // Build license data
-      const licenseData: LicenseData = {
-        generatedAt: new Date().toISOString(),
-        generator: 'https://github.com/reuixiy/fonts',
-        version: '3.0.0',
-        fonts: fontLicenseData,
-        compliance: complianceResult,
-      };
-
-      // Generate files in requested formats
-      for (const format of formats) {
-        await this.generateFormat(licenseData, format, outputDir);
+      // Generate README if requested
+      if (includeReadme) {
+        await this.generateReadme(outputDir);
       }
 
       this.log(`Documentation files generated successfully in ${outputDir}`);
@@ -83,9 +90,9 @@ export class DocsGenerator extends BaseService implements IDocsGenerator {
       this.log('Collecting license information...');
 
       if (fontIds && fontIds.length > 0) {
-        return await this.collector.collectSpecificLicenseInfo(fontIds);
+        return await this.licenseService.collectSpecificLicenseInfo(fontIds);
       } else {
-        return await this.collector.collectAllLicenseInfo();
+        return await this.licenseService.collectAllLicenseInfo();
       }
     }, 'license information collection');
   }
@@ -100,7 +107,7 @@ export class DocsGenerator extends BaseService implements IDocsGenerator {
       this.log('Validating license compliance...');
 
       const licenseData = fontLicenseData ?? (await this.collectLicenseInfo());
-      return await this.complianceValidator.validateCompliance(licenseData);
+      return await this.licenseService.validateCompliance(licenseData);
     }, 'license validation');
   }
 
@@ -122,16 +129,16 @@ export class DocsGenerator extends BaseService implements IDocsGenerator {
     switch (format) {
       case 'markdown':
       case 'md':
-        content = await this.markdownGenerator.generate(licenseData);
+        content = await this.licenseGenerator.generate(licenseData);
         break;
       case 'json':
-        content = await this.jsonGenerator.generate(licenseData);
+        content = await this.licenseGenerator.generateJson(licenseData);
         break;
       case 'txt':
-        content = await this.markdownGenerator.generatePlainText(licenseData);
+        content = await this.licenseGenerator.generatePlainText(licenseData);
         break;
       case 'html':
-        content = await this.markdownGenerator.generateHtml(licenseData);
+        content = await this.licenseGenerator.generateHtml(licenseData);
         break;
       default:
         throw new Error(`Unsupported license format: ${format}`);
@@ -140,4 +147,13 @@ export class DocsGenerator extends BaseService implements IDocsGenerator {
     await writeFile(filePath, content, 'utf-8');
     this.log(`Generated ${fileName}`);
   }
+
+  /**
+   * Generate README file for the build directory
+   */
+  async generateReadme(outputDir: string): Promise<void> {
+    await this.readmeGenerator.generateReadme(outputDir);
+  }
+
+  // ...existing code...
 }

@@ -5,6 +5,8 @@ export interface DocsGenerationOptions {
   formats?: string[];
   includeCompliance?: boolean;
   validateLicenses?: boolean;
+  includeReadme?: boolean;
+  includeLicense?: boolean;
 }
 
 export interface IDocsGenerator {
