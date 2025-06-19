@@ -19,21 +19,8 @@ export const checkCommand: CLICommand = {
       const options = ArgsParser.parseStandardOptions(args);
       await validateCheckOptions(options);
 
-      // Initialize version checker
-      const versionChecker = new VersionChecker();
-
-      // Check for updates
-      console.log(chalk.yellow('📋 Checking font versions...'));
-
-      let updateResults: VersionCheckResult;
-      if (options.fontIds.length > 0) {
-        updateResults = await versionChecker.checkSpecific(options.fontIds);
-      } else {
-        updateResults = await versionChecker.run();
-      }
-
-      // Display results
-      displayUpdateResults(updateResults);
+      // Run the check and display results
+      await runVersionCheck(options.fontIds);
     } catch (error: unknown) {
       console.error(
         chalk.red('❌ Version check failed:'),
@@ -43,6 +30,32 @@ export const checkCommand: CLICommand = {
     }
   },
 };
+
+/**
+ * Run version check and display results
+ * Returns the VersionCheckResult for programmatic use
+ */
+export async function runVersionCheck(
+  fontIds: string[] = []
+): Promise<VersionCheckResult> {
+  // Initialize version checker
+  const versionChecker = new VersionChecker();
+
+  // Check for updates
+  console.log(chalk.yellow('📋 Checking font versions...'));
+
+  let updateResults: VersionCheckResult;
+  if (fontIds.length > 0) {
+    updateResults = await versionChecker.checkSpecific(fontIds);
+  } else {
+    updateResults = await versionChecker.run();
+  }
+
+  // Display results
+  displayUpdateResults(updateResults);
+
+  return updateResults;
+}
 
 async function validateCheckOptions(options: StandardOptions): Promise<void> {
   // Validate font IDs if provided
@@ -87,7 +100,5 @@ function displayUpdateResults(results: VersionCheckResult): void {
     console.log(chalk.bold.green('\n✅ All fonts are up to date!'));
   }
 
-  console.log(
-    chalk.gray('\n💡 Use --force to bypass cache (feature coming soon)')
-  );
+  console.log(chalk.gray('\n💡 Use --force to bypass cache'));
 }

@@ -18,9 +18,9 @@
     
     "// Production execution": "",
     "start": "pnpm run exec:start",
-    "start:force": "pnpm run exec:start -- --force",
-    "build:fonts": "pnpm run exec:start -- --build-only",
-    "build:specific": "pnpm run exec:start -- --fonts",
+    "start:force": "pnpm run exec:start --force",
+    "build:fonts": "pnpm run exec:start --build-only",
+    "build:specific": "pnpm run exec:start --fonts",
     
     "// Base helpers": "",
     "exec:start": "pnpm run build && node dist/index.js",
@@ -28,8 +28,8 @@
     
     "// CLI commands": "",
     "cli": "pnpm run exec:cli",
-    "cli:help": "pnpm run exec:cli -- --help",
-    "cli:version": "pnpm run exec:cli -- --version",
+    "cli:help": "pnpm run exec:cli --help",
+    "cli:version": "pnpm run exec:cli --version",
     "cli:build": "pnpm run exec:cli build",
     "cli:check": "pnpm run exec:cli check",
     "cli:download": "pnpm run exec:cli download",
@@ -39,10 +39,10 @@
     "cli:clean": "pnpm run exec:cli clean",
     
     "// Clean shortcuts": "",
-    "clean": "pnpm run cli:clean -- --all",
-    "clean:build": "pnpm run cli:clean -- --build",
-    "clean:deps": "pnpm run cli:clean -- --deps",
-    "clean:cache": "pnpm run cli:clean -- --cache",
+    "clean": "pnpm run cli:clean --all",
+    "clean:build": "pnpm run cli:clean --build",
+    "clean:deps": "pnpm run cli:clean --deps",
+    "clean:cache": "pnpm run cli:clean --cache",
     
     "// Linting": "",
     "lint": "eslint .",
