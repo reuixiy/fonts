@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { FontDownloader } from '@/modules/download/FontDownloader.js';
 import { CLIValidator } from '@/cli/utils/validation.js';
 import { ArgsParser } from '@/cli/utils/args.js';
-import type { CLICommand, CLIArgs } from '@/cli/types.js';
+import type { CLICommand, CLIArgs, StandardOptions } from '@/cli/types.js';
 
 export const downloadCommand: CLICommand = {
   name: 'download',
@@ -14,9 +14,15 @@ export const downloadCommand: CLICommand = {
     console.log(chalk.bold.blue('📥 Downloading Fonts\n'));
 
     try {
-      // Parse download options
-      const options = parseDownloadOptions(args);
-      await validateDownloadOptions(options);
+      // Parse standard options
+      const options = ArgsParser.parseStandardOptions(args);
+      // Override default output directory for downloads
+      const downloadOptions = {
+        ...options,
+        outputDir:
+          options.outputDir === 'build' ? 'downloads' : options.outputDir,
+      };
+      await validateDownloadOptions(downloadOptions);
 
       // Initialize font downloader
       const fontDownloader = new FontDownloader();
@@ -24,14 +30,14 @@ export const downloadCommand: CLICommand = {
       // Download fonts
       console.log(chalk.yellow('📋 Downloading fonts...'));
 
-      if (options.fontIds.length > 0) {
-        await fontDownloader.downloadSpecific(options.fontIds);
+      if (downloadOptions.fontIds.length > 0) {
+        await fontDownloader.downloadSpecific(downloadOptions.fontIds);
         console.log(
           chalk.bold.green(
-            `\n🎉 Successfully downloaded ${options.fontIds.length} font(s)!`
+            `\n🎉 Successfully downloaded ${downloadOptions.fontIds.length} font(s)!`
           )
         );
-        console.log(chalk.gray(`Fonts: ${options.fontIds.join(', ')}`));
+        console.log(chalk.gray(`Fonts: ${downloadOptions.fontIds.join(', ')}`));
       } else {
         await fontDownloader.downloadAll();
         console.log(
@@ -39,7 +45,9 @@ export const downloadCommand: CLICommand = {
         );
       }
 
-      console.log(chalk.gray(`Download directory: ${options.outputDir}`));
+      console.log(
+        chalk.gray(`Download directory: ${downloadOptions.outputDir}`)
+      );
     } catch (error: unknown) {
       console.error(
         chalk.red('❌ Font download failed:'),
@@ -50,29 +58,8 @@ export const downloadCommand: CLICommand = {
   },
 };
 
-interface DownloadOptions {
-  fontIds: string[];
-  outputDir: string;
-  forceRedownload: boolean;
-}
-
-function parseDownloadOptions(args: CLIArgs): DownloadOptions {
-  const fontIds =
-    ArgsParser.getOption(args, 'fonts')
-      ?.split(',')
-      .map((id) => id.trim()) ?? [];
-  const outputDir = ArgsParser.getOption(args, 'output') ?? 'downloads';
-  const forceRedownload = ArgsParser.hasFlag(args, 'force');
-
-  return {
-    fontIds,
-    outputDir,
-    forceRedownload,
-  };
-}
-
 async function validateDownloadOptions(
-  options: DownloadOptions
+  options: StandardOptions
 ): Promise<void> {
   // Validate font IDs if provided
   if (options.fontIds.length > 0) {

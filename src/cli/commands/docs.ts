@@ -5,7 +5,7 @@ import { ConfigManager } from '@/config/index.js';
 import { PathUtils } from '@/utils/PathUtils.js';
 import { CLIValidator } from '@/cli/utils/validation.js';
 import { ArgsParser } from '@/cli/utils/args.js';
-import type { CLICommand, CLIArgs } from '@/cli/types.js';
+import type { CLICommand, CLIArgs, DocsOptions } from '@/cli/types.js';
 
 export const docsCommand: CLICommand = {
   name: 'docs',
@@ -17,8 +17,8 @@ export const docsCommand: CLICommand = {
     console.log(chalk.bold.blue('📚 Generating Documentation\n'));
 
     try {
-      // Parse documentation options
-      const options = parseDocsOptions(args);
+      // Parse docs-specific options
+      const options = ArgsParser.parseDocsOptions(args);
       await validateDocsOptions(options);
 
       // Initialize generator
@@ -57,43 +57,6 @@ export const docsCommand: CLICommand = {
     }
   },
 };
-
-interface DocsOptions {
-  outputDir: string;
-  includeLicense: boolean;
-  includeReadme: boolean;
-  validateLicenses: boolean;
-  includeCompliance: boolean;
-}
-
-function parseDocsOptions(args: CLIArgs): DocsOptions {
-  const outputDir = ArgsParser.getOption(args, 'output') ?? 'build';
-
-  // Check specific flags
-  const licenseOnly = ArgsParser.hasFlag(args, 'license-only');
-  const readmeOnly = ArgsParser.hasFlag(args, 'readme-only');
-
-  // By default, generate both unless specified otherwise
-  let includeLicense = true;
-  let includeReadme = true;
-
-  if (licenseOnly) {
-    includeReadme = false;
-  } else if (readmeOnly) {
-    includeLicense = false;
-  }
-
-  const validateLicenses = !ArgsParser.hasFlag(args, 'no-validate');
-  const includeCompliance = !ArgsParser.hasFlag(args, 'no-compliance');
-
-  return {
-    outputDir,
-    includeLicense,
-    includeReadme,
-    validateLicenses,
-    includeCompliance,
-  };
-}
 
 async function validateDocsOptions(options: DocsOptions): Promise<void> {
   // Validate output directory

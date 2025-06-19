@@ -1,5 +1,11 @@
 // CLI argument parsing utilities
-import type { CLIArgs } from '@/cli/types.js';
+import type {
+  CLIArgs,
+  StandardOptions,
+  DocsOptions,
+  CleanOptions,
+  BasicOptions,
+} from '@/cli/types.js';
 
 export class ArgsParser {
   /**
@@ -91,5 +97,97 @@ export class ArgsParser {
    */
   static getPositionalFrom(args: CLIArgs, index: number): string[] {
     return args.positional.slice(index);
+  }
+
+  /**
+   * Parse font IDs from string with flexible separators
+   * Supports both comma and space separation
+   */
+  static parseFontIds(fontString: string): string[] {
+    return fontString
+      .split(/[,\s]+/) // Split by comma or space
+      .map((id) => id.trim()) // Remove whitespace
+      .filter((id) => id.length > 0); // Filter empty strings
+  }
+
+  /**
+   * Parse standard options used across all commands
+   */
+  static parseStandardOptions(args: CLIArgs): StandardOptions {
+    const fontOption = ArgsParser.getOption(args, 'fonts');
+    const fontIds = fontOption ? ArgsParser.parseFontIds(fontOption) : [];
+    const outputDir = ArgsParser.getOption(args, 'output') ?? 'build';
+
+    return {
+      fontIds,
+      outputDir,
+      skipDownload: ArgsParser.hasFlag(args, 'skip-download'),
+      skipSubset: ArgsParser.hasFlag(args, 'skip-subset'),
+      skipCSS: ArgsParser.hasFlag(args, 'skip-css'),
+      skipDocs: ArgsParser.hasFlag(args, 'skip-docs'),
+      force: ArgsParser.hasFlag(args, 'force'),
+    };
+  }
+
+  /**
+   * Parse docs-specific options
+   */
+  static parseDocsOptions(args: CLIArgs): DocsOptions {
+    // Check specific flags
+    const licenseOnly = ArgsParser.hasFlag(args, 'license-only');
+    const readmeOnly = ArgsParser.hasFlag(args, 'readme-only');
+
+    // By default, generate both unless specified otherwise
+    let includeLicense = true;
+    let includeReadme = true;
+
+    if (licenseOnly) {
+      includeReadme = false;
+    } else if (readmeOnly) {
+      includeLicense = false;
+    }
+
+    const validateLicenses = !ArgsParser.hasFlag(args, 'no-validate');
+    const includeCompliance = !ArgsParser.hasFlag(args, 'no-compliance');
+    const outputDir = ArgsParser.getOption(args, 'output') ?? 'build';
+
+    return {
+      outputDir,
+      includeLicense,
+      includeReadme,
+      validateLicenses,
+      includeCompliance,
+      force: ArgsParser.hasFlag(args, 'force'),
+    };
+  }
+
+  /**
+   * Parse clean-specific options
+   */
+  static parseCleanOptions(args: CLIArgs): CleanOptions {
+    const all = ArgsParser.hasFlag(args, 'all');
+
+    return {
+      cleanBuild: all || ArgsParser.hasFlag(args, 'build'),
+      cleanDownloads: all || ArgsParser.hasFlag(args, 'downloads'),
+      cleanCache: all || ArgsParser.hasFlag(args, 'cache'),
+      cleanDeps: all || ArgsParser.hasFlag(args, 'deps'),
+      force: ArgsParser.hasFlag(args, 'force'),
+    };
+  }
+
+  /**
+   * Parse basic options (subset of StandardOptions)
+   */
+  static parseBasicOptions(args: CLIArgs): BasicOptions {
+    const fontOption = ArgsParser.getOption(args, 'fonts');
+    const fontIds = fontOption ? ArgsParser.parseFontIds(fontOption) : [];
+    const outputDir = ArgsParser.getOption(args, 'output') ?? 'build';
+
+    return {
+      fontIds,
+      outputDir,
+      force: ArgsParser.hasFlag(args, 'force'),
+    };
   }
 }

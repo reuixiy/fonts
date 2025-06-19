@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { VersionChecker } from '@/modules/version/VersionChecker.js';
 import { CLIValidator } from '@/cli/utils/validation.js';
 import { ArgsParser } from '@/cli/utils/args.js';
-import type { CLICommand, CLIArgs } from '@/cli/types.js';
+import type { CLICommand, CLIArgs, StandardOptions } from '@/cli/types.js';
 import type { VersionCheckResult } from '@/types/workflow.js';
 
 export const checkCommand: CLICommand = {
@@ -15,8 +15,8 @@ export const checkCommand: CLICommand = {
     console.log(chalk.bold.blue('🔍 Checking for Updates\n'));
 
     try {
-      // Parse check options
-      const options = parseCheckOptions(args);
+      // Parse standard options
+      const options = ArgsParser.parseStandardOptions(args);
       await validateCheckOptions(options);
 
       // Initialize version checker
@@ -44,27 +44,7 @@ export const checkCommand: CLICommand = {
   },
 };
 
-interface CheckOptions {
-  fontIds: string[];
-  force: boolean;
-  cacheTtl: number;
-}
-
-function parseCheckOptions(args: CLIArgs): CheckOptions {
-  const fontIds =
-    ArgsParser.getOption(args, 'fonts')
-      ?.split(',')
-      .map((id) => id.trim()) ?? [];
-  const cacheTtlStr = ArgsParser.getOption(args, 'cache-ttl') ?? '24';
-
-  return {
-    fontIds,
-    force: ArgsParser.hasFlag(args, 'force'),
-    cacheTtl: parseInt(cacheTtlStr, 10),
-  };
-}
-
-async function validateCheckOptions(options: CheckOptions): Promise<void> {
+async function validateCheckOptions(options: StandardOptions): Promise<void> {
   // Validate font IDs if provided
   if (options.fontIds.length > 0) {
     const fontValidation = CLIValidator.validateFontIds(options.fontIds);
@@ -75,13 +55,11 @@ async function validateCheckOptions(options: CheckOptions): Promise<void> {
     }
   }
 
-  // Validate cache TTL
-  const ttlValidation = CLIValidator.validateCacheTtl(
-    options.cacheTtl.toString()
-  );
-  if (!ttlValidation.isValid) {
-    console.error(chalk.red('Invalid cache TTL:'));
-    console.error(CLIValidator.formatErrors(ttlValidation));
+  // Validate output directory
+  const outputValidation = CLIValidator.validateOutputDir(options.outputDir);
+  if (!outputValidation.isValid) {
+    console.error(chalk.red('Invalid output directory:'));
+    console.error(CLIValidator.formatErrors(outputValidation));
     process.exit(1);
   }
 }

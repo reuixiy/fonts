@@ -8,7 +8,7 @@ import { ConfigManager } from '@/config/index.js';
 import { PathUtils } from '@/utils/PathUtils.js';
 import { CLIValidator } from '@/cli/utils/validation.js';
 import { ArgsParser } from '@/cli/utils/args.js';
-import type { CLICommand, CLIArgs } from '@/cli/types.js';
+import type { CLICommand, CLIArgs, StandardOptions } from '@/cli/types.js';
 
 export const buildCommand: CLICommand = {
   name: 'build',
@@ -19,8 +19,8 @@ export const buildCommand: CLICommand = {
     console.log(chalk.bold.blue('🔨 Starting Build Process\n'));
 
     try {
-      // Parse build options
-      const options = parseBuildOptions(args);
+      // Parse standard options
+      const options = ArgsParser.parseStandardOptions(args);
       await validateBuildOptions(options);
 
       // Initialize services
@@ -37,7 +37,7 @@ export const buildCommand: CLICommand = {
       await fontSubsetter.init();
       await cssGenerator.init();
 
-      // Execute build steps
+      // Execute build steps with granular control
       if (!options.skipDownload) {
         console.log(chalk.yellow('📋 Step 1: Downloading fonts...'));
         if (options.fontIds.length > 0) {
@@ -47,19 +47,27 @@ export const buildCommand: CLICommand = {
         }
       }
 
-      console.log(chalk.yellow('📋 Step 2: Subsetting fonts...'));
-      if (options.fontIds.length > 0) {
-        await fontSubsetter.processSpecific(options.fontIds);
-      } else {
-        await fontSubsetter.processAll();
+      if (!options.skipSubset) {
+        console.log(chalk.yellow('📋 Step 2: Subsetting fonts...'));
+        if (options.fontIds.length > 0) {
+          await fontSubsetter.processSpecific(options.fontIds);
+        } else {
+          await fontSubsetter.processAll();
+        }
       }
 
       if (!options.skipCSS) {
         console.log(chalk.yellow('📋 Step 3: Generating CSS...'));
-        await cssGenerator.generateAll();
+        if (options.fontIds.length > 0) {
+          await cssGenerator.generateSpecific(options.fontIds);
+          // Regenerate unified CSS when processing specific fonts
+          await cssGenerator.generateUnified();
+        } else {
+          await cssGenerator.generateAll();
+        }
       }
 
-      if (!options.skipLicense) {
+      if (!options.skipDocs) {
         console.log(chalk.yellow('📋 Step 4: Generating documentation...'));
         await docsGenerator.generateDocumentation();
       }
@@ -73,31 +81,7 @@ export const buildCommand: CLICommand = {
   },
 };
 
-interface BuildOptions {
-  fontIds: string[];
-  outputDir: string;
-  skipDownload: boolean;
-  skipCSS: boolean;
-  skipLicense: boolean;
-}
-
-function parseBuildOptions(args: CLIArgs): BuildOptions {
-  const fontIds =
-    ArgsParser.getOption(args, 'fonts')
-      ?.split(',')
-      .map((id) => id.trim()) ?? [];
-  const outputDir = ArgsParser.getOption(args, 'output') ?? 'build';
-
-  return {
-    fontIds,
-    outputDir,
-    skipDownload: ArgsParser.hasFlag(args, 'skip-download'),
-    skipCSS: ArgsParser.hasFlag(args, 'skip-css'),
-    skipLicense: ArgsParser.hasFlag(args, 'skip-license'),
-  };
-}
-
-async function validateBuildOptions(options: BuildOptions): Promise<void> {
+async function validateBuildOptions(options: StandardOptions): Promise<void> {
   // Validate font IDs if provided
   if (options.fontIds.length > 0) {
     const fontValidation = CLIValidator.validateFontIds(options.fontIds);

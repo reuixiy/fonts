@@ -17,12 +17,13 @@
     "type-check": "tsc --noEmit",
     
     "// Production execution": "",
-    "start": "pnpm run exec:build",
-    "build:fonts": "pnpm run exec:build -- --build-only",
-    "build:specific": "pnpm run exec:build -- --fonts",
+    "start": "pnpm run exec:start",
+    "start:force": "pnpm run exec:start -- --force",
+    "build:fonts": "pnpm run exec:start -- --build-only",
+    "build:specific": "pnpm run exec:start -- --fonts",
     
     "// Base helpers": "",
-    "exec:build": "pnpm run build && node dist/index.js",
+    "exec:start": "pnpm run build && node dist/index.js",
     "exec:cli": "node dist/cli/bin.js",
     
     "// CLI commands": "",

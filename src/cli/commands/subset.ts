@@ -5,7 +5,7 @@ import { ConfigManager } from '@/config/index.js';
 import { PathUtils } from '@/utils/PathUtils.js';
 import { CLIValidator } from '@/cli/utils/validation.js';
 import { ArgsParser } from '@/cli/utils/args.js';
-import type { CLICommand, CLIArgs } from '@/cli/types.js';
+import type { CLICommand, CLIArgs, StandardOptions } from '@/cli/types.js';
 
 export const subsetCommand: CLICommand = {
   name: 'subset',
@@ -16,14 +16,20 @@ export const subsetCommand: CLICommand = {
     console.log(chalk.bold.blue('⚙️ Subsetting Fonts\n'));
 
     try {
-      // Parse subset options
-      const options = parseSubsetOptions(args);
-      await validateSubsetOptions(options);
+      // Parse standard options
+      const options = ArgsParser.parseStandardOptions(args);
+      // Use downloads as input, build as output by default
+      const subsetOptions = {
+        ...options,
+        inputDir: 'downloads',
+        outputDir: options.outputDir,
+      };
+      await validateSubsetOptions(subsetOptions);
 
       // Initialize font subsetter
       const fontSubsetter = new FontSubsetter(
-        PathUtils.resolve(process.cwd(), options.inputDir),
-        PathUtils.resolve(process.cwd(), options.outputDir),
+        PathUtils.resolve(process.cwd(), subsetOptions.inputDir),
+        PathUtils.resolve(process.cwd(), subsetOptions.outputDir),
         ConfigManager.load().fonts
       );
 
@@ -31,11 +37,11 @@ export const subsetCommand: CLICommand = {
 
       console.log(chalk.yellow('📋 Subsetting fonts...'));
 
-      if (options.fontIds.length > 0) {
-        await fontSubsetter.processSpecific(options.fontIds);
+      if (subsetOptions.fontIds.length > 0) {
+        await fontSubsetter.processSpecific(subsetOptions.fontIds);
         console.log(
           chalk.bold.green(
-            `\n🎉 Successfully subsetted ${options.fontIds.length} font(s)!`
+            `\n🎉 Successfully subsetted ${subsetOptions.fontIds.length} font(s)!`
           )
         );
       } else {
@@ -43,8 +49,8 @@ export const subsetCommand: CLICommand = {
         console.log(chalk.bold.green('\n🎉 Successfully subsetted all fonts!'));
       }
 
-      console.log(chalk.gray(`Input directory: ${options.inputDir}`));
-      console.log(chalk.gray(`Output directory: ${options.outputDir}`));
+      console.log(chalk.gray(`Input directory: ${subsetOptions.inputDir}`));
+      console.log(chalk.gray(`Output directory: ${subsetOptions.outputDir}`));
     } catch (error: unknown) {
       console.error(
         chalk.red('❌ Font subsetting failed:'),
@@ -55,28 +61,9 @@ export const subsetCommand: CLICommand = {
   },
 };
 
-interface SubsetOptions {
-  fontIds: string[];
-  inputDir: string;
-  outputDir: string;
-}
-
-function parseSubsetOptions(args: CLIArgs): SubsetOptions {
-  const fontIds =
-    ArgsParser.getOption(args, 'fonts')
-      ?.split(',')
-      .map((id) => id.trim()) ?? [];
-  const inputDir = ArgsParser.getOption(args, 'input') ?? 'downloads';
-  const outputDir = ArgsParser.getOption(args, 'output') ?? 'build';
-
-  return {
-    fontIds,
-    inputDir,
-    outputDir,
-  };
-}
-
-async function validateSubsetOptions(options: SubsetOptions): Promise<void> {
+async function validateSubsetOptions(
+  options: StandardOptions & { inputDir: string }
+): Promise<void> {
   // Validate font IDs if provided
   if (options.fontIds.length > 0) {
     const fontValidation = CLIValidator.validateFontIds(options.fontIds);
@@ -85,14 +72,6 @@ async function validateSubsetOptions(options: SubsetOptions): Promise<void> {
       console.error(CLIValidator.formatErrors(fontValidation));
       process.exit(1);
     }
-  }
-
-  // Validate input directory
-  const inputValidation = CLIValidator.validateOutputDir(options.inputDir);
-  if (!inputValidation.isValid) {
-    console.error(chalk.red('Invalid input directory:'));
-    console.error(CLIValidator.formatErrors(inputValidation));
-    process.exit(1);
   }
 
   // Validate output directory

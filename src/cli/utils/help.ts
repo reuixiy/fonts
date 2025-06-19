@@ -40,15 +40,19 @@ export class HelpGenerator {
         title: 'Examples',
         content: [
           '  # Most common usage:',
-          `  pnpm run cli:build                   # Build all fonts`,
+          `  pnpm run cli:build                      # Build all fonts`,
           `  pnpm run cli:build -- --fonts imingcp   # Build specific font`,
-          `  pnpm run cli:check                   # Check for updates`,
-          `  pnpm run cli:clean -- --all          # Clean everything`,
+          `  pnpm run cli:check                      # Check for updates`,
+          `  pnpm run cli:clean -- --all             # Clean everything`,
           '',
           '  # Direct CLI usage:',
-          `  ${config.name} build --fonts imingcp      # Build specific font`,
-          `  ${config.name} check                      # Check for updates`,
-          `  ${config.name} clean --build              # Clean build artifacts`,
+          `  ${config.name} build --fonts "imingcp lxgwwenkaitc"  # Build multiple fonts`,
+          `  ${config.name} check --fonts imingcp               # Check specific font`,
+          `  ${config.name} clean --build                       # Clean build artifacts`,
+          '',
+          '  # Font IDs support both formats:',
+          '  --fonts "imingcp lxgwwenkaitc"    # Space-separated',
+          '  --fonts imingcp,lxgwwenkaitc      # Comma-separated',
         ],
       },
     ];
@@ -86,53 +90,47 @@ export class HelpGenerator {
       sections.push({
         title: 'Options',
         content: [
-          '  --fonts <ids>     Comma-separated list of font IDs to process',
-          '  --skip-download   Skip downloading, use existing files',
-          '  --skip-css        Skip CSS generation',
-          '  --skip-license    Skip documentation generation',
+          '  --fonts <ids>     Space or comma-separated font IDs to process',
           '  --output <dir>    Output directory (default: build)',
+          '  --skip-download   Skip downloading fonts',
+          '  --skip-subset     Skip font subsetting',
+          '  --skip-css        Skip CSS generation',
+          '  --skip-docs       Skip documentation generation',
+          '  --force           Force execution (skip version check)',
         ],
       });
     } else if (command.name === 'check') {
       sections.push({
         title: 'Options',
         content: [
-          '  --fonts <ids>     Comma-separated list of font IDs to check',
-          '  --force          Force check even if cache is fresh',
-          '  --cache-ttl <n>  Cache TTL in hours (default: 24)',
+          '  --fonts <ids>     Space or comma-separated font IDs to check',
+          '  --force           Force check (bypass cache)',
         ],
       });
     } else if (command.name === 'download') {
-      // Override usage for download command
-      sections[1] = {
-        title: 'Usage',
-        content: [
-          `${config.name} ${command.name} [fontIds...]`,
-          `${config.name} ${command.name} --fonts <ids>`,
-        ],
-      };
       sections.push({
         title: 'Options',
         content: [
-          '  --fonts <ids>     Comma-separated list of font IDs to download',
+          '  --fonts <ids>     Space or comma-separated font IDs to download',
           '  --output <dir>    Download directory (default: downloads)',
-          '  --force          Force re-download existing files',
+          '  --force           Force re-download existing files',
         ],
       });
-    } else if (command.name === 'process') {
+    } else if (command.name === 'subset') {
       sections.push({
         title: 'Options',
         content: [
-          '  --fonts <ids>     Comma-separated list of font IDs to process',
-          '  --input <dir>     Input directory (default: downloads)',
+          '  --fonts <ids>     Space or comma-separated font IDs to subset',
           '  --output <dir>    Output directory (default: build)',
+          '  --force           Force re-processing',
         ],
       });
     } else if (command.name === 'css') {
       sections.push({
         title: 'Options',
         content: [
-          '  --fonts <ids>     Comma-separated list of font IDs to generate CSS for',
+          '  --fonts <ids>     Space or comma-separated font IDs for CSS generation',
+          '  --output <dir>    Output directory (default: build)',
         ],
       });
     } else if (command.name === 'docs') {

@@ -13,19 +13,22 @@ export const cssCommand: CLICommand = {
     console.log(chalk.bold.blue('🎨 Generating CSS Files\n'));
 
     try {
-      // Parse CSS options
-      const options = parseCSSOptions(args);
+      // Parse standard options
+      const options = ArgsParser.parseStandardOptions(args);
 
       // Initialize CSS generator
       const cssGenerator = new CSSGenerator();
+      await cssGenerator.init();
 
-      if (options.specific && options.fontIds.length > 0) {
+      if (options.fontIds.length > 0) {
         console.log(
           chalk.cyan(
             `Generating CSS for specific fonts: ${options.fontIds.join(', ')}`
           )
         );
         await cssGenerator.generateSpecific(options.fontIds);
+        // Regenerate unified CSS when processing specific fonts
+        await cssGenerator.generateUnified();
       } else {
         console.log(chalk.cyan('Generating CSS for all processed fonts'));
         await cssGenerator.generateAll();
@@ -41,18 +44,3 @@ export const cssCommand: CLICommand = {
     }
   },
 };
-
-interface CSSOptions {
-  specific: boolean;
-  fontIds: string[];
-}
-
-function parseCSSOptions(args: CLIArgs): CSSOptions {
-  const fontsOption = ArgsParser.getOption(args, 'fonts');
-  const fontIds = fontsOption ? fontsOption.split(' ') : [];
-
-  return {
-    specific: fontIds.length > 0,
-    fontIds,
-  };
-}

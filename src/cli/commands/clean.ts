@@ -14,8 +14,8 @@ export const cleanCommand: CLICommand = {
     console.log(chalk.bold.blue('🧹 Cleaning Build Artifacts\n'));
 
     try {
-      // Parse clean options
-      const options = parseCleanOptions(args);
+      // Parse clean-specific options
+      const options = ArgsParser.parseCleanOptions(args);
 
       const cleanTasks: Array<{
         name: string;
@@ -121,23 +121,3 @@ export const cleanCommand: CLICommand = {
     }
   },
 };
-
-interface CleanOptions {
-  cleanBuild: boolean;
-  cleanDownloads: boolean;
-  cleanCache: boolean;
-  cleanDeps: boolean;
-  force: boolean;
-}
-
-function parseCleanOptions(args: CLIArgs): CleanOptions {
-  const all = ArgsParser.hasFlag(args, 'all');
-
-  return {
-    cleanBuild: all || ArgsParser.hasFlag(args, 'build'),
-    cleanDownloads: all || ArgsParser.hasFlag(args, 'downloads'),
-    cleanCache: all || ArgsParser.hasFlag(args, 'cache'),
-    cleanDeps: all || ArgsParser.hasFlag(args, 'deps'),
-    force: ArgsParser.hasFlag(args, 'force'),
-  };
-}
