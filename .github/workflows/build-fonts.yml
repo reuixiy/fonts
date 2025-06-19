@@ -126,12 +126,13 @@ jobs:
         id: date
         run: echo "date=$(date -u +%Y-%m-%d)" >> $GITHUB_OUTPUT
       
-      - name: Deploy to GitHub Pages
+      - name: Incremental deploy to build branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
           publish_branch: build
+          keep_files: true # Preserve existing files in the build branch
           commit_message: |
             🔄 Font build ${{ github.run_id }} - ${{ steps.date.outputs.date }}
             

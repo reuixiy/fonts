@@ -1,7 +1,7 @@
 {
-  "name": "web-font-auto-subsetting",
+  "name": "fonts",
   "version": "3.0.0",
-  "description": "Automated web font subsetting and deployment workflow with modular TypeScript architecture",
+  "description": "Automated web font subsetting workflow with chunked loading for optimal performance.",
   "main": "dist/index.js",
   "bin": {
     "fonts": "dist/cli/bin.js"
