@@ -7,9 +7,11 @@ import { HelpGenerator } from '@/cli/utils/help.js';
 import { CLIValidator } from '@/cli/utils/validation.js';
 import { buildCommand } from '@/cli/commands/build.js';
 import { checkCommand } from '@/cli/commands/check.js';
-import { processCommand } from '@/cli/commands/process.js';
+import { downloadCommand } from '@/cli/commands/download.js';
+import { subsetCommand } from '@/cli/commands/subset.js';
 import { cssCommand } from '@/cli/commands/css.js';
 import { cleanCommand } from '@/cli/commands/clean.js';
+import { docsCommand } from '@/cli/commands/docs.js';
 import type { CLIConfig, CLIArgs } from '@/cli/types.js';
 
 export class CLI {
@@ -21,10 +23,12 @@ export class CLI {
       version: '3.0.0',
       description: 'Web font auto-subsetting workflow tool',
       commands: [
-        buildCommand,
         checkCommand,
-        processCommand,
+        buildCommand,
+        downloadCommand,
+        subsetCommand,
         cssCommand,
+        docsCommand,
         cleanCommand,
       ],
     };
@@ -147,5 +151,5 @@ export async function main(): Promise<void> {
 }
 
 // Export for programmatic use
-export { buildCommand, checkCommand, processCommand, cleanCommand };
+export { buildCommand, checkCommand, subsetCommand, cleanCommand };
 export type { CLICommand, CLIArgs, CLIConfig } from '@/cli/types.js';

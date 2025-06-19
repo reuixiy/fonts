@@ -1,54 +1,53 @@
-// Process command implementation
+// Subset command implementation
 import chalk from 'chalk';
-import { FontProcessor } from '@/modules/processing/FontProcessor.js';
+import { FontSubsetter } from '@/modules/subset/FontSubsetter.js';
 import { ConfigManager } from '@/config/index.js';
 import { PathUtils } from '@/utils/PathUtils.js';
 import { CLIValidator } from '@/cli/utils/validation.js';
 import { ArgsParser } from '@/cli/utils/args.js';
 import type { CLICommand, CLIArgs } from '@/cli/types.js';
 
-export const processCommand: CLICommand = {
-  name: 'process',
-  description: 'Process downloaded font files (subset, optimize)',
-  aliases: ['p'],
+export const subsetCommand: CLICommand = {
+  name: 'subset',
+  description: 'Subset downloaded font files (optimize and chunk)',
+  aliases: ['s'],
 
   async execute(args: CLIArgs): Promise<void> {
-    console.log(chalk.bold.blue('⚙️ Processing Fonts\n'));
+    console.log(chalk.bold.blue('⚙️ Subsetting Fonts\n'));
 
     try {
-      // Parse process options
-      const options = parseProcessOptions(args);
-      await validateProcessOptions(options);
+      // Parse subset options
+      const options = parseSubsetOptions(args);
+      await validateSubsetOptions(options);
 
-      // Initialize font processor
-      const fontProcessor = new FontProcessor(
+      // Initialize font subsetter
+      const fontSubsetter = new FontSubsetter(
         PathUtils.resolve(process.cwd(), options.inputDir),
         PathUtils.resolve(process.cwd(), options.outputDir),
         ConfigManager.load().fonts
       );
 
-      await fontProcessor.init();
+      await fontSubsetter.init();
 
-      // Process fonts
-      console.log(chalk.yellow('📋 Processing fonts...'));
+      console.log(chalk.yellow('📋 Subsetting fonts...'));
 
       if (options.fontIds.length > 0) {
-        await fontProcessor.processSpecific(options.fontIds);
+        await fontSubsetter.processSpecific(options.fontIds);
         console.log(
           chalk.bold.green(
-            `\n🎉 Successfully processed ${options.fontIds.length} font(s)!`
+            `\n🎉 Successfully subsetted ${options.fontIds.length} font(s)!`
           )
         );
       } else {
-        await fontProcessor.processAll();
-        console.log(chalk.bold.green('\n🎉 Successfully processed all fonts!'));
+        await fontSubsetter.processAll();
+        console.log(chalk.bold.green('\n🎉 Successfully subsetted all fonts!'));
       }
 
       console.log(chalk.gray(`Input directory: ${options.inputDir}`));
       console.log(chalk.gray(`Output directory: ${options.outputDir}`));
     } catch (error: unknown) {
       console.error(
-        chalk.red('❌ Font processing failed:'),
+        chalk.red('❌ Font subsetting failed:'),
         (error as Error).message
       );
       process.exit(1);
@@ -56,13 +55,13 @@ export const processCommand: CLICommand = {
   },
 };
 
-interface ProcessOptions {
+interface SubsetOptions {
   fontIds: string[];
   inputDir: string;
   outputDir: string;
 }
 
-function parseProcessOptions(args: CLIArgs): ProcessOptions {
+function parseSubsetOptions(args: CLIArgs): SubsetOptions {
   const fontIds =
     ArgsParser.getOption(args, 'fonts')
       ?.split(',')
@@ -77,7 +76,7 @@ function parseProcessOptions(args: CLIArgs): ProcessOptions {
   };
 }
 
-async function validateProcessOptions(options: ProcessOptions): Promise<void> {
+async function validateSubsetOptions(options: SubsetOptions): Promise<void> {
   // Validate font IDs if provided
   if (options.fontIds.length > 0) {
     const fontValidation = CLIValidator.validateFontIds(options.fontIds);

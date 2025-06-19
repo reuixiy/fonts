@@ -51,7 +51,62 @@ All fonts included in this project maintain their original licenses:
 
 Please refer to each font's source repository for complete license terms and attribution requirements.
 
-## 🚀 Quick Start
+## 🌐 CDN Usage
+
+### Quick Start
+
+You can use the fonts directly from jsDelivr CDN without any build process:
+
+#### All Fonts (Recommended)
+```html
+<!-- Minified CSS with all fonts -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/reuixiy/fonts@build/css/fonts.min.css">
+
+<!-- Unminified CSS with all fonts -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/reuixiy/fonts@build/css/fonts.css">
+```
+
+#### Individual Fonts
+
+**I.Ming CP (Traditional Chinese Serif)**
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/reuixiy/fonts@build/css/imingcp.min.css">
+```
+
+**LXGW WenKai TC (Traditional Chinese Handwriting)**
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/reuixiy/fonts@build/css/lxgwwenkaitc.min.css">
+```
+
+**Amstelvar (Latin Variable Font)**
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/reuixiy/fonts@build/css/amstelvar.min.css">
+```
+
+### CSS Usage
+
+After including the CSS files, use the fonts in your stylesheets:
+
+```css
+/* Traditional Chinese Serif */
+.serif-text {
+  font-family: 'I.MingCP', serif;
+}
+
+/* Traditional Chinese Handwriting */
+.handwriting-text {
+  font-family: 'LXGW WenKai TC', sans-serif;
+  font-weight: 300;
+}
+
+/* Latin Variable Font */
+.variable-text {
+  font-family: 'Amstelvar', serif;
+  font-variation-settings: 'wght' 400, 'wdth' 100, 'opsz' 14;
+}
+```
+
+## 🚀 Development Quick Start
 
 ### Prerequisites
 
@@ -85,7 +140,12 @@ pnpm run cli:build --fonts <ids>  # Build specific fonts (e.g., imingcp lxgwwenk
 
 # Individual CLI commands
 pnpm run cli:check           # Check for font version updates
-pnpm run cli:process         # Process fonts with current settings
+pnpm run cli:download        # Download fonts from sources
+pnpm run cli:download --fonts <ids>  # Download specific fonts only
+pnpm run cli:subset          # Subset fonts with current settings
+pnpm run cli:docs            # Generate license and README for build directory
+pnpm run cli:docs --license-only  # Generate only license files (LICENSE.md, LICENSE.json)
+pnpm run cli:docs --readme-only   # Generate only build README.md
 
 # Legacy workflows (still available)
 pnpm start                   # Full workflow with version checking

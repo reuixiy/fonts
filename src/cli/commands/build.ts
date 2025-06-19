@@ -1,9 +1,9 @@
 // Build command implementation
 import chalk from 'chalk';
 import { FontDownloader } from '@/modules/download/FontDownloader.js';
-import { FontProcessor } from '@/modules/processing/FontProcessor.js';
+import { FontSubsetter } from '@/modules/subset/FontSubsetter.js';
 import { CSSGenerator } from '@/modules/css/CSSGenerator.js';
-import { LicenseGenerator } from '@/modules/license/LicenseGenerator.js';
+import { DocsGenerator } from '@/modules/docs/DocsGenerator.js';
 import { ConfigManager } from '@/config/index.js';
 import { PathUtils } from '@/utils/PathUtils.js';
 import { CLIValidator } from '@/cli/utils/validation.js';
@@ -12,8 +12,7 @@ import type { CLICommand, CLIArgs } from '@/cli/types.js';
 
 export const buildCommand: CLICommand = {
   name: 'build',
-  description:
-    'Build font files with processing, CSS generation, and license creation',
+  description: 'Complete build workflow: download, subset, css, docs',
   aliases: ['b'],
 
   async execute(args: CLIArgs): Promise<void> {
@@ -26,18 +25,16 @@ export const buildCommand: CLICommand = {
 
       // Initialize services
       const fontDownloader = new FontDownloader();
-      const fontProcessor = new FontProcessor(
+      const fontSubsetter = new FontSubsetter(
         PathUtils.resolve(process.cwd(), 'downloads'),
         PathUtils.resolve(process.cwd(), options.outputDir),
         ConfigManager.load().fonts
       );
       const cssGenerator = new CSSGenerator();
-      const licenseGenerator = new LicenseGenerator(
-        ConfigManager.getBuildConfig()
-      );
+      const docsGenerator = new DocsGenerator(ConfigManager.getBuildConfig());
 
       // Initialize services
-      await fontProcessor.init();
+      await fontSubsetter.init();
       await cssGenerator.init();
 
       // Execute build steps
@@ -50,11 +47,11 @@ export const buildCommand: CLICommand = {
         }
       }
 
-      console.log(chalk.yellow('📋 Step 2: Processing fonts...'));
+      console.log(chalk.yellow('📋 Step 2: Subsetting fonts...'));
       if (options.fontIds.length > 0) {
-        await fontProcessor.processSpecific(options.fontIds);
+        await fontSubsetter.processSpecific(options.fontIds);
       } else {
-        await fontProcessor.processAll();
+        await fontSubsetter.processAll();
       }
 
       if (!options.skipCSS) {
@@ -63,12 +60,8 @@ export const buildCommand: CLICommand = {
       }
 
       if (!options.skipLicense) {
-        console.log(
-          chalk.yellow('📋 Step 4: Generating license information...')
-        );
-        await licenseGenerator.generateLicenseFile({
-          outputDir: options.outputDir,
-        });
+        console.log(chalk.yellow('📋 Step 4: Generating documentation...'));
+        await docsGenerator.generateDocumentation();
       }
 
       console.log(chalk.bold.green('\n🎉 Build completed successfully!'));

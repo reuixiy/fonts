@@ -1,4 +1,4 @@
-// Processing module types
+// Subset module types
 import type { FontChunk } from '@/types/font.js';
 
 export interface FontSubsetConfig {
@@ -19,7 +19,7 @@ export interface FontMetrics {
   baseSize: number;
 }
 
-export interface ProcessingResult {
+export interface SubsettingResult {
   fontId: string;
   style: string;
   chunks: ChunkWithBuffer[];
@@ -43,7 +43,7 @@ export interface ChunkMetadata {
   totalSize: number;
 }
 
-export interface ProcessingOptions {
+export interface SubsettingOptions {
   maxConcurrentFonts?: number;
   maxConcurrentChunks?: number;
   outputFormat?: 'woff2' | 'woff' | 'truetype';

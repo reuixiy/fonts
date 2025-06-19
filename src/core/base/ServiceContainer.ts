@@ -3,9 +3,9 @@ import type {
   IWorkflow,
   IVersionChecker,
   IFontDownloader,
-  IFontProcessor,
+  IFontSubsetter,
   ICSSGenerator,
-  ILicenseGenerator,
+  IDocsGenerator,
 } from '@/core/interfaces/index.js';
 
 export class ServiceContainer {
@@ -42,16 +42,16 @@ export class ServiceContainer {
     return this.resolve<IFontDownloader>('fontDownloader');
   }
 
-  getFontProcessor(): IFontProcessor {
-    return this.resolve<IFontProcessor>('fontProcessor');
+  getFontSubsetter(): IFontSubsetter {
+    return this.resolve<IFontSubsetter>('fontSubsetter');
   }
 
   getCSSGenerator(): ICSSGenerator {
     return this.resolve<ICSSGenerator>('cssGenerator');
   }
 
-  getLicenseGenerator(): ILicenseGenerator {
-    return this.resolve<ILicenseGenerator>('licenseGenerator');
+  getDocsGenerator(): IDocsGenerator {
+    return this.resolve<IDocsGenerator>('docsGenerator');
   }
 
   getWorkflow(): IWorkflow {
@@ -62,9 +62,9 @@ export class ServiceContainer {
   registerServices(services: {
     versionChecker: IVersionChecker;
     fontDownloader: IFontDownloader;
-    fontProcessor: IFontProcessor;
+    fontSubsetter: IFontSubsetter;
     cssGenerator: ICSSGenerator;
-    licenseGenerator: ILicenseGenerator;
+    docsGenerator: IDocsGenerator;
     workflow: IWorkflow;
   }): void {
     Object.entries(services).forEach(([key, service]) => {

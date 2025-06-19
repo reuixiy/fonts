@@ -1,27 +1,27 @@
-// Main font processor service
+// Main font subsetting service
 import fs from 'fs-extra';
 import path from 'path';
 import { cpus } from 'os';
 import { BaseService } from '@/core/base/BaseService.js';
 import { ErrorHandler } from '@/core/services/ErrorHandler.js';
-import { CharacterExtractor } from '@/modules/processing/CharacterExtractor.js';
-import { FontSubsetService } from '@/modules/processing/FontSubsetService.js';
-import { UnicodeRangeGenerator } from '@/modules/processing/UnicodeRangeGenerator.js';
-import type { IFontProcessor } from '@/core/interfaces/IFontProcessor.js';
+import { CharacterExtractor } from '@/modules/subset/CharacterExtractor.js';
+import { FontSubsetService } from '@/modules/subset/FontSubsetService.js';
+import { UnicodeRangeGenerator } from '@/modules/subset/UnicodeRangeGenerator.js';
+import type { IFontSubsetter } from '@/core/interfaces/IFontSubsetter.js';
 import type { FontConfig } from '@/types/config.js';
 import type {
-  ProcessingResult,
-  ProcessingOptions,
+  SubsettingResult,
+  SubsettingOptions,
   ChunkMetadata,
   FontSubsetConfig,
   ChunkWithBuffer,
-} from '@/modules/processing/types.js';
+} from '@/modules/subset/types.js';
 
-export class FontProcessor extends BaseService implements IFontProcessor {
+export class FontSubsetter extends BaseService implements IFontSubsetter {
   private characterExtractor: CharacterExtractor;
   private subsetService: FontSubsetService;
   private unicodeGenerator: UnicodeRangeGenerator;
-  private options: ProcessingOptions;
+  private options: SubsettingOptions;
 
   // Performance optimizations
   private readonly maxConcurrentFonts: number;
@@ -30,9 +30,9 @@ export class FontProcessor extends BaseService implements IFontProcessor {
     private downloadDir: string,
     private outputDir: string,
     private fontConfigs: Record<string, FontConfig>,
-    options?: ProcessingOptions
+    options?: SubsettingOptions
   ) {
-    super('FontProcessor');
+    super('FontSubsetter');
 
     this.options = {
       maxConcurrentFonts: cpus().length,
@@ -188,7 +188,7 @@ export class FontProcessor extends BaseService implements IFontProcessor {
     fontConfig: FontConfig,
     inputPath: string,
     style: string
-  ): Promise<ProcessingResult | null> {
+  ): Promise<SubsettingResult | null> {
     const fileName = path.basename(inputPath);
 
     this.log(`📝 Processing font: ${fontConfig.displayName} (${style})`);

@@ -6,24 +6,24 @@ import { URL } from 'url';
 // New v3.0 imports
 import { VersionChecker } from '@/modules/version/VersionChecker.js';
 import { FontDownloader } from '@/modules/download/FontDownloader.js';
-import { FontProcessor } from '@/modules/processing/FontProcessor.js';
+import { FontSubsetter } from '@/modules/subset/FontSubsetter.js';
 import { CSSGenerator } from '@/modules/css/CSSGenerator.js';
-import { LicenseGenerator } from '@/modules/license/LicenseGenerator.js';
+import { DocsGenerator } from '@/modules/docs/DocsGenerator.js';
 import { ServiceContainer } from '@/core/base/ServiceContainer.js';
 import { ConfigManager } from '@/config/index.js';
 import type { IVersionChecker } from '@/core/interfaces/IVersionChecker.js';
 import type { IFontDownloader } from '@/core/interfaces/IFontDownloader.js';
-import type { IFontProcessor } from '@/core/interfaces/IFontProcessor.js';
+import type { IFontSubsetter } from '@/core/interfaces/IFontSubsetter.js';
 import type { ICSSGenerator } from '@/core/interfaces/ICSSGenerator.js';
-import type { ILicenseGenerator } from '@/core/interfaces/ILicenseGenerator.js';
+import type { IDocsGenerator } from '@/core/interfaces/IDocsGenerator.js';
 
 class FontWorkflowV3 {
   private serviceContainer: ServiceContainer;
   private versionChecker: IVersionChecker;
   private fontDownloader: IFontDownloader;
-  private fontProcessor: IFontProcessor;
+  private fontSubsetter: IFontSubsetter;
   private cssGenerator: ICSSGenerator;
-  private licenseGenerator: ILicenseGenerator;
+  private docsGenerator: IDocsGenerator;
 
   constructor() {
     this.serviceContainer = ServiceContainer.getInstance();
@@ -31,24 +31,22 @@ class FontWorkflowV3 {
     // Use new v3.0 modules
     this.versionChecker = new VersionChecker();
     this.fontDownloader = new FontDownloader();
-    this.fontProcessor = new FontProcessor(
+    this.fontSubsetter = new FontSubsetter(
       path.join(process.cwd(), 'downloads'),
       path.join(process.cwd(), 'build'),
       ConfigManager.load().fonts
     );
     this.cssGenerator = new CSSGenerator();
 
-    // Use new v3.0 LicenseGenerator
-    this.licenseGenerator = new LicenseGenerator(
-      ConfigManager.getBuildConfig()
-    );
+    // Use new v3.0 DocsGenerator
+    this.docsGenerator = new DocsGenerator(ConfigManager.getBuildConfig());
 
     // Register services in container
     this.serviceContainer.register('versionChecker', this.versionChecker);
     this.serviceContainer.register('fontDownloader', this.fontDownloader);
-    this.serviceContainer.register('fontProcessor', this.fontProcessor);
+    this.serviceContainer.register('fontSubsetter', this.fontSubsetter);
     this.serviceContainer.register('cssGenerator', this.cssGenerator);
-    this.serviceContainer.register('licenseGenerator', this.licenseGenerator);
+    this.serviceContainer.register('docsGenerator', this.docsGenerator);
   }
 
   async runFullWorkflow(): Promise<void> {
@@ -58,7 +56,7 @@ class FontWorkflowV3 {
 
     try {
       // Initialize services
-      await this.fontProcessor.init();
+      await this.fontSubsetter.init();
       await this.cssGenerator.init();
 
       // Step 1: Check versions using new v3.0 VersionChecker
@@ -76,19 +74,19 @@ class FontWorkflowV3 {
       console.log(chalk.bold.yellow('\n📋 Step 2: Downloading fonts...'));
       await this.fontDownloader.downloadAll();
 
-      // Step 3: Process fonts (using new v3.0 FontProcessor)
+      // Step 3: Process fonts (using new v3.0 FontSubsetter)
       console.log(chalk.bold.yellow('\n📋 Step 3: Processing fonts...'));
-      await this.fontProcessor.processAll();
+      await this.fontSubsetter.processAll();
 
       // Step 4: Generate CSS (using new v3.0 CSSGenerator)
       console.log(chalk.bold.yellow('\n📋 Step 4: Generating CSS...'));
       await this.cssGenerator.generateAll();
 
-      // Step 5: Generate license information using new v3.0 LicenseGenerator
+      // Step 5: Generate documentation (license and README)
       console.log(
-        chalk.bold.yellow('\n📋 Step 5: Generating license information...')
+        chalk.bold.yellow('\n📋 Step 5: Generating documentation...')
       );
-      await this.licenseGenerator.generateLicenseFile();
+      await this.docsGenerator.generateDocumentation();
 
       console.log(
         chalk.bold.green('\n🎉 Full workflow completed successfully!')
@@ -104,26 +102,26 @@ class FontWorkflowV3 {
 
     try {
       // Initialize services
-      await this.fontProcessor.init();
+      await this.fontSubsetter.init();
       await this.cssGenerator.init();
 
       // Step 1: Download fonts
       console.log(chalk.bold.yellow('📋 Step 1: Downloading fonts...'));
       await this.fontDownloader.downloadAll();
 
-      // Step 2: Process fonts (using new v3.0 FontProcessor)
+      // Step 2: Process fonts (using new v3.0 FontSubsetter)
       console.log(chalk.bold.yellow('\n📋 Step 2: Processing fonts...'));
-      await this.fontProcessor.processAll();
+      await this.fontSubsetter.processAll();
 
       // Step 3: Generate CSS (using new v3.0 CSSGenerator)
       console.log(chalk.bold.yellow('\n📋 Step 3: Generating CSS...'));
       await this.cssGenerator.generateAll();
 
-      // Step 4: Generate license information
+      // Step 4: Generate documentation (license and README)
       console.log(
-        chalk.bold.yellow('\n📋 Step 4: Generating license information...')
+        chalk.bold.yellow('\n📋 Step 4: Generating documentation...')
       );
-      await this.licenseGenerator.generateLicenseFile();
+      await this.docsGenerator.generateDocumentation();
 
       console.log(
         chalk.bold.green('\n🎉 Build workflow completed successfully!')
@@ -146,7 +144,7 @@ class FontWorkflowV3 {
 
     try {
       // Initialize services
-      await this.fontProcessor.init();
+      await this.fontSubsetter.init();
 
       // Validate font IDs using new v3.0 config system
       const validation = ConfigManager.validateFontIds(fontIds);
@@ -158,9 +156,9 @@ class FontWorkflowV3 {
       console.log(chalk.bold.yellow('📋 Step 1: Downloading fonts...'));
       await this.fontDownloader.downloadSpecific(fontIds);
 
-      // Step 2: Process specific fonts (using new v3.0 FontProcessor)
+      // Step 2: Process specific fonts (using new v3.0 FontSubsetter)
       console.log(chalk.bold.yellow('\n📋 Step 2: Processing fonts...'));
-      await this.fontProcessor.processSpecific(fontIds);
+      await this.fontSubsetter.processSpecific(fontIds);
 
       // Step 3: Generate CSS for specific fonts (using new v3.0 CSSGenerator)
       console.log(chalk.bold.yellow('\n📋 Step 3: Generating CSS...'));
@@ -170,11 +168,11 @@ class FontWorkflowV3 {
       console.log(chalk.bold.yellow('\n📋 Step 4: Updating unified CSS...'));
       await this.cssGenerator.generateUnified();
 
-      // Step 5: Generate license information
+      // Step 5: Generate documentation (license and README)
       console.log(
-        chalk.bold.yellow('\n📋 Step 5: Generating license information...')
+        chalk.bold.yellow('\n📋 Step 5: Generating documentation...')
       );
-      await this.licenseGenerator.generateLicenseFile();
+      await this.docsGenerator.generateDocumentation();
 
       console.log(
         chalk.bold.green(

@@ -1,14 +1,14 @@
-// License generation interface
+// Documentation generation interface
 
-export interface LicenseGenerationOptions {
+export interface DocsGenerationOptions {
   outputDir?: string;
   formats?: string[];
   includeCompliance?: boolean;
   validateLicenses?: boolean;
 }
 
-export interface ILicenseGenerator {
-  generateLicenseFile(options?: LicenseGenerationOptions): Promise<void>;
+export interface IDocsGenerator {
+  generateDocumentation(options?: DocsGenerationOptions): Promise<void>;
   collectLicenseInfo(fontIds?: string[]): Promise<Record<string, unknown>>;
   validateLicenses(
     fontLicenseData?: Record<string, unknown>

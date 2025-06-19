@@ -1,26 +1,26 @@
-// License generation service
+// Documentation generation service
 import { writeFile, mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { BaseService } from '@/core/base/BaseService.js';
 import type {
-  ILicenseGenerator,
-  LicenseGenerationOptions,
-} from '@/core/interfaces/ILicenseGenerator.js';
+  IDocsGenerator,
+  DocsGenerationOptions,
+} from '@/core/interfaces/IDocsGenerator.js';
 import type { BuildConfig } from '@/types/config.js';
-import type { LicenseData, FontLicenseData } from '@/modules/license/types.js';
-import { LicenseCollector } from '@/modules/license/LicenseCollector.js';
-import { MarkdownGenerator } from '@/modules/license/MarkdownGenerator.js';
-import { JsonGenerator } from '@/modules/license/JsonGenerator.js';
-import { ComplianceValidator } from '@/modules/license/ComplianceValidator.js';
+import type { LicenseData, FontLicenseData } from '@/modules/docs/types.js';
+import { LicenseCollector } from '@/modules/docs/LicenseCollector.js';
+import { MarkdownGenerator } from '@/modules/docs/MarkdownGenerator.js';
+import { JsonGenerator } from '@/modules/docs/JsonGenerator.js';
+import { ComplianceValidator } from '@/modules/docs/ComplianceValidator.js';
 
-export class LicenseGenerator extends BaseService implements ILicenseGenerator {
+export class DocsGenerator extends BaseService implements IDocsGenerator {
   private collector: LicenseCollector;
   private markdownGenerator: MarkdownGenerator;
   private jsonGenerator: JsonGenerator;
   private complianceValidator: ComplianceValidator;
 
   constructor(private buildConfig: BuildConfig) {
-    super('LicenseGenerator');
+    super('DocsGenerator');
     this.collector = new LicenseCollector();
     this.markdownGenerator = new MarkdownGenerator();
     this.jsonGenerator = new JsonGenerator();
@@ -28,13 +28,13 @@ export class LicenseGenerator extends BaseService implements ILicenseGenerator {
   }
 
   /**
-   * Generate license files
+   * Generate documentation files (license files, etc.)
    */
-  async generateLicenseFile(
-    options: LicenseGenerationOptions = {}
+  async generateDocumentation(
+    options: DocsGenerationOptions = {}
   ): Promise<void> {
     await this.executeWithErrorHandling(async () => {
-      this.log('Generating license files...');
+      this.log('Generating documentation files...');
 
       const {
         outputDir = this.buildConfig.outputDir,
@@ -69,8 +69,8 @@ export class LicenseGenerator extends BaseService implements ILicenseGenerator {
         await this.generateFormat(licenseData, format, outputDir);
       }
 
-      this.log(`License files generated successfully in ${outputDir}`);
-    }, 'license file generation');
+      this.log(`Documentation files generated successfully in ${outputDir}`);
+    }, 'documentation file generation');
   }
 
   /**
@@ -112,13 +112,16 @@ export class LicenseGenerator extends BaseService implements ILicenseGenerator {
     format: string,
     outputDir: string
   ): Promise<void> {
-    const fileName = `LICENSE.${format}`;
+    // Use .md extension for markdown format instead of .markdown
+    const extension = format === 'markdown' ? 'md' : format;
+    const fileName = `LICENSE.${extension}`;
     const filePath = join(outputDir, fileName);
 
     let content: string;
 
     switch (format) {
       case 'markdown':
+      case 'md':
         content = await this.markdownGenerator.generate(licenseData);
         break;
       case 'json':

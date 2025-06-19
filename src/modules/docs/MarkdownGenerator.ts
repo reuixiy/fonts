@@ -1,6 +1,6 @@
 // Markdown license file generator
 import { BaseService } from '@/core/base/BaseService.js';
-import type { LicenseData, FontLicenseData } from '@/modules/license/types.js';
+import type { LicenseData, FontLicenseData } from '@/modules/docs/types.js';
 
 export class MarkdownGenerator extends BaseService {
   constructor() {

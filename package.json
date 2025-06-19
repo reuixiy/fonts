@@ -31,8 +31,10 @@
     "cli:version": "pnpm run exec:cli -- --version",
     "cli:build": "pnpm run exec:cli build",
     "cli:check": "pnpm run exec:cli check",
-    "cli:process": "pnpm run exec:cli process",
+    "cli:download": "pnpm run exec:cli download",
+    "cli:subset": "pnpm run exec:cli subset",
     "cli:css": "pnpm run exec:cli css",
+    "cli:docs": "pnpm run exec:cli docs",
     "cli:clean": "pnpm run exec:cli clean",
     
     "// Clean shortcuts": "",

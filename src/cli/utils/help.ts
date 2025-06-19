@@ -89,7 +89,7 @@ export class HelpGenerator {
           '  --fonts <ids>     Comma-separated list of font IDs to process',
           '  --skip-download   Skip downloading, use existing files',
           '  --skip-css        Skip CSS generation',
-          '  --skip-license    Skip license generation',
+          '  --skip-license    Skip documentation generation',
           '  --output <dir>    Output directory (default: build)',
         ],
       });
@@ -100,6 +100,23 @@ export class HelpGenerator {
           '  --fonts <ids>     Comma-separated list of font IDs to check',
           '  --force          Force check even if cache is fresh',
           '  --cache-ttl <n>  Cache TTL in hours (default: 24)',
+        ],
+      });
+    } else if (command.name === 'download') {
+      // Override usage for download command
+      sections[1] = {
+        title: 'Usage',
+        content: [
+          `${config.name} ${command.name} [fontIds...]`,
+          `${config.name} ${command.name} --fonts <ids>`,
+        ],
+      };
+      sections.push({
+        title: 'Options',
+        content: [
+          '  --fonts <ids>     Comma-separated list of font IDs to download',
+          '  --output <dir>    Download directory (default: downloads)',
+          '  --force          Force re-download existing files',
         ],
       });
     } else if (command.name === 'process') {
@@ -116,6 +133,17 @@ export class HelpGenerator {
         title: 'Options',
         content: [
           '  --fonts <ids>     Comma-separated list of font IDs to generate CSS for',
+        ],
+      });
+    } else if (command.name === 'docs') {
+      sections.push({
+        title: 'Options',
+        content: [
+          '  --output <dir>    Output directory (default: build)',
+          '  --license-only    Generate only license files (LICENSE.md, LICENSE.json)',
+          '  --readme-only     Generate only build README.md',
+          '  --no-validate     Skip license validation',
+          '  --no-compliance   Skip compliance checking',
         ],
       });
     } else if (command.name === 'clean') {

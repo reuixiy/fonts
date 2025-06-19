@@ -7,7 +7,7 @@ import type {
   FontSubsetConfig,
   ChunkWithBuffer,
   FontMetrics,
-} from '@/modules/processing/types.js';
+} from '@/modules/subset/types.js';
 
 export class FontSubsetService extends BaseService {
   private config: FontSubsetConfig;
