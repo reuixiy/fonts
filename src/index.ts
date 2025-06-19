@@ -53,7 +53,7 @@ class FontWorkflowV3 {
 
   async runFullWorkflow(): Promise<void> {
     console.log(
-      chalk.bold.blue('🚀 Starting Full Font Processing Workflow (v3.0)\\n')
+      chalk.bold.blue('🚀 Starting Full Font Processing Workflow (v3.0)\n')
     );
 
     try {
@@ -73,25 +73,25 @@ class FontWorkflowV3 {
       }
 
       // Step 2: Download fonts (legacy implementation)
-      console.log(chalk.bold.yellow('\\n📋 Step 2: Downloading fonts...'));
+      console.log(chalk.bold.yellow('\n📋 Step 2: Downloading fonts...'));
       await this.fontDownloader.downloadAll();
 
       // Step 3: Process fonts (using new v3.0 FontProcessor)
-      console.log(chalk.bold.yellow('\\n📋 Step 3: Processing fonts...'));
+      console.log(chalk.bold.yellow('\n📋 Step 3: Processing fonts...'));
       await this.fontProcessor.processAll();
 
       // Step 4: Generate CSS (using new v3.0 CSSGenerator)
-      console.log(chalk.bold.yellow('\\n📋 Step 4: Generating CSS...'));
+      console.log(chalk.bold.yellow('\n📋 Step 4: Generating CSS...'));
       await this.cssGenerator.generateAll();
 
       // Step 5: Generate license information using new v3.0 LicenseGenerator
       console.log(
-        chalk.bold.yellow('\\n📋 Step 5: Generating license information...')
+        chalk.bold.yellow('\n📋 Step 5: Generating license information...')
       );
       await this.licenseGenerator.generateLicenseFile();
 
       console.log(
-        chalk.bold.green('\\n🎉 Full workflow completed successfully!')
+        chalk.bold.green('\n🎉 Full workflow completed successfully!')
       );
     } catch (error: unknown) {
       console.error(chalk.red('❌ Workflow failed:'), (error as Error).message);
@@ -100,7 +100,7 @@ class FontWorkflowV3 {
   }
 
   async runBuildOnly(): Promise<void> {
-    console.log(chalk.bold.blue('🚀 Starting Build-Only Workflow (v3.0)\\n'));
+    console.log(chalk.bold.blue('🚀 Starting Build-Only Workflow (v3.0)\n'));
 
     try {
       // Initialize services
@@ -112,21 +112,21 @@ class FontWorkflowV3 {
       await this.fontDownloader.downloadAll();
 
       // Step 2: Process fonts (using new v3.0 FontProcessor)
-      console.log(chalk.bold.yellow('\\n📋 Step 2: Processing fonts...'));
+      console.log(chalk.bold.yellow('\n📋 Step 2: Processing fonts...'));
       await this.fontProcessor.processAll();
 
       // Step 3: Generate CSS (using new v3.0 CSSGenerator)
-      console.log(chalk.bold.yellow('\\n📋 Step 3: Generating CSS...'));
+      console.log(chalk.bold.yellow('\n📋 Step 3: Generating CSS...'));
       await this.cssGenerator.generateAll();
 
       // Step 4: Generate license information
       console.log(
-        chalk.bold.yellow('\\n📋 Step 4: Generating license information...')
+        chalk.bold.yellow('\n📋 Step 4: Generating license information...')
       );
       await this.licenseGenerator.generateLicenseFile();
 
       console.log(
-        chalk.bold.green('\\n🎉 Build workflow completed successfully!')
+        chalk.bold.green('\n🎉 Build workflow completed successfully!')
       );
     } catch (error: unknown) {
       console.error(
@@ -140,7 +140,7 @@ class FontWorkflowV3 {
   async runSpecificFonts(fontIds: string[]): Promise<void> {
     console.log(
       chalk.bold.blue(
-        `🚀 Processing Specific Fonts (v3.0): ${fontIds.join(', ')}\\n`
+        `🚀 Processing Specific Fonts (v3.0): ${fontIds.join(', ')}\n`
       )
     );
 
@@ -159,26 +159,26 @@ class FontWorkflowV3 {
       await this.fontDownloader.downloadSpecific(fontIds);
 
       // Step 2: Process specific fonts (using new v3.0 FontProcessor)
-      console.log(chalk.bold.yellow('\\n📋 Step 2: Processing fonts...'));
+      console.log(chalk.bold.yellow('\n📋 Step 2: Processing fonts...'));
       await this.fontProcessor.processSpecific(fontIds);
 
       // Step 3: Generate CSS for specific fonts (using new v3.0 CSSGenerator)
-      console.log(chalk.bold.yellow('\\n📋 Step 3: Generating CSS...'));
+      console.log(chalk.bold.yellow('\n📋 Step 3: Generating CSS...'));
       await this.cssGenerator.generateSpecific(fontIds);
 
       // Step 4: Regenerate unified CSS
-      console.log(chalk.bold.yellow('\\n📋 Step 4: Updating unified CSS...'));
+      console.log(chalk.bold.yellow('\n📋 Step 4: Updating unified CSS...'));
       await this.cssGenerator.generateUnified();
 
       // Step 5: Generate license information
       console.log(
-        chalk.bold.yellow('\\n📋 Step 5: Generating license information...')
+        chalk.bold.yellow('\n📋 Step 5: Generating license information...')
       );
       await this.licenseGenerator.generateLicenseFile();
 
       console.log(
         chalk.bold.green(
-          '\\n🎉 Specific font processing completed successfully!'
+          '\n🎉 Specific font processing completed successfully!'
         )
       );
     } catch (error: unknown) {
@@ -197,7 +197,7 @@ async function main() {
   const args = process.argv.slice(2);
 
   console.log(
-    chalk.gray('🔧 Running with v3.0 Architecture (Fully Migrated!)\\n')
+    chalk.gray('🔧 Running with v3.0 Architecture (Fully Migrated!)\n')
   );
 
   if (args.length === 0) {
@@ -221,21 +221,18 @@ async function main() {
   } else {
     console.log(chalk.yellow('Usage:'));
     console.log(
-      chalk.cyan(
-        '  pnpm start                    # Full workflow with version checking'
-      )
+      chalk.cyan('  pnpm start                        # Full workflow')
     );
     console.log(
-      chalk.cyan(
-        '  pnpm start -- --build-only   # Build all fonts without version checking'
-      )
+      chalk.cyan('  pnpm run build:fonts             # Build all fonts')
     );
     console.log(
-      chalk.cyan('  pnpm start -- --fonts <ids>  # Process specific fonts')
+      chalk.cyan('  pnpm run build:specific -- <ids> # Build specific fonts')
     );
     console.log(
-      chalk.gray('\\nAvailable font IDs: imingcp, lxgwwenkaitc, amstelvar')
+      chalk.gray('\nAvailable font IDs: imingcp, lxgwwenkaitc, amstelvar')
     );
+    console.log(chalk.gray('For more options: pnpm run cli:help'));
   }
 }
 

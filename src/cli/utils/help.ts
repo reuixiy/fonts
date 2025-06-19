@@ -39,13 +39,16 @@ export class HelpGenerator {
       {
         title: 'Examples',
         content: [
-          `  ${config.name}                         # Run full workflow`,
+          '  # Most common usage:',
+          `  pnpm run cli:build                   # Build all fonts`,
+          `  pnpm run cli:build -- --fonts imingcp   # Build specific font`,
+          `  pnpm run cli:check                   # Check for updates`,
+          `  pnpm run cli:clean -- --all          # Clean everything`,
+          '',
+          '  # Direct CLI usage:',
           `  ${config.name} build --fonts imingcp      # Build specific font`,
           `  ${config.name} check                      # Check for updates`,
-          `  ${config.name} process --input downloads  # Process downloaded fonts`,
-          `  ${config.name} css --fonts imingcp        # Generate CSS for specific font`,
-          `  ${config.name} clean --build              # Clean build & dist directories`,
-          `  ${config.name} clean --all --force        # Clean everything`,
+          `  ${config.name} clean --build              # Clean build artifacts`,
         ],
       },
     ];
