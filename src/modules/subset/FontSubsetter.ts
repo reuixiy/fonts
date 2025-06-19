@@ -212,7 +212,9 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
         fontBuffer,
         extractionResult.characters,
         fontConfig.subset.maxChunkSizeKB,
-        extractionResult.fontMetrics
+        extractionResult.fontMetrics,
+        fontConfig.displayName,
+        style
       );
 
       // Generate Unicode ranges for each chunk
@@ -235,7 +237,8 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
         chunksWithRanges,
         fontDir,
         fontConfig.output.filenamePattern,
-        style
+        style,
+        fontConfig.displayName
       );
 
       this.log(`✅ Created ${savedChunks.length} chunks for ${style}`);
