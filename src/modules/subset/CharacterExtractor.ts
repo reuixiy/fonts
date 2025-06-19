@@ -47,10 +47,7 @@ export class CharacterExtractor extends BaseService {
       ).characterSet;
 
       if (!characterSet) {
-        this.log('Character set not accessible, using fallback', 'warn');
-        return {
-          characters: this.getFallbackCharacterSet(),
-        };
+        throw new Error('Cannot access character set from font file');
       }
 
       // Convert to array if it's a Set
@@ -61,10 +58,8 @@ export class CharacterExtractor extends BaseService {
       for (const codePoint of codePoints) {
         try {
           const char = String.fromCodePoint(codePoint);
-          // Skip control characters and invalid characters
-          if (codePoint > 31 && char.trim().length > 0) {
-            characters.push(char);
-          }
+          // Include all characters that exist in the font, no filtering
+          characters.push(char);
         } catch {
           // Skip invalid code points
           continue;
@@ -101,11 +96,9 @@ export class CharacterExtractor extends BaseService {
         `Character extraction failed: ${
           error instanceof Error ? error.message : 'Unknown error'
         }`,
-        'warn'
+        'error'
       );
-      return {
-        characters: this.getFallbackCharacterSet(),
-      };
+      throw error;
     }
   }
 
@@ -153,32 +146,5 @@ export class CharacterExtractor extends BaseService {
   setFontMetrics(fontPath: string, metrics: FontMetrics): void {
     const cacheKey = path.basename(fontPath, path.extname(fontPath));
     this.metricsCache.set(cacheKey, metrics);
-  }
-
-  /**
-   * Get fallback character set for Chinese fonts
-   */
-  private getFallbackCharacterSet(): string[] {
-    // Common Chinese characters (simplified + traditional + punctuation)
-    const ranges: [number, number][] = [
-      [0x4e00, 0x9fff], // CJK Unified Ideographs
-      [0x3400, 0x4dbf], // CJK Extension A
-      [0xff00, 0xffef], // Halfwidth and Fullwidth Forms
-      [0x3000, 0x303f], // CJK Symbols and Punctuation
-    ];
-
-    const chars: string[] = [];
-    for (const [start, end] of ranges) {
-      for (let i = start; i <= Math.min(end, start + 1000); i++) {
-        // Limit to avoid too many chars
-        try {
-          chars.push(String.fromCodePoint(i));
-        } catch {
-          continue;
-        }
-      }
-    }
-
-    return chars;
   }
 }

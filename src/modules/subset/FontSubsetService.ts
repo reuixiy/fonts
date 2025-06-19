@@ -36,8 +36,6 @@ export class FontSubsetService extends BaseService {
     try {
       const subsetBuffer = await subsetFont(fontBuffer, text, {
         targetFormat: format,
-        // Additional optimization options
-        preserveNameIds: [1, 2, 4, 6], // Keep essential name records
       });
 
       return Buffer.from(subsetBuffer);
@@ -214,6 +212,7 @@ export class FontSubsetService extends BaseService {
         unicodeRanges: [], // Will be set by caller
         characterCount: testChars.length,
         buffer: testBuffer,
+        characters: testChars, // Store actual characters used in this chunk
       });
 
       this.log(

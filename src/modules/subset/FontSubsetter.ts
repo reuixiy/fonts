@@ -217,17 +217,11 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
         style
       );
 
-      // Generate Unicode ranges for each chunk
-      const chunksWithRanges = chunks.map((chunk, index) => {
-        const chunkChars = extractionResult.characters.slice(
-          index *
-            Math.floor(extractionResult.characters.length / chunks.length),
-          (index + 1) *
-            Math.floor(extractionResult.characters.length / chunks.length)
-        );
+      // Generate Unicode ranges for each chunk using actual characters
+      const chunksWithRanges = chunks.map((chunk) => {
         return {
           ...chunk,
-          unicodeRanges: this.unicodeGenerator.generateRanges(chunkChars),
+          unicodeRanges: this.unicodeGenerator.generateRanges(chunk.characters),
         };
       });
 

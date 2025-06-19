@@ -12,6 +12,7 @@ export interface ChunkWithBuffer extends Omit<FontChunk, 'filename'> {
   path: string;
   filename: string;
   compressionRatio: string;
+  characters: string[]; // Actual characters used in this chunk
 }
 
 export interface FontMetrics {
