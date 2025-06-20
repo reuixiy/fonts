@@ -1,0 +1,348 @@
+{
+  "fontId": "amstelvar",
+  "displayName": "Amstelvar",
+  "generatedAt": "2025-06-20T08:56:30.772Z",
+  "chunks": [
+    {
+      "chunkIndex": 0,
+      "filename": "0.woff2",
+      "style": "roman",
+      "size": 294,
+      "unicodeRanges": [
+        "U+0",
+        "U+D",
+        "U+20-5F",
+        "U+61-7A",
+        "U+C6",
+        "U+D8",
+        "U+E6",
+        "U+F8",
+        "U+131",
+        "U+300-304",
+        "U+306-30C",
+        "U+30F",
+        "U+311",
+        "U+31B",
+        "U+323-324",
+        "U+326-328",
+        "U+32E",
+        "U+331",
+        "U+391",
+        "U+395",
+        "U+397",
+        "U+399",
+        "U+39F",
+        "U+3A5",
+        "U+3A9",
+        "U+3B1",
+        "U+3B5",
+        "U+3B7",
+        "U+3B9",
+        "U+3BF",
+        "U+3C5",
+        "U+3C9",
+        "U+410",
+        "U+415-416",
+        "U+418",
+        "U+41A",
+        "U+41E",
+        "U+423",
+        "U+42D-430",
+        "U+435-436",
+        "U+438",
+        "U+43A",
+        "U+43E",
+        "U+443",
+        "U+44D-44F"
+      ],
+      "characterCount": 153
+    },
+    {
+      "chunkIndex": 1,
+      "filename": "1.woff2",
+      "style": "roman",
+      "size": 7,
+      "unicodeRanges": [
+        "U+60",
+        "U+7B-7E"
+      ],
+      "characterCount": 5
+    },
+    {
+      "chunkIndex": 2,
+      "filename": "2.woff2",
+      "style": "roman",
+      "size": 85,
+      "unicodeRanges": [
+        "U+A0-C5",
+        "U+C7-D7",
+        "U+D9-E0"
+      ],
+      "characterCount": 63
+    },
+    {
+      "chunkIndex": 3,
+      "filename": "3.woff2",
+      "style": "roman",
+      "size": 33,
+      "unicodeRanges": [
+        "U+E1-E5",
+        "U+E7-F7",
+        "U+F9-FF"
+      ],
+      "characterCount": 29
+    },
+    {
+      "chunkIndex": 4,
+      "filename": "4.woff2",
+      "style": "roman",
+      "size": 71,
+      "unicodeRanges": [
+        "U+100-130",
+        "U+132-140"
+      ],
+      "characterCount": 64
+    },
+    {
+      "chunkIndex": 5,
+      "filename": "5.woff2",
+      "style": "roman",
+      "size": 85,
+      "unicodeRanges": [
+        "U+141-17E"
+      ],
+      "characterCount": 62
+    },
+    {
+      "chunkIndex": 6,
+      "filename": "6.woff2",
+      "style": "roman",
+      "size": 109,
+      "unicodeRanges": [
+        "U+18F",
+        "U+192",
+        "U+1A0-1A1",
+        "U+1AF-1B0",
+        "U+1C4-1CC",
+        "U+1E6-1E7",
+        "U+1EA-1EB",
+        "U+1FA-21B",
+        "U+22A-22D",
+        "U+230-233"
+      ],
+      "characterCount": 61
+    },
+    {
+      "chunkIndex": 7,
+      "filename": "7.woff2",
+      "style": "roman",
+      "size": 13,
+      "unicodeRanges": [
+        "U+259",
+        "U+2B9-2BA",
+        "U+2BC",
+        "U+2C6-2C7",
+        "U+2C9",
+        "U+2D8-2DD"
+      ],
+      "characterCount": 13
+    },
+    {
+      "chunkIndex": 8,
+      "filename": "8.woff2",
+      "style": "roman",
+      "size": 105,
+      "unicodeRanges": [
+        "U+374-375",
+        "U+37E",
+        "U+384-38A",
+        "U+38C",
+        "U+38E-390",
+        "U+392-394",
+        "U+396",
+        "U+398",
+        "U+39A-39E",
+        "U+3A0-3A1",
+        "U+3A3-3A4",
+        "U+3A6-3A8",
+        "U+3AA-3B0",
+        "U+3B2-3B4",
+        "U+3B6",
+        "U+3B8",
+        "U+3BA-3BE",
+        "U+3C0-3C4"
+      ],
+      "characterCount": 53
+    },
+    {
+      "chunkIndex": 9,
+      "filename": "9.woff2",
+      "style": "roman",
+      "size": 29,
+      "unicodeRanges": [
+        "U+3C6-3C8",
+        "U+3CA-3CF",
+        "U+3D7"
+      ],
+      "characterCount": 10
+    },
+    {
+      "chunkIndex": 10,
+      "filename": "10.woff2",
+      "style": "roman",
+      "size": 90,
+      "unicodeRanges": [
+        "U+401-40F",
+        "U+411-414",
+        "U+417",
+        "U+419",
+        "U+41B-41D",
+        "U+41F-422",
+        "U+424-42C",
+        "U+431-434",
+        "U+437",
+        "U+439",
+        "U+43B-43D",
+        "U+43F-441"
+      ],
+      "characterCount": 49
+    },
+    {
+      "chunkIndex": 11,
+      "filename": "11.woff2",
+      "style": "roman",
+      "size": 112,
+      "unicodeRanges": [
+        "U+442",
+        "U+444-44C",
+        "U+451-45F",
+        "U+490-493",
+        "U+496-49D",
+        "U+4A0-4A3",
+        "U+4AA-4B3",
+        "U+4B6-4BB",
+        "U+4C0-4C2",
+        "U+4CF"
+      ],
+      "characterCount": 61
+    },
+    {
+      "chunkIndex": 12,
+      "filename": "12.woff2",
+      "style": "roman",
+      "size": 43,
+      "unicodeRanges": [
+        "U+4D0-4D3",
+        "U+4D6-4D9",
+        "U+4DC-4DD",
+        "U+4E6-4E9",
+        "U+4EE-4F3",
+        "U+4FE-4FF"
+      ],
+      "characterCount": 22
+    },
+    {
+      "chunkIndex": 13,
+      "filename": "13.woff2",
+      "style": "roman",
+      "size": 7,
+      "unicodeRanges": [
+        "U+2014",
+        "U+2018-2019",
+        "U+201C-201D",
+        "U+2026"
+      ],
+      "characterCount": 6
+    },
+    {
+      "chunkIndex": 14,
+      "filename": "14.woff2",
+      "style": "roman",
+      "size": 46,
+      "unicodeRanges": [
+        "U+1E80-1E85",
+        "U+1E9E",
+        "U+1EA0-1EAF"
+      ],
+      "characterCount": 23
+    },
+    {
+      "chunkIndex": 15,
+      "filename": "15.woff2",
+      "style": "roman",
+      "size": 61,
+      "unicodeRanges": [
+        "U+1EB0-1EDC"
+      ],
+      "characterCount": 45
+    },
+    {
+      "chunkIndex": 16,
+      "filename": "16.woff2",
+      "style": "roman",
+      "size": 47,
+      "unicodeRanges": [
+        "U+1EDD-1EF9",
+        "U+2010",
+        "U+2013",
+        "U+2015",
+        "U+201A",
+        "U+201E",
+        "U+2020-2022",
+        "U+2030",
+        "U+2032-2033",
+        "U+2039-203A",
+        "U+2044",
+        "U+2052",
+        "U+2074"
+      ],
+      "characterCount": 45
+    },
+    {
+      "chunkIndex": 17,
+      "filename": "17.woff2",
+      "style": "roman",
+      "size": 108,
+      "unicodeRanges": [
+        "U+20A1",
+        "U+20A3-20A4",
+        "U+20A6-20A7",
+        "U+20A9",
+        "U+20AB-20AD",
+        "U+20B1-20B2",
+        "U+20B4-20B5",
+        "U+20B8-20BA",
+        "U+20BC-20BD",
+        "U+2116",
+        "U+2122",
+        "U+2126",
+        "U+2206",
+        "U+2212",
+        "U+2215",
+        "U+2219",
+        "U+2248",
+        "U+2260",
+        "U+2264-2265",
+        "U+27E8-27E9",
+        "U+F50E-F511",
+        "U+F518-F51B",
+        "U+F522-F525",
+        "U+F528-F529"
+      ],
+      "characterCount": 45
+    },
+    {
+      "chunkIndex": 18,
+      "filename": "18.woff2",
+      "style": "roman",
+      "size": 22,
+      "unicodeRanges": [
+        "U+F52C-F52D",
+        "U+FB00-FB04"
+      ],
+      "characterCount": 7
+    }
+  ],
+  "totalChunks": 19,
+  "totalSize": 1367
+}

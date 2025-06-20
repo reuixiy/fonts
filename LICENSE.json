@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "generatedAt": "2025-06-20T08:56:31.278Z",
+    "generator": "https://github.com/reuixiy/fonts",
+    "version": "4.0.0",
+    "totalFonts": 3
+  },
+  "compliance": {
+    "checked": true,
+    "issues": [
+      "imingcp has usage restrictions: requires specific name format, profit restrictions"
+    ]
+  },
+  "fonts": {
+    "imingcp": {
+      "name": "I.MingCP",
+      "displayName": "I.MingCP",
+      "description": "A high-quality Traditional Chinese serif font based on Mincho style",
+      "source": {
+        "type": "github-release",
+        "repository": "ichitenfont/I.Ming",
+        "url": "https://github.com/ichitenfont/I.Ming"
+      },
+      "license": {
+        "type": "IPA Font License Agreement v1.0",
+        "url": "https://github.com/ichitenfont/I.Ming/blob/master/LICENSE.md",
+        "attribution": "Required with specific format",
+        "requirements": [
+          "Include IPA font license agreement",
+          "Include original copyright notice",
+          "Derived fonts must include \"IPA\" in the name",
+          "Cannot be redistributed for profit without permission"
+        ],
+        "permissions": {
+          "webUse": true,
+          "commercialUse": false,
+          "modification": true
+        }
+      }
+    },
+    "lxgwwenkaitc": {
+      "name": "LXGWWenKaiTC",
+      "displayName": "LXGW WenKai TC",
+      "description": "A handwriting-style Traditional Chinese font with elegant strokes",
+      "source": {
+        "type": "github-release",
+        "repository": "lxgw/LxgwWenkaiTC",
+        "url": "https://github.com/lxgw/LxgwWenkaiTC"
+      },
+      "license": {
+        "type": "SIL Open Font License 1.1",
+        "url": "https://github.com/lxgw/LxgwWenkaiTC/blob/main/OFL.txt",
+        "attribution": "Required when redistributing",
+        "requirements": [
+          "Include original copyright notice",
+          "Include license text when redistributing",
+          "Font name must be changed if modified",
+          "Cannot be sold by itself"
+        ],
+        "permissions": {
+          "webUse": true,
+          "commercialUse": true,
+          "modification": true
+        }
+      }
+    },
+    "amstelvar": {
+      "name": "Amstelvar",
+      "displayName": "Amstelvar",
+      "description": "A parametric variable font with multiple design axes",
+      "source": {
+        "type": "github-repo",
+        "repository": "googlefonts/amstelvar",
+        "url": "https://github.com/googlefonts/amstelvar"
+      },
+      "license": {
+        "type": "SIL Open Font License 1.1",
+        "url": "https://github.com/googlefonts/amstelvar/blob/main/OFL.txt",
+        "attribution": "Required when redistributing",
+        "requirements": [
+          "Include original copyright notice",
+          "Include license text when redistributing",
+          "Font name must be changed if modified",
+          "Cannot be sold by itself"
+        ],
+        "permissions": {
+          "webUse": true,
+          "commercialUse": true,
+          "modification": true
+        }
+      }
+    }
+  }
+}

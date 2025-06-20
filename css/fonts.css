@@ -1,0 +1,17 @@
+/*!
+ * Chinese Fonts CSS - Unified Import-Based Stylesheet
+ * 
+ * This file imports individual font CSS files with their respective licenses.
+ * See individual CSS files for specific font license information.
+ * 
+ * Generated: 2025-06-20T08:56:31.274Z
+ * Generator: https://github.com/reuixiy/fonts
+ */
+
+/* Available fonts: imingcp, lxgwwenkaitc, amstelvar */
+
+@import './imingcp.css';  /* I.MingCP */
+@import './lxgwwenkaitc.css';  /* LXGW WenKai TC */
+@import './amstelvar.css';  /* Amstelvar */
+
+/* End of imports */
