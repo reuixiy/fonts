@@ -18,21 +18,75 @@ import type {
   ProcessingMetadata,
 } from '@/modules/css/types.js';
 
+// Constants
+const DEFAULT_CONFIG = {
+  outputDir: path.join(process.cwd(), 'build'),
+  cssDir: path.join(process.cwd(), 'build', 'css'),
+  template: 'standard' as const,
+  minify: true,
+  baseUrl: '../fonts',
+};
+
+const SUPPORTED_FONT_EXTENSIONS = ['.woff2', '.woff', '.ttf'] as const;
+const STYLE_PATTERNS = {
+  italic: /italic/i,
+  roman: /roman/i,
+  bold: /bold/i,
+  light: /light/i,
+} as const;
+
+const FILE_NAMES = {
+  metadata: 'chunks.json',
+  unifiedCSS: 'fonts.css',
+  unifiedMinCSS: 'fonts.min.css',
+} as const;
+
+const CSS_TEMPLATE = {
+  header: (
+    fontId: string,
+    fontConfig: FontConfig,
+    currentDateTime: string
+  ) => `/*!
+ * ${fontConfig.displayName} - Font CSS
+ * 
+ * Font ID: ${fontId}
+ * Display Name: ${fontConfig.displayName}
+ * License: ${fontConfig.license.type}
+ * License URL: ${fontConfig.license.url}
+ * 
+ * Generated: ${currentDateTime}
+ * Generator: https://github.com/reuixiy/fonts
+ */
+
+`,
+  unifiedHeader: (availableFonts: string[], currentDateTime: string) => `/*!
+ * Chinese Fonts CSS - Unified Import-Based Stylesheet (Minified)
+ * 
+ * This file imports individual minified font CSS files with their respective licenses.
+ * See individual CSS files for specific font license information.
+ * 
+ * Generated: ${currentDateTime}
+ * Generator: https://github.com/reuixiy/fonts
+ */
+
+/* Available fonts: ${availableFonts.join(', ')} */
+
+`,
+} as const;
+
+const FALLBACK_UNICODE_RANGE = 'U+4E00-9FFF'; // Default Chinese range
+
 export class CSSGenerator extends BaseService implements ICSSGenerator {
-  private fontFaceGenerator: FontFaceGenerator;
-  private minifier: CSSMinifier;
-  private unifiedGenerator: UnifiedCSSGenerator;
-  private config: CSSGeneratorConfig;
+  private readonly fontFaceGenerator: FontFaceGenerator;
+  private readonly minifier: CSSMinifier;
+  private readonly unifiedGenerator: UnifiedCSSGenerator;
+  private readonly config: CSSGeneratorConfig;
 
   constructor(options?: Partial<CSSGeneratorConfig>) {
     super('CSSGenerator');
 
     this.config = {
-      outputDir: path.join(process.cwd(), 'build'),
-      cssDir: path.join(process.cwd(), 'build', 'css'),
-      template: 'standard',
-      minify: true,
-      baseUrl: '../fonts',
+      ...DEFAULT_CONFIG,
       ...options,
     };
 
@@ -70,34 +124,7 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
       );
 
       const fontConfigs = ConfigManager.load().fonts;
-      const allResults: AllResults = {};
-
-      // Generate individual CSS files for each font
-      for (const fontId of processedFonts) {
-        const fontConfig = fontConfigs[fontId];
-        if (!fontConfig) {
-          this.log(`No config found for font: ${fontId}`, 'warn');
-          continue;
-        }
-
-        try {
-          const processResult = await this.getProcessingResult(fontId);
-          if (!processResult) {
-            this.log(`No processing result for: ${fontId}`, 'warn');
-            continue;
-          }
-
-          await this.generateIndividualCSS(fontId, fontConfig, processResult);
-          allResults[fontId] = processResult;
-          this.log(`Completed CSS generation: ${fontId}`);
-        } catch (error) {
-          ErrorHandler.handle(error, `Generating CSS for ${fontId}`);
-          allResults[fontId] = {
-            error: error instanceof Error ? error.message : 'Unknown error',
-          };
-          continue;
-        }
-      }
+      await this.generateFontCSS(processedFonts, fontConfigs);
 
       // Generate unified CSS file
       await this.generateUnified(fontConfigs);
@@ -121,33 +148,7 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
       );
 
       const fontConfigs = ConfigManager.load().fonts;
-      const allResults: AllResults = {};
-
-      for (const fontId of fontIds) {
-        const fontConfig = fontConfigs[fontId];
-        if (!fontConfig) {
-          this.log(`No config found for font: ${fontId}`, 'warn');
-          continue;
-        }
-
-        try {
-          const processResult = await this.getProcessingResult(fontId);
-          if (!processResult) {
-            this.log(`No processing result for: ${fontId}`, 'warn');
-            continue;
-          }
-
-          await this.generateIndividualCSS(fontId, fontConfig, processResult);
-          allResults[fontId] = processResult;
-          this.log(`Completed CSS generation: ${fontId}`);
-        } catch (error) {
-          ErrorHandler.handle(error, `Generating CSS for ${fontId}`);
-          allResults[fontId] = {
-            error: error instanceof Error ? error.message : 'Unknown error',
-          };
-          continue;
-        }
-      }
+      await this.generateFontCSS(fontIds, fontConfigs);
 
       // Don't regenerate unified CSS when generating specific fonts
       // The unified CSS should only be generated when building all fonts
@@ -160,6 +161,55 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
   }
 
   /**
+   * Generate CSS for multiple fonts (shared logic)
+   */
+  private async generateFontCSS(
+    fontIds: string[],
+    fontConfigs: Record<string, FontConfig>
+  ): Promise<AllResults> {
+    const allResults: AllResults = {};
+
+    for (const fontId of fontIds) {
+      const fontConfig = fontConfigs[fontId];
+      if (!fontConfig) {
+        this.log(`No config found for font: ${fontId}`, 'warn');
+        continue;
+      }
+
+      try {
+        const processResult = await this.getProcessingResult(fontId);
+        if (!processResult) {
+          this.log(`No processing result for: ${fontId}`, 'warn');
+          continue;
+        }
+
+        await this.generateIndividualCSS(fontId, fontConfig, processResult);
+        allResults[fontId] = processResult;
+        this.log(`Completed CSS generation: ${fontId}`);
+      } catch (error) {
+        await this.handleFontGenerationError(fontId, error, allResults);
+        continue;
+      }
+    }
+
+    return allResults;
+  }
+
+  /**
+   * Handle font generation errors consistently
+   */
+  private async handleFontGenerationError(
+    fontId: string,
+    error: unknown,
+    allResults: AllResults
+  ): Promise<void> {
+    ErrorHandler.handle(error, `Generating CSS for ${fontId}`);
+    allResults[fontId] = {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    };
+  }
+
+  /**
    * Generate unified CSS file
    */
   async generateUnified(
@@ -168,24 +218,12 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
     try {
       const configs = fontConfigs ?? ConfigManager.load().fonts;
 
-      const unifiedPath = path.join(this.config.cssDir, 'fonts.css');
+      const unifiedPath = path.join(this.config.cssDir, FILE_NAMES.unifiedCSS);
       await this.unifiedGenerator.generateUnifiedCSS(configs, unifiedPath);
 
       // Generate minified version if enabled
       if (this.config.minify) {
-        // Create minified version that imports .min.css files
-        const minifiedUnifiedCSS = this.createMinifiedUnifiedCSS(configs);
-        const minifiedMinCSS = await this.minifier.minify(minifiedUnifiedCSS);
-
-        const minUnifiedPath = path.join(this.config.cssDir, 'fonts.min.css');
-        await fs.writeFile(minUnifiedPath, minifiedMinCSS);
-        const minStats = await fs.stat(minUnifiedPath);
-
-        this.log(
-          `Generated minified unified CSS: fonts.min.css (${(
-            minStats.size / 1024
-          ).toFixed(1)}KB)`
-        );
+        await this.generateMinifiedUnified(configs);
       }
 
       this.log('Generated unified CSS file');
@@ -193,6 +231,30 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
       ErrorHandler.handle(error, 'Generating unified CSS');
       throw error;
     }
+  }
+
+  /**
+   * Generate minified unified CSS
+   */
+  private async generateMinifiedUnified(
+    configs: Record<string, FontConfig>
+  ): Promise<void> {
+    // Create minified version that imports .min.css files
+    const minifiedUnifiedCSS = this.createMinifiedUnifiedCSS(configs);
+    const minifiedMinCSS = await this.minifier.minify(minifiedUnifiedCSS);
+
+    const minUnifiedPath = path.join(
+      this.config.cssDir,
+      FILE_NAMES.unifiedMinCSS
+    );
+    await fs.writeFile(minUnifiedPath, minifiedMinCSS);
+    const minStats = await fs.stat(minUnifiedPath);
+
+    this.log(
+      `Generated minified unified CSS: ${FILE_NAMES.unifiedMinCSS} (${(
+        minStats.size / 1024
+      ).toFixed(1)}KB)`
+    );
   }
 
   /**
@@ -206,54 +268,19 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
     this.log(`Generating CSS for ${fontConfig.displayName}...`);
 
     try {
-      // Generate @font-face rules
-      const fontFaceRules = this.fontFaceGenerator.generateFontFaceRules(
+      // Generate CSS content
+      const css = await this.createCSSContent(
         fontId,
         fontConfig,
-        processResults,
-        this.config.baseUrl
+        processResults
       );
-
-      // Convert to CSS string
-      let css = this.createCSSHeader(fontId, fontConfig);
-      css += this.fontFaceGenerator.fontFaceRulesToCSS(fontFaceRules);
 
       // Write main CSS file
-      const cssFileName = `${fontId}.css`;
-      const cssPath = path.join(this.config.cssDir, cssFileName);
-      await fs.writeFile(cssPath, css);
-      const cssStats = await fs.stat(cssPath);
-
-      this.log(
-        `Generated CSS: ${cssFileName} (${(cssStats.size / 1024).toFixed(1)}KB)`
-      );
-
-      const result: CSSResult = {
-        path: cssPath,
-        filename: cssFileName,
-        size: cssStats.size,
-      };
+      const result = await this.writeCSSFile(fontId, css);
 
       // Generate minified version if enabled
       if (this.config.minify) {
-        const minifiedCSS = await this.minifier.minify(css);
-        const minCssFileName = `${fontId}.min.css`;
-        const minCssPath = path.join(this.config.cssDir, minCssFileName);
-
-        await fs.writeFile(minCssPath, minifiedCSS);
-        const minCssStats = await fs.stat(minCssPath);
-
-        result.minified = {
-          path: minCssPath,
-          filename: minCssFileName,
-          size: minCssStats.size,
-        };
-
-        this.log(
-          `Generated minified CSS: ${minCssFileName} (${(
-            minCssStats.size / 1024
-          ).toFixed(1)}KB)`
-        );
+        result.minified = await this.writeMinifiedCSSFile(fontId, css);
       }
 
       return result;
@@ -269,24 +296,81 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
   }
 
   /**
+   * Create CSS content for a font
+   */
+  private async createCSSContent(
+    fontId: string,
+    fontConfig: FontConfig,
+    processResults: FontProcessingResult[]
+  ): Promise<string> {
+    // Generate @font-face rules
+    const fontFaceRules = this.fontFaceGenerator.generateFontFaceRules(
+      fontId,
+      fontConfig,
+      processResults,
+      this.config.baseUrl
+    );
+
+    // Convert to CSS string
+    let css = this.createCSSHeader(fontId, fontConfig);
+    css += this.fontFaceGenerator.fontFaceRulesToCSS(fontFaceRules);
+
+    return css;
+  }
+
+  /**
+   * Write CSS file and return result metadata
+   */
+  private async writeCSSFile(fontId: string, css: string): Promise<CSSResult> {
+    const cssFileName = `${fontId}.css`;
+    const cssPath = path.join(this.config.cssDir, cssFileName);
+    await fs.writeFile(cssPath, css);
+    const cssStats = await fs.stat(cssPath);
+
+    this.log(
+      `Generated CSS: ${cssFileName} (${(cssStats.size / 1024).toFixed(1)}KB)`
+    );
+
+    return {
+      path: cssPath,
+      filename: cssFileName,
+      size: cssStats.size,
+    };
+  }
+
+  /**
+   * Write minified CSS file and return result metadata
+   */
+  private async writeMinifiedCSSFile(
+    fontId: string,
+    css: string
+  ): Promise<CSSResult> {
+    const minifiedCSS = await this.minifier.minify(css);
+    const minCssFileName = `${fontId}.min.css`;
+    const minCssPath = path.join(this.config.cssDir, minCssFileName);
+
+    await fs.writeFile(minCssPath, minifiedCSS);
+    const minCssStats = await fs.stat(minCssPath);
+
+    this.log(
+      `Generated minified CSS: ${minCssFileName} (${(
+        minCssStats.size / 1024
+      ).toFixed(1)}KB)`
+    );
+
+    return {
+      path: minCssPath,
+      filename: minCssFileName,
+      size: minCssStats.size,
+    };
+  }
+
+  /**
    * Create CSS header with metadata
    */
   private createCSSHeader(fontId: string, fontConfig: FontConfig): string {
     const currentDateTime = new Date().toISOString();
-
-    return `/*!
- * ${fontConfig.displayName} - Font CSS
- * 
- * Font ID: ${fontId}
- * Display Name: ${fontConfig.displayName}
- * License: ${fontConfig.license.type}
- * License URL: ${fontConfig.license.url}
- * 
- * Generated: ${currentDateTime}
- * Generator: https://github.com/reuixiy/fonts
- */
-
-`;
+    return CSS_TEMPLATE.header(fontId, fontConfig, currentDateTime);
   }
 
   /**
@@ -302,6 +386,10 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
     }
   }
 
+  // ============================================================================
+  // UTILITY METHODS
+  // ============================================================================
+
   /**
    * Get list of processed fonts
    */
@@ -314,12 +402,8 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
       for (const item of items) {
         const itemPath = path.join(fontsDir, item);
         const stat = await fs.stat(itemPath);
-        if (stat.isDirectory()) {
-          // Check if this directory has font files
-          const hasChunks = await this.hasFontChunks(itemPath);
-          if (hasChunks) {
-            processedFonts.push(item);
-          }
+        if (stat.isDirectory() && (await this.hasFontChunks(itemPath))) {
+          processedFonts.push(item);
         }
       }
 
@@ -335,16 +419,51 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
    */
   private async hasFontChunks(fontDir: string): Promise<boolean> {
     try {
-      const files = await fs.readdir(fontDir);
-      return files.some(
-        (file) =>
-          file.endsWith('.woff2') ||
-          file.endsWith('.woff') ||
-          file.endsWith('.ttf')
-      );
+      // Check main directory for font files
+      if (await this.directoryHasFontFiles(fontDir)) {
+        return true;
+      }
+
+      // Check subdirectories for font files
+      const items = await fs.readdir(fontDir);
+      for (const item of items) {
+        const itemPath = path.join(fontDir, item);
+        const stat = await fs.stat(itemPath);
+
+        if (
+          stat.isDirectory() &&
+          (await this.directoryHasFontFiles(itemPath))
+        ) {
+          return true;
+        }
+      }
+
+      return false;
     } catch {
       return false;
     }
+  }
+
+  /**
+   * Check if a directory contains font files
+   */
+  private async directoryHasFontFiles(directory: string): Promise<boolean> {
+    try {
+      const files = await fs.readdir(directory);
+      return files.some((file) => this.isSupportedFontFile(file));
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Check if file is a supported font file
+   */
+  private isSupportedFontFile(filename: string): boolean {
+    const extension = path.extname(filename).toLowerCase();
+    return SUPPORTED_FONT_EXTENSIONS.includes(
+      extension as (typeof SUPPORTED_FONT_EXTENSIONS)[number]
+    );
   }
 
   /**
@@ -355,14 +474,11 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
   ): Promise<FontProcessingResult[] | null> {
     try {
       const fontDir = path.join(this.config.outputDir, 'fonts', fontId);
-      const metadataPath = path.join(fontDir, 'chunks.json');
+      const metadataFiles = await this.findMetadataFiles(fontDir);
 
-      if (await fs.pathExists(metadataPath)) {
-        // Use metadata if available
-        const metadata = await fs.readJson(metadataPath);
-        return this.convertMetadataToProcessingResult(metadata);
+      if (metadataFiles.length > 0) {
+        return this.loadFromMetadata(metadataFiles);
       } else {
-        // Fallback: scan directory for font files
         return this.scanDirectoryForChunks(fontDir);
       }
     } catch (error) {
@@ -377,30 +493,119 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
   }
 
   /**
+   * Load processing results from metadata files
+   */
+  private async loadFromMetadata(
+    metadataFiles: Array<{ path: string; style: string }>
+  ): Promise<FontProcessingResult[]> {
+    const results: FontProcessingResult[] = [];
+
+    for (const metadataFile of metadataFiles) {
+      const metadata = await fs.readJson(metadataFile.path);
+      const processResult = this.convertMetadataToProcessingResult(metadata);
+      results.push(...processResult);
+    }
+
+    return results;
+  }
+
+  /**
+   * Find all chunks.json metadata files for a font in correct order
+   */
+  private async findMetadataFiles(
+    fontDir: string
+  ): Promise<Array<{ path: string; style: string }>> {
+    const metadataFiles: Array<{ path: string; style: string }> = [];
+
+    try {
+      // Check main directory for regular style
+      await this.addMainMetadataFile(fontDir, metadataFiles);
+
+      // Check style subdirectories in correct order
+      await this.addStyleMetadataFiles(fontDir, metadataFiles);
+    } catch (error) {
+      this.log(`Error finding metadata files in ${fontDir}: ${error}`, 'debug');
+    }
+
+    return metadataFiles;
+  }
+
+  /**
+   * Add main directory metadata file if exists
+   */
+  private async addMainMetadataFile(
+    fontDir: string,
+    metadataFiles: Array<{ path: string; style: string }>
+  ): Promise<void> {
+    const mainMetadataPath = path.join(fontDir, FILE_NAMES.metadata);
+    if (await fs.pathExists(mainMetadataPath)) {
+      metadataFiles.push({ path: mainMetadataPath, style: 'regular' });
+    }
+  }
+
+  /**
+   * Add style subdirectory metadata files in correct order
+   */
+  private async addStyleMetadataFiles(
+    fontDir: string,
+    metadataFiles: Array<{ path: string; style: string }>
+  ): Promise<void> {
+    const directoryEntries = await fs.readdir(fontDir);
+    const sortedStyleDirectories = this.sortStyleDirectories(directoryEntries);
+
+    for (const styleDirName of sortedStyleDirectories) {
+      const styleDirPath = path.join(fontDir, styleDirName);
+      const stat = await fs.stat(styleDirPath);
+
+      if (stat.isDirectory()) {
+        const styleMetadataPath = path.join(styleDirPath, FILE_NAMES.metadata);
+        if (await fs.pathExists(styleMetadataPath)) {
+          metadataFiles.push({
+            path: styleMetadataPath,
+            style: styleDirName,
+          });
+        }
+      }
+    }
+  }
+
+  /**
+   * Sort style directories to ensure roman comes before italic
+   */
+  private sortStyleDirectories(directoryEntries: string[]): string[] {
+    return directoryEntries.sort((a, b) => {
+      if (a === 'roman' && b !== 'roman') return -1;
+      if (a !== 'roman' && b === 'roman') return 1;
+      return a.localeCompare(b);
+    });
+  }
+
+  /**
    * Convert metadata to processing result format
    */
   private convertMetadataToProcessingResult(
     metadata: ProcessingMetadata
   ): FontProcessingResult[] {
-    const chunksByStyle: Record<string, ChunkWithUnicodeRanges[]> = {};
+    const chunks = metadata.chunks.map((chunk) => this.convertChunk(chunk));
+    const style = metadata.chunks[0]?.style ?? 'regular';
 
-    metadata.chunks.forEach((chunk) => {
-      const style = chunk.style ?? 'regular';
-      chunksByStyle[style] ??= [];
-      chunksByStyle[style].push({
-        index: chunk.chunkIndex,
-        filename: chunk.filename,
-        size: chunk.size,
-        unicodeRanges: chunk.unicodeRanges ?? [],
-        characterCount: chunk.characterCount ?? 0,
-        style: chunk.style,
-      });
-    });
+    return [{ style, chunks }];
+  }
 
-    return Object.entries(chunksByStyle).map(([style, chunks]) => ({
-      style,
-      chunks: chunks.sort((a, b) => a.index - b.index),
-    }));
+  /**
+   * Convert a single chunk from metadata format
+   */
+  private convertChunk(
+    chunk: ProcessingMetadata['chunks'][0]
+  ): ChunkWithUnicodeRanges {
+    return {
+      index: chunk.chunkIndex,
+      filename: chunk.filename,
+      size: chunk.size,
+      unicodeRanges: chunk.unicodeRanges ?? [],
+      characterCount: chunk.characterCount ?? 0,
+      style: chunk.style,
+    };
   }
 
   /**
@@ -411,45 +616,13 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
   ): Promise<FontProcessingResult[] | null> {
     try {
       const files = await fs.readdir(fontDir);
-      const fontFiles = files.filter(
-        (file) =>
-          file.endsWith('.woff2') ||
-          file.endsWith('.woff') ||
-          file.endsWith('.ttf')
-      );
+      const fontFiles = files.filter((file) => this.isSupportedFontFile(file));
 
       if (fontFiles.length === 0) {
         return null;
       }
 
-      const chunks: ChunkWithUnicodeRanges[] = await Promise.all(
-        fontFiles.map(async (file, index) => {
-          const filePath = path.join(fontDir, file);
-          const stats = await fs.stat(filePath);
-
-          // Extract style from filename
-          let style = 'regular';
-          const lowerFile = file.toLowerCase();
-          if (lowerFile.includes('italic')) {
-            style = 'italic';
-          } else if (lowerFile.includes('roman')) {
-            style = 'roman';
-          } else if (lowerFile.includes('bold')) {
-            style = 'bold';
-          } else if (lowerFile.includes('light')) {
-            style = 'light';
-          }
-
-          return {
-            index,
-            filename: file,
-            size: stats.size,
-            unicodeRanges: ['U+4E00-9FFF'], // Default Chinese range
-            characterCount: 0,
-            style,
-          };
-        })
-      );
+      const chunks = await this.createChunksFromFiles(fontDir, fontFiles);
 
       return [
         {
@@ -463,6 +636,45 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
   }
 
   /**
+   * Create chunks from font files
+   */
+  private async createChunksFromFiles(
+    fontDir: string,
+    fontFiles: string[]
+  ): Promise<ChunkWithUnicodeRanges[]> {
+    return Promise.all(
+      fontFiles.map(async (file, index) => {
+        const filePath = path.join(fontDir, file);
+        const stats = await fs.stat(filePath);
+
+        return {
+          index,
+          filename: file,
+          size: stats.size,
+          unicodeRanges: [FALLBACK_UNICODE_RANGE],
+          characterCount: 0,
+          style: this.extractStyleFromFilename(file),
+        };
+      })
+    );
+  }
+
+  /**
+   * Extract style from filename
+   */
+  private extractStyleFromFilename(filename: string): string {
+    const lowerFilename = filename.toLowerCase();
+
+    for (const [style, pattern] of Object.entries(STYLE_PATTERNS)) {
+      if (pattern.test(lowerFilename)) {
+        return style;
+      }
+    }
+
+    return 'regular';
+  }
+
+  /**
    * Create minified unified CSS content that imports .min.css files
    */
   private createMinifiedUnifiedCSS(
@@ -471,19 +683,7 @@ export class CSSGenerator extends BaseService implements ICSSGenerator {
     const currentDateTime = new Date().toISOString();
     const availableFonts = Object.keys(fontConfigs);
 
-    let css = `/*!
- * Chinese Fonts CSS - Unified Import-Based Stylesheet (Minified)
- * 
- * This file imports individual minified font CSS files with their respective licenses.
- * See individual CSS files for specific font license information.
- * 
- * Generated: ${currentDateTime}
- * Generator: https://github.com/reuixiy/fonts
- */
-
-/* Available fonts: ${availableFonts.join(', ')} */
-
-`;
+    let css = CSS_TEMPLATE.unifiedHeader(availableFonts, currentDateTime);
 
     // Add imports for each font (using .min.css files, assume all files exist)
     Object.keys(fontConfigs).forEach((fontId) => {

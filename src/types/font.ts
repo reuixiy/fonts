@@ -19,5 +19,4 @@ export interface FontChunk {
   size: number;
   unicodeRanges: string[];
   characterCount: number;
-  style?: string;
 }

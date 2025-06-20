@@ -96,14 +96,6 @@ After including the CSS files, you can use the fonts in your stylesheets:
 }
 \`\`\`
 
-## Features
-
-- **Progressive Loading**: Critical characters load first, additional characters load on-demand
-- **Size-Optimized**: Fonts are automatically chunked for optimal loading performance
-- **WOFF2 Format**: Modern compression for smaller file sizes
-- **Unicode Range**: Precise character coverage with optimized @font-face rules
-- **CDN Ready**: Hosted on jsDelivr for global fast delivery
-
 ## Directory Structure
 
 \`\`\`

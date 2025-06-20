@@ -31,7 +31,7 @@ jobs:
           version: latest
       
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --allow-build=cn-font-split esbuild koffi protobufjs
       
       - name: Check font versions
         id: version-check
@@ -55,6 +55,7 @@ jobs:
           # Create/checkout orphan cache branch (clean branch with only cache file)
           git fetch origin cache || true
           git checkout cache 2>/dev/null || git checkout --orphan cache
+          git pull origin cache || true
           
           # Clear everything except our cache file
           git rm -rf . 2>/dev/null || true

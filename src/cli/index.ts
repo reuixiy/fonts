@@ -20,7 +20,7 @@ export class CLI {
   constructor() {
     this.config = {
       name: 'fonts',
-      version: '3.0.0',
+      version: '4.0.0',
       description: 'Web font auto-subsetting workflow tool',
       commands: [
         checkCommand,

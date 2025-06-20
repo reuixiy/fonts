@@ -24,94 +24,21 @@ export class FontFaceGenerator extends BaseService {
     const fontPath = `${baseUrl}/${fontId}`;
     const rules: FontFaceRule[] = [];
 
-    if (fontConfig.type === 'variable') {
-      rules.push(
-        ...this.generateVariableFontRules(
-          fontConfig,
-          processResults,
-          fontPath,
-          fontId
-        )
-      );
-    } else {
-      rules.push(
-        ...this.generateStaticFontRules(
-          fontConfig,
-          processResults,
-          fontPath,
-          fontId
-        )
-      );
-    }
-
-    return rules;
-  }
-
-  /**
-   * Generate rules for variable fonts
-   */
-  private generateVariableFontRules(
-    fontConfig: FontConfig,
-    processResults: FontProcessingResult[],
-    fontPath: string,
-    fontId: string
-  ): FontFaceRule[] {
-    const rules: FontFaceRule[] = [];
-
-    if (fontConfig.subset.type === 'size-based-chunks') {
-      // Chunked variable font: group chunks by style
-      const chunksByStyle = this.groupChunksByStyle(processResults);
-
-      Object.entries(chunksByStyle).forEach(([style, chunks]) => {
-        const sortedChunks = chunks.sort((a, b) => a.index - b.index);
-
-        sortedChunks.forEach((chunk) => {
-          const rule = this.createVariableFontRule(
-            fontConfig,
-            chunk,
-            fontPath,
-            style,
-            fontId
-          );
-          rules.push(rule);
-        });
-      });
-    } else {
-      // Single-file variable font
-      rules.push(
-        ...this.generateSingleVariableFontRules(
-          fontConfig,
-          processResults,
-          fontPath,
-          fontId
-        )
-      );
-    }
-
-    return rules;
-  }
-
-  /**
-   * Generate rules for static fonts
-   */
-  private generateStaticFontRules(
-    fontConfig: FontConfig,
-    processResults: FontProcessingResult[],
-    fontPath: string,
-    fontId: string
-  ): FontFaceRule[] {
-    const rules: FontFaceRule[] = [];
-
     processResults.forEach((result) => {
-      const sortedChunks = result.chunks.sort((a, b) => a.index - b.index);
-
-      sortedChunks.forEach((chunk) => {
-        const rule = this.createStaticFontRule(
+      result.chunks.forEach((chunk) => {
+        const rule = this.createFontRule(
           fontConfig,
           chunk,
           fontPath,
-          fontId
+          fontId,
+          result.style ?? 'regular'
         );
+
+        // For non-chunked fonts, use full unicode range
+        if (fontConfig.subset.type !== 'size-based-chunks') {
+          rule.unicodeRange = 'U+0000-FFFF';
+        }
+
         rules.push(rule);
       });
     });
@@ -120,53 +47,27 @@ export class FontFaceGenerator extends BaseService {
   }
 
   /**
-   * Create a font-face rule for variable fonts
+   * Create a font-face rule
    */
-  private createVariableFontRule(
+  private createFontRule(
     fontConfig: FontConfig,
     chunk: ChunkWithUnicodeRanges,
     fontPath: string,
-    style: string,
-    fontId: string
+    fontId: string,
+    style: string
   ): FontFaceRule {
     const fontStyle = style === 'italic' ? 'italic' : 'normal';
-    const fontWeight = fontConfig.weight ?? '100 900';
+    const fontWeight =
+      fontConfig.type === 'variable'
+        ? fontConfig.weight ?? '100 900'
+        : String(fontConfig.weight ?? 400);
 
     const src = this.generateSrcValue(
       fontConfig,
       chunk.filename,
       fontPath,
-      fontId
-    );
-
-    return {
-      fontFamily: `'${fontConfig.displayName}'`,
-      src,
-      fontDisplay: 'swap',
-      fontStyle,
-      fontWeight: String(fontWeight),
-      fontStretch: fontConfig.css?.fontStretch,
-      unicodeRange: this.formatUnicodeRanges(chunk.unicodeRanges ?? []),
-    };
-  }
-
-  /**
-   * Create a font-face rule for static fonts
-   */
-  private createStaticFontRule(
-    fontConfig: FontConfig,
-    chunk: ChunkWithUnicodeRanges,
-    fontPath: string,
-    fontId: string
-  ): FontFaceRule {
-    const fontStyle = fontConfig.style ?? 'normal';
-    const fontWeight = fontConfig.weight ?? 400;
-
-    const src = this.generateSrcValue(
-      fontConfig,
-      chunk.filename,
-      fontPath,
-      fontId
+      fontId,
+      style
     );
 
     return {
@@ -187,16 +88,60 @@ export class FontFaceGenerator extends BaseService {
     fontConfig: FontConfig,
     filename: string,
     fontPath: string,
-    fontId?: string
+    fontId?: string,
+    style?: string
   ): string {
     if (fontConfig.css?.srcFormat) {
-      return fontConfig.css.srcFormat
-        .replace(/{filename}/g, filename)
-        .replace(/{fontPath}/g, fontPath)
-        .replace(/{fontId}/g, fontId ?? '');
+      return this.generateCustomSrcValue(
+        fontConfig,
+        filename,
+        fontPath,
+        fontId,
+        style
+      );
     }
 
-    return `url('${fontPath}/${filename}') format('woff2')`;
+    return this.generateDefaultSrcValue(filename, fontPath, style);
+  }
+
+  /**
+   * Generate custom src value using srcFormat template
+   */
+  private generateCustomSrcValue(
+    fontConfig: FontConfig,
+    filename: string,
+    fontPath: string,
+    fontId?: string,
+    style?: string
+  ): string {
+    const actualFilename =
+      style && style !== 'regular' ? `${style}/${filename}` : filename;
+    const srcFormat = fontConfig.css?.srcFormat;
+
+    if (!srcFormat) {
+      return this.generateDefaultSrcValue(filename, fontPath, style);
+    }
+
+    return srcFormat
+      .replace(/{filename}/g, actualFilename)
+      .replace(/{fontPath}/g, fontPath)
+      .replace(/{fontId}/g, fontId ?? '');
+  }
+
+  /**
+   * Generate default src value
+   */
+  private generateDefaultSrcValue(
+    filename: string,
+    fontPath: string,
+    style?: string
+  ): string {
+    const actualPath =
+      style && style !== 'regular'
+        ? `${fontPath}/${style}/${filename}`
+        : `${fontPath}/${filename}`;
+
+    return `url('${actualPath}') format('woff2')`;
   }
 
   /**
@@ -204,78 +149,6 @@ export class FontFaceGenerator extends BaseService {
    */
   private formatUnicodeRanges(ranges: string[]): string {
     return ranges.join(', ');
-  }
-
-  /**
-   * Group chunks by style
-   */
-  private groupChunksByStyle(
-    processResults: FontProcessingResult[]
-  ): Record<string, ChunkWithUnicodeRanges[]> {
-    const chunksByStyle: Record<string, ChunkWithUnicodeRanges[]> = {};
-
-    processResults.forEach((result) => {
-      result.chunks.forEach((chunk) => {
-        const style = chunk.style ?? 'regular';
-        chunksByStyle[style] ??= [];
-        chunksByStyle[style].push(chunk);
-      });
-    });
-
-    return chunksByStyle;
-  }
-
-  /**
-   * Generate rules for single variable font files
-   */
-  private generateSingleVariableFontRules(
-    fontConfig: FontConfig,
-    processResults: FontProcessingResult[],
-    fontPath: string,
-    fontId: string
-  ): FontFaceRule[] {
-    const rules: FontFaceRule[] = [];
-
-    if (fontConfig.styles && Array.isArray(fontConfig.styles)) {
-      // Multi-style variable font
-      fontConfig.styles.forEach((style) => {
-        const styleResult = processResults.find(
-          (result) => result.style === style
-        );
-        if (styleResult && styleResult.chunks.length > 0) {
-          const chunk = styleResult.chunks[0];
-          const rule = this.createVariableFontRule(
-            fontConfig,
-            chunk,
-            fontPath,
-            style,
-            fontId
-          );
-          rules.push({
-            ...rule,
-            unicodeRange: 'U+0000-FFFF', // Full range for non-chunked
-          });
-        }
-      });
-    } else {
-      // Single style variable font
-      if (processResults.length > 0 && processResults[0].chunks.length > 0) {
-        const chunk = processResults[0].chunks[0];
-        const rule = this.createVariableFontRule(
-          fontConfig,
-          chunk,
-          fontPath,
-          'regular',
-          fontId
-        );
-        rules.push({
-          ...rule,
-          unicodeRange: 'U+0000-FFFF', // Full range for non-chunked
-        });
-      }
-    }
-
-    return rules;
   }
 
   /**

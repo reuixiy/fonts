@@ -60,7 +60,7 @@ export class DocsGenerator extends BaseService implements IDocsGenerator {
         const licenseData: LicenseData = {
           generatedAt: new Date().toISOString(),
           generator: 'https://github.com/reuixiy/fonts',
-          version: '3.0.0',
+          version: '4.0.0',
           fonts: fontLicenseData,
           compliance: complianceResult,
         };

@@ -1,7 +1,4 @@
 // Build and output related types
-import type { ChunkResult, CSSResult } from '@/types/common.js';
-
-export type { ChunkResult, CSSResult };
 
 export interface BuildMetadata {
   timestamp: string;

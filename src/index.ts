@@ -1,4 +1,4 @@
-// v3.0 Main entry point - Delegates to CLI for single source of truth
+// Main entry point - Delegates to CLI for single source of truth
 import chalk from 'chalk';
 import { URL } from 'url';
 import { CLI } from '@/cli/index.js';
@@ -12,7 +12,7 @@ async function main(): Promise<void> {
   const args = process.argv.slice(2);
   const cli = new CLI();
 
-  console.log(chalk.gray('🔧 Web Font Auto-Subsetting v3.0\n'));
+  console.log(chalk.gray('🔧 Web Font Auto-Subsetting\n'));
 
   try {
     // Parse arguments to check for flags

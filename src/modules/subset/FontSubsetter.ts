@@ -1,55 +1,33 @@
-// Main font subsetting service
+// Main font subsetting service using cn-font-split
 import fs from 'fs-extra';
 import path from 'path';
-import { cpus } from 'os';
+import { fontSplit } from 'cn-font-split';
 import { BaseService } from '@/core/base/BaseService.js';
 import { ErrorHandler } from '@/core/services/ErrorHandler.js';
-import { CharacterExtractor } from '@/modules/subset/CharacterExtractor.js';
-import { FontSubsetService } from '@/modules/subset/FontSubsetService.js';
-import { UnicodeRangeGenerator } from '@/modules/subset/UnicodeRangeGenerator.js';
 import type { IFontSubsetter } from '@/core/interfaces/IFontSubsetter.js';
 import type { FontConfig } from '@/types/config.js';
 import type {
   SubsettingResult,
-  SubsettingOptions,
-  ChunkMetadata,
-  FontSubsetConfig,
-  ChunkWithBuffer,
+  ChunksMetadata,
+  Chunk,
+  ChunkInfo,
+  FontFile,
+  DownloadResult,
+  FontStyle,
+} from '@/modules/subset/types.js';
+import {
+  SUPPORTED_FONT_EXTENSIONS,
+  STYLE_PATTERNS,
+  CSS_REGEX,
 } from '@/modules/subset/types.js';
 
 export class FontSubsetter extends BaseService implements IFontSubsetter {
-  private characterExtractor: CharacterExtractor;
-  private subsetService: FontSubsetService;
-  private unicodeGenerator: UnicodeRangeGenerator;
-  private options: SubsettingOptions;
-
-  // Performance optimizations
-  private readonly maxConcurrentFonts: number;
-
   constructor(
-    private downloadDir: string,
-    private outputDir: string,
-    private fontConfigs: Record<string, FontConfig>,
-    options?: SubsettingOptions
+    private readonly downloadDir: string,
+    private readonly outputDir: string,
+    private readonly fontConfigs: Record<string, FontConfig>
   ) {
     super('FontSubsetter');
-
-    this.options = {
-      maxConcurrentFonts: cpus().length,
-      maxConcurrentChunks: cpus().length * 2,
-      outputFormat: 'woff2',
-      targetChunkSize: 64,
-      ...options,
-    };
-
-    this.maxConcurrentFonts = this.options.maxConcurrentFonts!;
-
-    this.characterExtractor = new CharacterExtractor();
-    this.subsetService = new FontSubsetService({
-      outputFormat: this.options.outputFormat,
-      targetChunkSize: this.options.targetChunkSize,
-    } as FontSubsetConfig);
-    this.unicodeGenerator = new UnicodeRangeGenerator();
   }
 
   /**
@@ -66,34 +44,9 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
   async processAll(): Promise<void> {
     try {
       const downloadedFonts = await this.getDownloadedFonts();
-      this.log(
-        `Processing ${downloadedFonts.length} fonts with optimized method`
-      );
+      this.log(`Processing ${downloadedFonts.length} fonts`);
 
-      // Process fonts in parallel batches
-      const batches = this.createBatches(
-        downloadedFonts,
-        this.maxConcurrentFonts
-      );
-
-      for (const batch of batches) {
-        const batchPromises = batch.map(async (fontId: string) => {
-          try {
-            await this.processSingleFont(fontId);
-          } catch (error) {
-            ErrorHandler.handle(error, `Processing font ${fontId}`);
-            this.log(
-              `❌ ${fontId}: ${
-                error instanceof Error ? error.message : 'Unknown error'
-              }`,
-              'error'
-            );
-          }
-        });
-
-        await Promise.all(batchPromises);
-      }
-
+      await this.processFontsInBatches(downloadedFonts);
       this.log('🎉 All fonts processed successfully!');
     } catch (error) {
       ErrorHandler.handle(error, 'Processing all fonts');
@@ -107,33 +60,81 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
   async processSpecific(fontIds: string[]): Promise<void> {
     try {
       this.log(`Processing ${fontIds.length} specific fonts`);
-
-      // Process fonts in parallel batches
-      const batches = this.createBatches(fontIds, this.maxConcurrentFonts);
-
-      for (const batch of batches) {
-        const batchPromises = batch.map(async (fontId: string) => {
-          try {
-            await this.processSingleFont(fontId);
-          } catch (error) {
-            ErrorHandler.handle(error, `Processing specific font ${fontId}`);
-            this.log(
-              `❌ ${fontId}: ${
-                error instanceof Error ? error.message : 'Unknown error'
-              }`,
-              'error'
-            );
-          }
-        });
-
-        await Promise.all(batchPromises);
-      }
-
+      await this.processFontsInBatches(fontIds);
       this.log('🎉 Specific fonts processed successfully!');
     } catch (error) {
       ErrorHandler.handle(error, 'Processing specific fonts');
       throw error;
     }
+  }
+
+  /**
+   * Validate output files - simplified version
+   */
+  async validateOutput(fontIds?: string[]): Promise<boolean> {
+    try {
+      const fontsToValidate = fontIds ?? (await this.getDownloadedFonts());
+
+      for (const fontId of fontsToValidate) {
+        const fontDir = path.join(this.outputDir, 'fonts', fontId);
+        if (!(await fs.pathExists(fontDir))) {
+          this.log(`❌ Missing font directory for ${fontId}`, 'error');
+          return false;
+        }
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Clean up temporary files and cache
+   */
+  async cleanup(): Promise<void> {
+    try {
+      this.log('Cleanup completed');
+    } catch (error) {
+      ErrorHandler.handle(error, 'Cleanup');
+      throw error;
+    }
+  }
+
+  // ============================================================================
+  // PRIVATE METHODS
+  // ============================================================================
+
+  /**
+   * Process fonts in parallel batches
+   */
+  private async processFontsInBatches(fontIds: string[]): Promise<void> {
+    const batches = this.createBatches(fontIds, fontIds.length);
+
+    for (const batch of batches) {
+      const batchPromises = batch.map(async (fontId: string) => {
+        try {
+          await this.processSingleFont(fontId);
+        } catch (error) {
+          this.handleFontProcessingError(fontId, error);
+        }
+      });
+
+      await Promise.all(batchPromises);
+    }
+  }
+
+  /**
+   * Handle font processing errors consistently
+   */
+  private handleFontProcessingError(fontId: string, error: unknown): void {
+    ErrorHandler.handle(error, `Processing font ${fontId}`);
+    this.log(
+      `❌ ${fontId}: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
+      'error'
+    );
   }
 
   /**
@@ -152,42 +153,49 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
       return;
     }
 
-    // Process all files for this font (handle multiple styles)
-    const allChunks: (ChunkWithBuffer & { style: string })[] = [];
-    let totalChunks = 0;
-
-    for (const file of downloadResult.files) {
-      const inputPath = file.path;
-      const style = file.style ?? 'regular';
-
-      const result = await this.processFont(
-        fontId,
-        fontConfig,
-        inputPath,
-        style
-      );
-      if (result) {
-        allChunks.push(...result.chunks.map((chunk) => ({ ...chunk, style })));
-        totalChunks += result.chunks.length;
-      }
-    }
-
-    // Save combined metadata for all styles
-    if (allChunks.length > 0) {
-      await this.saveChunkMetadata(fontId, fontConfig, allChunks);
-    }
-
+    const totalChunks = await this.processAllFontFiles(
+      fontId,
+      fontConfig,
+      downloadResult.files
+    );
     this.log(`✅ ${fontId}: ${totalChunks} total chunks created`);
   }
 
   /**
-   * Process a single font file
+   * Process all font files for a single font family
+   */
+  private async processAllFontFiles(
+    fontId: string,
+    fontConfig: FontConfig,
+    files: FontFile[]
+  ): Promise<number> {
+    let totalChunks = 0;
+
+    for (const file of files) {
+      const style = file.style ?? 'regular';
+      const result = await this.processFont(
+        fontId,
+        fontConfig,
+        file.path,
+        style
+      );
+
+      if (result) {
+        totalChunks += result.chunks.length;
+      }
+    }
+
+    return totalChunks;
+  }
+
+  /**
+   * Process a single font file using cn-font-split
    */
   private async processFont(
     fontId: string,
     fontConfig: FontConfig,
     inputPath: string,
-    style: string
+    style: FontStyle
   ): Promise<SubsettingResult | null> {
     const fileName = path.basename(inputPath);
 
@@ -195,71 +203,27 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
     this.log(`📁 File: ${fileName}`, 'debug');
 
     try {
-      // Extract characters from font
-      const extractionResult = await this.characterExtractor.extractCharacters(
-        inputPath
-      );
-      if (extractionResult.characters.length === 0) {
-        this.log('⚠️ No characters found, skipping', 'warn');
-        return null;
-      }
+      const outputDir = this.determineOutputDirectory(fontId, style);
+      await fs.ensureDir(outputDir);
 
-      // Read font buffer
-      const fontBuffer = await fs.readFile(inputPath);
+      // Process font with cn-font-split
+      await this.splitFont(inputPath, outputDir, fontId, style);
 
-      // Create chunks using ultra-fast method with per-font chunk size
-      const chunks = await this.subsetService.createOptimalChunks(
-        fontBuffer,
-        extractionResult.characters,
-        fontConfig.subset.maxChunkSizeKB,
-        extractionResult.fontMetrics,
-        fontConfig.displayName,
+      // Create and save metadata
+      const result = await this.createFontResult(
+        fontId,
+        fontConfig,
+        outputDir,
         style
       );
 
-      // Generate Unicode ranges for each chunk using actual characters
-      const chunksWithRanges = chunks.map((chunk) => {
-        return {
-          ...chunk,
-          unicodeRanges: this.unicodeGenerator.generateRanges(chunk.characters),
-        };
-      });
+      if (result) {
+        this.log(`✅ Created ${result.chunks.length} chunks for ${style}`);
+      } else {
+        this.log('⚠️ No chunks generated, skipping', 'warn');
+      }
 
-      // Save chunks to files
-      const fontDir = path.join(this.outputDir, 'fonts', fontId);
-      const savedChunks = await this.subsetService.saveChunks(
-        chunksWithRanges,
-        fontDir,
-        fontConfig.output.filenamePattern,
-        style,
-        fontConfig.displayName
-      );
-
-      this.log(`✅ Created ${savedChunks.length} chunks for ${style}`);
-
-      const totalSize = savedChunks.reduce((sum, chunk) => sum + chunk.size, 0);
-
-      return {
-        fontId,
-        style,
-        chunks: savedChunks,
-        totalSize,
-        metadata: {
-          fontId,
-          displayName: fontConfig.displayName,
-          generatedAt: new Date().toISOString(),
-          chunks: savedChunks.map((chunk) => ({
-            chunkIndex: chunk.index,
-            filename: chunk.filename,
-            style,
-            size: chunk.size,
-            unicodeRanges: chunk.unicodeRanges,
-            characterCount: chunk.characterCount,
-          })),
-          totalChunks: savedChunks.length,
-          totalSize,
-        },
-      };
+      return result;
     } catch (error) {
       ErrorHandler.handle(error, `Processing font ${fontId}`);
       throw error;
@@ -267,89 +231,251 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
   }
 
   /**
-   * Save chunk metadata to JSON file for CSS generator
+   * Determine the output directory for a font style
    */
-  private async saveChunkMetadata(
+  private determineOutputDirectory(fontId: string, style: FontStyle): string {
+    const fontDir = path.join(this.outputDir, 'fonts', fontId);
+    return style !== 'regular' ? path.join(fontDir, style) : fontDir;
+  }
+
+  /**
+   * Split font using cn-font-split
+   */
+  private async splitFont(
+    inputPath: string,
+    outputDir: string,
+    fontId: string,
+    style: FontStyle
+  ): Promise<void> {
+    const inputBuffer = new Uint8Array(await fs.readFile(inputPath));
+
+    await fontSplit({
+      input: inputBuffer,
+      outDir: outputDir,
+      css: {
+        fileName: `${fontId}${style !== 'regular' ? `-${style}` : ''}.css`,
+        compress: false,
+        commentUnicodes: true,
+      },
+      testHtml: false,
+      reporter: false,
+      renameOutputFont: '[index].[ext]',
+      silent: true,
+    });
+  }
+
+  /**
+   * Create font result with metadata from generated files
+   */
+  private async createFontResult(
     fontId: string,
     fontConfig: FontConfig,
-    allChunks: (ChunkWithBuffer & { style: string })[]
-  ): Promise<void> {
-    const fontDir = path.join(this.outputDir, 'fonts', fontId);
-    const metadataPath = path.join(fontDir, 'chunks.json');
+    outputDir: string,
+    style: FontStyle
+  ): Promise<SubsettingResult | null> {
+    const files = await fs.readdir(outputDir);
+    const cssFile = files.find((file) => file.endsWith('.css'));
 
-    const metadata: ChunkMetadata = {
+    if (!cssFile) {
+      return null;
+    }
+
+    // Parse CSS to extract all chunk information
+    const cssContent = await fs.readFile(
+      path.join(outputDir, cssFile),
+      'utf-8'
+    );
+    const chunkInfoFromCSS = this.extractChunkInfoFromCSS(cssContent);
+
+    if (chunkInfoFromCSS.length === 0) {
+      return null;
+    }
+
+    // Convert to Chunk format
+    const chunks = await this.createChunksFromCSSInfo(
+      chunkInfoFromCSS,
+      outputDir
+    );
+    const totalSize = chunks.reduce((sum, chunk) => sum + chunk.size, 0); // Sum in KB since chunk.size is already in KB
+
+    // Save metadata
+    const metadata = this.createMetadata(
+      fontId,
+      fontConfig,
+      chunks,
+      totalSize,
+      style
+    );
+    await this.saveMetadata(outputDir, metadata);
+
+    // Clean up temporary files
+    await this.cleanupTemporaryFiles(outputDir);
+
+    return {
+      fontId,
+      style,
+      chunks,
+      totalSize,
+      metadata,
+    };
+  }
+
+  /**
+   * Extract chunk information directly from CSS file
+   */
+  private extractChunkInfoFromCSS(cssContent: string): ChunkInfo[] {
+    const chunkInfo: ChunkInfo[] = [];
+
+    let match;
+    while ((match = CSS_REGEX.fontFace.exec(cssContent)) !== null) {
+      const fontFaceBlock = match[0];
+
+      // Extract src URL and unicode range
+      const srcMatch = CSS_REGEX.src.exec(fontFaceBlock);
+      const unicodeMatch = CSS_REGEX.unicodeRange.exec(fontFaceBlock);
+
+      if (srcMatch && unicodeMatch) {
+        const filename = srcMatch[1]; // e.g., "10.woff2"
+        const rangeString = unicodeMatch[1].trim();
+        const unicodeRanges = rangeString.split(',').map((r) => r.trim());
+
+        // Extract index from filename
+        const indexMatch = filename.match(/^(\d+)\./);
+        const index = indexMatch ? parseInt(indexMatch[1], 10) : 0;
+
+        chunkInfo.push({
+          index,
+          filename,
+          unicodeRanges,
+          characterCount: this.estimateCharacterCount(unicodeRanges),
+        });
+      }
+    }
+
+    // Sort by index to ensure correct order
+    return chunkInfo.sort((a, b) => a.index - b.index);
+  }
+
+  /**
+   * Create chunks from CSS-extracted information
+   */
+  private async createChunksFromCSSInfo(
+    chunkInfoFromCSS: ChunkInfo[],
+    outputDir: string
+  ): Promise<Chunk[]> {
+    const chunks: Chunk[] = [];
+
+    for (const info of chunkInfoFromCSS) {
+      const chunkPath = path.join(outputDir, info.filename);
+
+      // Only read file size, not full buffer to save memory
+      let size: number;
+
+      try {
+        const stats = await fs.stat(chunkPath);
+        size = stats.size;
+      } catch {
+        // If file doesn't exist, skip
+        continue;
+      }
+
+      chunks.push({
+        index: info.index,
+        filename: info.filename,
+        path: chunkPath,
+        size: this.bytesToKB(size), // Convert to KB
+        unicodeRanges: info.unicodeRanges,
+        characterCount: info.characterCount,
+      });
+    }
+
+    return chunks;
+  }
+
+  /**
+   * Create metadata object
+   */
+  private createMetadata(
+    fontId: string,
+    fontConfig: FontConfig,
+    chunks: Chunk[],
+    totalSize: number,
+    style: FontStyle
+  ): ChunksMetadata {
+    return {
       fontId,
       displayName: fontConfig.displayName,
       generatedAt: new Date().toISOString(),
-      chunks: allChunks.map((chunk) => ({
+      chunks: chunks.map((chunk) => ({
         chunkIndex: chunk.index,
         filename: chunk.filename,
-        style: chunk.style,
+        style,
         size: chunk.size,
         unicodeRanges: chunk.unicodeRanges,
         characterCount: chunk.characterCount,
       })),
-      totalChunks: allChunks.length,
-      totalSize: allChunks.reduce((sum, chunk) => sum + chunk.size, 0),
+      totalChunks: chunks.length,
+      totalSize,
     };
-
-    await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
-    this.log(`💾 Saved metadata: chunks.json`, 'debug');
   }
 
   /**
-   * Validate output files
+   * Save metadata to file
    */
-  async validateOutput(fontIds?: string[]): Promise<boolean> {
+  private async saveMetadata(
+    outputDir: string,
+    metadata: ChunksMetadata
+  ): Promise<void> {
+    const metadataPath = path.join(outputDir, 'chunks.json');
+    await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
+    this.log(
+      `💾 Saved metadata for ${metadata.chunks[0]?.style || 'unknown'}: ${
+        metadata.totalChunks
+      } chunks, ${metadata.totalSize}KB total`,
+      'debug'
+    );
+  }
+
+  /**
+   * Clean up temporary files after metadata generation
+   */
+  private async cleanupTemporaryFiles(outputDir: string): Promise<void> {
     try {
-      const fontsToValidate = fontIds ?? (await this.getDownloadedFonts());
-      let allValid = true;
+      const files = await fs.readdir(outputDir);
 
-      for (const fontId of fontsToValidate) {
-        const fontDir = path.join(this.outputDir, 'fonts', fontId);
-        const metadataPath = path.join(fontDir, 'chunks.json');
+      // Files to remove after chunks.json is generated
+      const filesToRemove = files.filter(
+        (file) => file.endsWith('.css') || file === 'index.proto'
+      );
 
-        if (!(await fs.pathExists(metadataPath))) {
-          this.log(`❌ Missing metadata for ${fontId}`, 'error');
-          allValid = false;
-          continue;
-        }
-
-        const metadata = JSON.parse(
-          await fs.readFile(metadataPath, 'utf-8')
-        ) as ChunkMetadata;
-
-        for (const chunk of metadata.chunks) {
-          const chunkPath = path.join(fontDir, chunk.filename);
-          if (!(await fs.pathExists(chunkPath))) {
-            this.log(`❌ Missing chunk file: ${chunk.filename}`, 'error');
-            allValid = false;
-          }
-        }
+      for (const file of filesToRemove) {
+        const filePath = path.join(outputDir, file);
+        await fs.remove(filePath);
+        this.log(`🗑️ Removed temporary file: ${file}`, 'debug');
       }
 
-      return allValid;
+      if (filesToRemove.length > 0) {
+        this.log(
+          `✨ Cleaned up ${filesToRemove.length} temporary files`,
+          'debug'
+        );
+      }
     } catch (error) {
-      ErrorHandler.handle(error, 'Validating output');
-      return false;
+      this.log(
+        `⚠️ Failed to clean up temporary files: ${
+          error instanceof Error ? error.message : 'Unknown error'
+        }`,
+        'warn'
+      );
     }
   }
 
-  /**
-   * Clean up temporary files and cache
-   */
-  async cleanup(): Promise<void> {
-    try {
-      // Clean up any temporary files if needed
-      this.log('Cleanup completed');
-    } catch (error) {
-      ErrorHandler.handle(error, 'Cleanup');
-      throw error;
-    }
-  }
+  // ============================================================================
+  // UTILITY METHODS
+  // ============================================================================
 
   /**
-   * Utility methods
+   * Create batches from an array
    */
   private createBatches<T>(array: T[], batchSize: number): T[][] {
     const batches: T[][] = [];
@@ -359,14 +485,16 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
     return batches;
   }
 
+  /**
+   * Get list of downloaded font directories
+   */
   private async getDownloadedFonts(): Promise<string[]> {
     try {
-      const downloadedDir = this.downloadDir;
-      const items = await fs.readdir(downloadedDir);
-
+      const items = await fs.readdir(this.downloadDir);
       const fonts: string[] = [];
+
       for (const item of items) {
-        const itemPath = path.join(downloadedDir, item);
+        const itemPath = path.join(this.downloadDir, item);
         const stat = await fs.stat(itemPath);
         if (stat.isDirectory()) {
           fonts.push(item);
@@ -380,39 +508,82 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
     }
   }
 
+  /**
+   * Get download result for a specific font
+   */
   private async getDownloadResult(
     fontId: string
-  ): Promise<{ files: Array<{ path: string; style?: string }> } | null> {
+  ): Promise<DownloadResult | null> {
     try {
       const fontDir = path.join(this.downloadDir, fontId);
       const files = await fs.readdir(fontDir);
 
       const fontFiles = files
-        .filter((file) => file.endsWith('.ttf') || file.endsWith('.otf'))
-        .map((file) => {
-          // Extract style from filename like the original implementation
-          let style = 'regular';
-          const lowerFile = file.toLowerCase();
-
-          if (lowerFile.includes('italic')) {
-            style = 'italic';
-          } else if (lowerFile.includes('roman')) {
-            style = 'roman';
-          } else if (lowerFile.includes('bold')) {
-            style = 'bold';
-          } else if (lowerFile.includes('light')) {
-            style = 'light';
-          }
-
-          return {
-            path: path.join(fontDir, file),
-            style,
-          };
-        });
+        .filter((file) => this.isSupportedFontFile(file))
+        .map((file) => ({
+          path: path.join(fontDir, file),
+          style: this.extractStyleFromFilename(file),
+        }));
 
       return { files: fontFiles };
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Check if file is a supported font file
+   */
+  private isSupportedFontFile(filename: string): boolean {
+    const extension = path.extname(filename).toLowerCase();
+    return SUPPORTED_FONT_EXTENSIONS.includes(
+      extension as (typeof SUPPORTED_FONT_EXTENSIONS)[number]
+    );
+  }
+
+  /**
+   * Extract style from filename
+   */
+  private extractStyleFromFilename(filename: string): FontStyle {
+    const lowerFilename = filename.toLowerCase();
+
+    for (const [style, pattern] of Object.entries(STYLE_PATTERNS)) {
+      if (pattern.test(lowerFilename)) {
+        return style;
+      }
+    }
+
+    return 'regular';
+  }
+
+  /**
+   * Estimate character count from unicode ranges
+   */
+  private estimateCharacterCount(unicodeRanges: string[]): number {
+    let count = 0;
+
+    for (const range of unicodeRanges) {
+      if (range.includes('-')) {
+        // Range like "U+4E00-9FFF"
+        const parts = range.replace('U+', '').split('-');
+        if (parts.length === 2) {
+          const start = parseInt(parts[0], 16);
+          const end = parseInt(parts[1], 16);
+          count += Math.max(0, end - start + 1);
+        }
+      } else {
+        // Single character like "U+4E00"
+        count += 1;
+      }
+    }
+
+    return count;
+  }
+
+  /**
+   * Convert bytes to KB (rounded)
+   */
+  private bytesToKB(bytes: number): number {
+    return Math.round(bytes / 1024);
   }
 }

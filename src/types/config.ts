@@ -31,8 +31,8 @@ export interface FontConfig {
     filenamePattern: string;
   };
   css?: {
-    fontStretch?: string;
     srcFormat?: string;
+    fontStretch?: string;
   };
   variableAxes?: string[];
 }
