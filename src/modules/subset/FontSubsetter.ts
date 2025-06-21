@@ -255,7 +255,6 @@ export class FontSubsetter extends BaseService implements IFontSubsetter {
       css: {
         fileName: `${fontId}${style !== 'regular' ? `-${style}` : ''}.css`,
         compress: false,
-        commentUnicodes: true,
       },
       testHtml: false,
       reporter: false,
