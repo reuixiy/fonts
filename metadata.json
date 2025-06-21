@@ -1,10 +1,10 @@
 {
-  "buildDate": "2025-06-20T08:58:15Z",
-  "buildId": "15775269151",
-  "commit": "459f4919892c95130be8095b47b3e243b7342648",
-  "buildType": "selective",
-  "updatedFonts": "imingcp,lxgwwenkaitc,amstelvar",
-  "processedFonts": "imingcp,lxgwwenkaitc,amstelvar",
+  "buildDate": "2025-06-21T02:00:52Z",
+  "buildId": "15790934882",
+  "commit": "e2c5504bb34ebfea7211f8e5f3cd344bd62bbe57",
+  "buildType": "full",
+  "updatedFonts": "all",
+  "processedFonts": "all",
   "fonts": {
   "imingcp": {
     "name": "I.MingCP",
@@ -23,14 +23,7 @@
     "weight": 400,
     "style": "normal",
     "subset": {
-      "type": "size-based-chunks",
-      "maxChunkSizeKB": 60
-    },
-    "output": {
-      "formats": [
-        "woff2"
-      ],
-      "filenamePattern": "imingcp-regular-chunk-{index}"
+      "type": "size-based-chunks"
     },
     "css": {
       "srcFormat": "url('../fonts/{fontId}/{filename}') format('woff2')"
@@ -53,14 +46,7 @@
     "weight": 300,
     "style": "normal",
     "subset": {
-      "type": "size-based-chunks",
-      "maxChunkSizeKB": 60
-    },
-    "output": {
-      "formats": [
-        "woff2"
-      ],
-      "filenamePattern": "lxgwwenkaitc-light-chunk-{index}"
+      "type": "size-based-chunks"
     },
     "css": {
       "srcFormat": "url('../fonts/{fontId}/{filename}') format('woff2')"
@@ -90,19 +76,13 @@
       "url": "https://github.com/googlefonts/amstelvar/blob/main/OFL.txt"
     },
     "type": "variable",
+    "weight": "100 900",
     "styles": [
       "roman",
       "italic"
     ],
     "subset": {
-      "type": "size-based-chunks",
-      "maxChunkSizeKB": 60
-    },
-    "output": {
-      "formats": [
-        "woff2"
-      ],
-      "filenamePattern": "amstelvar-{style}-chunk-{index}"
+      "type": "size-based-chunks"
     },
     "css": {
       "fontStretch": "50% 125%",

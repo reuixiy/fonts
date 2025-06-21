@@ -1,7 +1,7 @@
 {
   "fontId": "imingcp",
   "displayName": "I.MingCP",
-  "generatedAt": "2025-06-20T08:58:15.222Z",
+  "generatedAt": "2025-06-21T02:00:52.145Z",
   "chunks": [
     {
       "chunkIndex": 0,
@@ -12,7 +12,6 @@
         "U+0",
         "U+20-5D",
         "U+61-7A",
-        "U+A0",
         "U+C0-D6",
         "U+D8-F6",
         "U+F8-122",
@@ -92,7 +91,7 @@
         "U+A7B5",
         "U+FF10-FF19"
       ],
-      "characterCount": 539
+      "characterCount": 538
     },
     {
       "chunkIndex": 1,
@@ -111,11 +110,11 @@
       "style": "regular",
       "size": 6,
       "unicodeRanges": [
-        "U+A1-BF",
+        "U+A0-BF",
         "U+D7",
         "U+384"
       ],
-      "characterCount": 33
+      "characterCount": 34
     },
     {
       "chunkIndex": 3,
