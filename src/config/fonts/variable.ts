@@ -26,14 +26,10 @@ export const variableFonts: Record<string, FontConfig> = {
       url: 'https://github.com/googlefonts/amstelvar/blob/main/OFL.txt',
     },
     type: 'variable',
+    weight: '100 900',
     styles: ['roman', 'italic'],
     subset: {
       type: 'size-based-chunks',
-      maxChunkSizeKB: 60,
-    },
-    output: {
-      formats: ['woff2'],
-      filenamePattern: 'amstelvar-{style}-chunk-{index}',
     },
     css: {
       fontStretch: '50% 125%',

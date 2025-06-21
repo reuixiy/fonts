@@ -57,10 +57,6 @@ export class FontFaceGenerator extends BaseService {
     style: string
   ): FontFaceRule {
     const fontStyle = style === 'italic' ? 'italic' : 'normal';
-    const fontWeight =
-      fontConfig.type === 'variable'
-        ? fontConfig.weight ?? '100 900'
-        : String(fontConfig.weight ?? 400);
 
     const src = this.generateSrcValue(
       fontConfig,
@@ -75,7 +71,7 @@ export class FontFaceGenerator extends BaseService {
       src,
       fontDisplay: 'swap',
       fontStyle,
-      fontWeight: String(fontWeight),
+      fontWeight: String(fontConfig.weight),
       fontStretch: fontConfig.css?.fontStretch,
       unicodeRange: this.formatUnicodeRanges(chunk.unicodeRanges ?? []),
     };

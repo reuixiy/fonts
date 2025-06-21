@@ -18,17 +18,12 @@ export interface FontConfig {
     type: string;
     url: string;
   };
-  weight?: number;
+  weight?: number | string;
   style?: string;
   type?: string;
   styles?: string[];
   subset: {
     type: 'size-based-chunks';
-    maxChunkSizeKB: number;
-  };
-  output: {
-    formats: string[];
-    filenamePattern: string;
   };
   css?: {
     srcFormat?: string;

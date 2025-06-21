@@ -20,11 +20,6 @@ export const chineseFonts: Record<string, FontConfig> = {
     style: 'normal',
     subset: {
       type: 'size-based-chunks',
-      maxChunkSizeKB: 60,
-    },
-    output: {
-      formats: ['woff2'],
-      filenamePattern: 'imingcp-regular-chunk-{index}',
     },
     css: {
       srcFormat: "url('../fonts/{fontId}/{filename}') format('woff2')",
@@ -48,11 +43,6 @@ export const chineseFonts: Record<string, FontConfig> = {
     style: 'normal',
     subset: {
       type: 'size-based-chunks',
-      maxChunkSizeKB: 60,
-    },
-    output: {
-      formats: ['woff2'],
-      filenamePattern: 'lxgwwenkaitc-light-chunk-{index}',
     },
     css: {
       srcFormat: "url('../fonts/{fontId}/{filename}') format('woff2')",
