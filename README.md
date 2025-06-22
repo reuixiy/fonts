@@ -12,7 +12,7 @@ Automated web font subsetting workflow with chunked loading for optimal performa
 - **Source**: [ichitenfont/I.Ming](https://github.com/ichitenfont/I.Ming)
 - **License**: IPA Font License Agreement v1.0
 
-#### LXGW WenKai TC  
+#### LXGW WenKai TC (Light Weight Only)
 - **Font ID**: `lxgwwenkaitc`
 - **Type**: Traditional Chinese handwriting
 - **Source**: [lxgw/LxgwWenkaiTC](https://github.com/lxgw/LxgwWenkaiTC)
@@ -47,7 +47,7 @@ Automated web font subsetting workflow with chunked loading for optimal performa
 .serif { font-family: 'I.MingCP', serif; }
 
 /* Traditional Chinese handwriting */
-.handwriting { font-family: 'LXGW WenKai TC', sans-serif; font-weight: 300; }
+.handwriting { font-family: 'LXGW WenKai TC', cursive; font-weight: 300; }
 
 /* Latin variable font */
 .variable { font-family: 'Amstelvar', serif; }

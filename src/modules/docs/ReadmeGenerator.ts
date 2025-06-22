@@ -55,7 +55,7 @@ Add the following links to your HTML head section to use these fonts:
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/reuixiy/fonts@build/css/imingcp.css">
 \`\`\`
 
-#### LXGW WenKai TC (Traditional Chinese Handwriting)
+#### LXGW WenKai TC (Traditional Chinese Handwriting, Light Weight Only)
 \`\`\`html
 <!-- Minified -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/reuixiy/fonts@build/css/lxgwwenkaitc.min.css">
@@ -85,7 +85,7 @@ After including the CSS files, you can use the fonts in your stylesheets:
 
 /* Traditional Chinese Handwriting */
 .handwriting-text {
-  font-family: 'LXGW WenKai TC', sans-serif;
+  font-family: 'LXGW WenKai TC', cursive;
   font-weight: 300;
 }
 
