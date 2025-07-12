@@ -1,6 +1,7 @@
 // Build command implementation
 import chalk from 'chalk';
 import { FontDownloader } from '@/modules/download/FontDownloader.js';
+import { FontEditor } from '@/modules/edit/FontEditor.js';
 import { FontSubsetter } from '@/modules/subset/FontSubsetter.js';
 import { CSSGenerator } from '@/modules/css/CSSGenerator.js';
 import { DocsGenerator } from '@/modules/docs/DocsGenerator.js';
@@ -12,7 +13,7 @@ import type { CLICommand, CLIArgs, StandardOptions } from '@/cli/types.js';
 
 export const buildCommand: CLICommand = {
   name: 'build',
-  description: 'Complete build workflow: download, subset, css, docs',
+  description: 'Complete build workflow: download, edit, subset, css, docs',
   aliases: ['b'],
 
   async execute(args: CLIArgs): Promise<void> {
@@ -25,6 +26,7 @@ export const buildCommand: CLICommand = {
 
       // Initialize services
       const fontDownloader = new FontDownloader();
+      const fontEditor = new FontEditor();
       const fontSubsetter = new FontSubsetter(
         PathUtils.resolve(process.cwd(), 'downloads'),
         PathUtils.resolve(process.cwd(), options.outputDir),
@@ -47,8 +49,17 @@ export const buildCommand: CLICommand = {
         }
       }
 
+      if (!options.skipEdit) {
+        console.log(chalk.yellow('📋 Step 2: Editing fonts...'));
+        if (options.fontIds.length > 0) {
+          await fontEditor.editSpecific(options.fontIds);
+        } else {
+          await fontEditor.editAll();
+        }
+      }
+
       if (!options.skipSubset) {
-        console.log(chalk.yellow('📋 Step 2: Subsetting fonts...'));
+        console.log(chalk.yellow('📋 Step 3: Subsetting fonts...'));
         if (options.fontIds.length > 0) {
           await fontSubsetter.processSpecific(options.fontIds);
         } else {
@@ -57,7 +68,7 @@ export const buildCommand: CLICommand = {
       }
 
       if (!options.skipCSS) {
-        console.log(chalk.yellow('📋 Step 3: Generating CSS...'));
+        console.log(chalk.yellow('📋 Step 4: Generating CSS...'));
         if (options.fontIds.length > 0) {
           await cssGenerator.generateSpecific(options.fontIds);
           // Regenerate unified CSS when processing specific fonts
@@ -68,7 +79,7 @@ export const buildCommand: CLICommand = {
       }
 
       if (!options.skipDocs) {
-        console.log(chalk.yellow('📋 Step 4: Generating documentation...'));
+        console.log(chalk.yellow('📋 Step 5: Generating documentation...'));
         await docsGenerator.generateDocumentation();
       }
 

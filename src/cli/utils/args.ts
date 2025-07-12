@@ -122,6 +122,7 @@ export class ArgsParser {
       fontIds,
       outputDir,
       skipDownload: ArgsParser.hasFlag(args, 'skip-download'),
+      skipEdit: ArgsParser.hasFlag(args, 'skip-edit'),
       skipSubset: ArgsParser.hasFlag(args, 'skip-subset'),
       skipCSS: ArgsParser.hasFlag(args, 'skip-css'),
       skipDocs: ArgsParser.hasFlag(args, 'skip-docs'),

@@ -5,6 +5,7 @@ export interface StandardOptions {
   fontIds: string[]; // Specific font IDs to process
   outputDir: string; // Output directory
   skipDownload: boolean; // Skip font download step
+  skipEdit: boolean; // Skip font editing step
   skipSubset: boolean; // Skip font subsetting step
   skipCSS: boolean; // Skip CSS generation step
   skipDocs: boolean; // Skip documentation generation step

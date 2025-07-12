@@ -8,6 +8,7 @@ import { CLIValidator } from '@/cli/utils/validation.js';
 import { buildCommand } from '@/cli/commands/build.js';
 import { checkCommand } from '@/cli/commands/check.js';
 import { downloadCommand } from '@/cli/commands/download.js';
+import { editCommand } from '@/cli/commands/edit.js';
 import { subsetCommand } from '@/cli/commands/subset.js';
 import { cssCommand } from '@/cli/commands/css.js';
 import { cleanCommand } from '@/cli/commands/clean.js';
@@ -20,12 +21,13 @@ export class CLI {
   constructor() {
     this.config = {
       name: 'fonts',
-      version: '4.0.0',
+      version: '5.0.0',
       description: 'Web font auto-subsetting workflow tool',
       commands: [
         checkCommand,
         buildCommand,
         downloadCommand,
+        editCommand,
         subsetCommand,
         cssCommand,
         docsCommand,

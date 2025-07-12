@@ -69,6 +69,20 @@ export const cleanCommand: CLICommand = {
         });
       }
 
+      // Python artifacts
+      if (options.cleanCache) {
+        cleanTasks.push({
+          name: 'python-venv',
+          path: PathUtils.resolve(process.cwd(), '.venv-scripts'),
+          description: 'Python virtual environment for scripts',
+        });
+        cleanTasks.push({
+          name: 'pycache',
+          path: PathUtils.resolve(process.cwd(), 'scripts', '__pycache__'),
+          description: 'Python bytecode cache in scripts',
+        });
+      }
+
       if (cleanTasks.length === 0) {
         console.log(
           chalk.yellow(
