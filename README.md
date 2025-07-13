@@ -80,12 +80,12 @@ pnpm run build                  # Compile TypeScript
 pnpm run dev                    # Development mode with watch
 ```
 
-## Acknowledgements
-
-Thanks to [KonghaYao/cn-font-split](https://github.com/KonghaYao/cn-font-split) for lightning-fast subsetting.
-
 ## License
 
 MIT License - see [LICENSE.md](LICENSE.md) for details.
 
 Individual fonts maintain their respective licenses as documented above.
+
+## Acknowledgements
+
+Thanks to [KonghaYao/cn-font-split](https://github.com/KonghaYao/cn-font-split) for lightning-fast subsetting.

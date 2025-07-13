@@ -26,11 +26,19 @@ export class FontEditor extends BaseService implements IFontEditor {
     this.scriptsConfig = {
       scripts: [
         {
-          name: 'halt-fix',
-          path: 'scripts/halt-fix.py',
-          description: 'Fix GPOS halt feature for specific characters',
+          name: 'iming-halt-fix',
+          path: 'scripts/iming-halt-fix.py',
+          description: 'Fix GPOS halt feature for I.MingCP specific characters',
           requiredPackages: ['fonttools'],
-          targetFonts: ['imingcp'], // Specific to fonts that need halt fixing
+          targetFonts: ['imingcp'], // Specific to I.MingCP font
+          enabled: true,
+        },
+        {
+          name: 'lxgw-halt-fix',
+          path: 'scripts/lxgw-halt-fix.py',
+          description: 'Fix GPOS halt feature for LXGW WenKai TC punctuation',
+          requiredPackages: ['fonttools'],
+          targetFonts: ['lxgwwenkaitc'], // Specific to LXGW WenKai TC font
           enabled: true,
         },
         {

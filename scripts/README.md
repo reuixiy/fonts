@@ -6,11 +6,17 @@ The FontEditor module automatically executes these scripts during the build proc
 
 ## Available Scripts
 
-### halt-fix.py
-**Purpose**: Fix GPOS halt feature for specific characters  
+### iming-halt-fix.py
+**Purpose**: Fix GPOS halt feature for I.MingCP specific characters  
 **Target Fonts**: I.MingCP (`imingcp`)  
 **Dependencies**: fonttools  
 **Description**: Removes specific glyphs from the 'halt' feature in GPOS table to fix rendering issues
+
+### lxgw-halt-fix.py
+**Purpose**: Fix GPOS halt feature for LXGW WenKai TC punctuation  
+**Target Fonts**: LXGW WenKai TC (`lxgwwenkaitc`)  
+**Dependencies**: fonttools  
+**Description**: Removes punctuation characters (：、，；。！) from the 'halt' feature to fix rendering issues
 
 ### test.py
 **Purpose**: Test script for font information extraction  
@@ -121,7 +127,7 @@ You can test scripts individually:
 pip install fonttools
 
 # Run script directly with a font file
-python scripts/halt-fix.py /path/to/font.ttf
+python scripts/iming-halt-fix.py /path/to/font.ttf
 
 # Or test through the FontEditor (recommended)
 pnpm run cli:edit --fonts imingcp

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-GPOS Halt Feature Fix Script
+I.MingCP GPOS Halt Feature Fix Script
 
 Removes specific glyphs from the 'halt' feature in GPOS table to fix rendering issues.
 Specifically targets the '！' character in I.MingCP font.
@@ -111,7 +111,7 @@ def main():
     """Main script function"""
     # Get font path from command line argument
     if len(sys.argv) < 2:
-        log_progress("Usage: halt-fix.py <font_path>", 'error')
+        log_progress("Usage: iming-halt-fix.py <font_path>", 'error')
         sys.exit(1)
     
     font_path = Path(sys.argv[1])
