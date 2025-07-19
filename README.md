@@ -30,6 +30,8 @@ Automated web font subsetting workflow with chunked loading for optimal performa
 
 ### CDN
 
+[![](https://data.jsdelivr.com/v1/package/gh/reuixiy/fonts/badge)](https://www.jsdelivr.com/package/gh/reuixiy/fonts)
+
 ```html
 <!-- All fonts -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/reuixiy/fonts@build/css/fonts.min.css">
