@@ -5,7 +5,7 @@ LXGW WenKai TC Halt Feature Fix Script
 Removes specific punctuation characters from the 'halt' feature in GPOS table 
 to fix rendering issues in LXGW WenKai TC font.
 
-Targets characters: ：、，；。！
+Targets characters: 。．，、：；！•
 """
 
 from fontTools.ttLib import TTFont
@@ -43,8 +43,8 @@ def fix_lxgw_halt_feature(font_path: Path, target_chars: list = None) -> bool:
         True if modifications were made, False otherwise
     """
     if target_chars is None:
-        target_chars = ['：', '、', '，', '；', '。', '！']
-    
+        target_chars = ['。', '．', '，', '、', '：', '；', '！', '•']
+
     log_progress(f"Loading font: {font_path}")
     font = load_font(font_path)
     
@@ -143,7 +143,7 @@ def main():
     font_path = Path(sys.argv[1])
     
     # Target characters for LXGW WenKai TC
-    target_chars = ['：', '、', '，', '；', '。', '！']
+    target_chars = ['。', '．', '，', '、', '：', '；', '！', '•']
     
     log_progress(f"LXGW WenKai TC Halt Fix - Target characters: {''.join(target_chars)}")
     
