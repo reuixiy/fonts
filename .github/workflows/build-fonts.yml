@@ -12,7 +12,7 @@ on:
     branches: [ main ]
     paths:
       - 'src/**'
-      - 'scripts/*.{py}'
+      - 'scripts/**/*.py'
       - '.github/workflows/build-fonts.yml'
 
 jobs:
