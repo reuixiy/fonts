@@ -38,7 +38,7 @@ jobs:
           version: latest
 
       - name: Install Node.js dependencies
-        run: pnpm install --allow-build=cn-font-split esbuild koffi protobufjs
+        run: pnpm install
 
       - name: Build fonts using CLI
         env:

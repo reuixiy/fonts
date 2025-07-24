@@ -31,7 +31,7 @@ jobs:
           version: latest
       
       - name: Install dependencies
-        run: pnpm install --allow-build=cn-font-split esbuild koffi protobufjs
+        run: pnpm install
       
       - name: Check font versions
         id: version-check
