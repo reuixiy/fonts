@@ -1,7 +1,7 @@
 {
   "fontId": "lxgwwenkaitc",
   "displayName": "LXGW WenKai TC",
-  "generatedAt": "2025-09-30T16:23:25.255Z",
+  "generatedAt": "2025-10-09T16:24:46.643Z",
   "chunks": [
     {
       "chunkIndex": 0,
@@ -6729,7 +6729,7 @@
       "chunkIndex": 74,
       "filename": "74.woff2",
       "style": "regular",
-      "size": 69,
+      "size": 70,
       "unicodeRanges": [
         "U+4F1B",
         "U+4F7E",
@@ -18775,5 +18775,5 @@
     }
   ],
   "totalChunks": 256,
-  "totalSize": 9744
+  "totalSize": 9745
 }
