@@ -1,4 +1,4 @@
-name: Daily Font Version Check
+name: Weekly Font Version Check
 
 on:
   schedule:
