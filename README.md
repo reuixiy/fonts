@@ -1,6 +1,6 @@
 # Web Font CDN
 
-Generated on: 2025-10-10T16:23:14.560Z
+Generated on: 2025-12-10T06:27:07.826Z
 Source: [reuixiy/fonts](https://github.com/reuixiy/fonts)
 
 ## Quick Start
@@ -96,6 +96,6 @@ Please refer to [LICENSE.md](./LICENSE.md) for detailed license information of e
 
 ## Updates
 
-This repository is automatically updated daily to check for new font versions. The build is triggered when changes are detected.
+This repository is automatically updated weekly to check for new font versions. The build is triggered when changes are detected.
 
 For more information, visit the [source repository](https://github.com/reuixiy/fonts).

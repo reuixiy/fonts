@@ -1,7 +1,7 @@
 {
   "fontId": "amstelvar",
   "displayName": "Amstelvar",
-  "generatedAt": "2025-07-24T03:06:18.009Z",
+  "generatedAt": "2025-12-10T06:27:07.364Z",
   "chunks": [
     {
       "chunkIndex": 0,
@@ -247,12 +247,13 @@
       "style": "roman",
       "size": 7,
       "unicodeRanges": [
-        "U+2014",
+        "U+2013-2014",
         "U+2018-2019",
         "U+201C-201D",
+        "U+2022",
         "U+2026"
       ],
-      "characterCount": 6
+      "characterCount": 8
     },
     {
       "chunkIndex": 14,
@@ -280,21 +281,22 @@
       "chunkIndex": 16,
       "filename": "16.woff2",
       "style": "roman",
-      "size": 47,
+      "size": 54,
       "unicodeRanges": [
         "U+1EDD-1EF9",
         "U+2010",
-        "U+2013",
         "U+2015",
         "U+201A",
         "U+201E",
-        "U+2020-2022",
+        "U+2020-2021",
         "U+2030",
         "U+2032-2033",
         "U+2039-203A",
         "U+2044",
         "U+2052",
-        "U+2074"
+        "U+2074",
+        "U+20A1",
+        "U+20A3"
       ],
       "characterCount": 45
     },
@@ -302,10 +304,9 @@
       "chunkIndex": 17,
       "filename": "17.woff2",
       "style": "roman",
-      "size": 108,
+      "size": 105,
       "unicodeRanges": [
-        "U+20A1",
-        "U+20A3-20A4",
+        "U+20A4",
         "U+20A6-20A7",
         "U+20A9",
         "U+20AB-20AD",
@@ -327,7 +328,8 @@
         "U+F50E-F511",
         "U+F518-F51B",
         "U+F522-F525",
-        "U+F528-F529"
+        "U+F528-F529",
+        "U+F52C-F52D"
       ],
       "characterCount": 45
     },
@@ -335,14 +337,13 @@
       "chunkIndex": 18,
       "filename": "18.woff2",
       "style": "roman",
-      "size": 22,
+      "size": 17,
       "unicodeRanges": [
-        "U+F52C-F52D",
         "U+FB00-FB04"
       ],
-      "characterCount": 7
+      "characterCount": 5
     }
   ],
   "totalChunks": 19,
-  "totalSize": 1367
+  "totalSize": 1366
 }

@@ -6,7 +6,7 @@
  * License: SIL Open Font License 1.1
  * License URL: https://github.com/googlefonts/amstelvar/blob/main/OFL.txt
  * 
- * Generated: 2025-07-24T03:06:18.037Z
+ * Generated: 2025-12-10T06:27:07.388Z
  * Generator: https://github.com/reuixiy/fonts
  */
 
@@ -147,7 +147,7 @@
   font-style: normal;
   font-weight: 100 900;
   font-stretch: 50% 125%;
-  unicode-range: U+2014, U+2018-2019, U+201C-201D, U+2026;
+  unicode-range: U+2013-2014, U+2018-2019, U+201C-201D, U+2022, U+2026;
 }
 
 @font-face {
@@ -177,7 +177,7 @@
   font-style: normal;
   font-weight: 100 900;
   font-stretch: 50% 125%;
-  unicode-range: U+1EDD-1EF9, U+2010, U+2013, U+2015, U+201A, U+201E, U+2020-2022, U+2030, U+2032-2033, U+2039-203A, U+2044, U+2052, U+2074;
+  unicode-range: U+1EDD-1EF9, U+2010, U+2015, U+201A, U+201E, U+2020-2021, U+2030, U+2032-2033, U+2039-203A, U+2044, U+2052, U+2074, U+20A1, U+20A3;
 }
 
 @font-face {
@@ -187,7 +187,7 @@
   font-style: normal;
   font-weight: 100 900;
   font-stretch: 50% 125%;
-  unicode-range: U+20A1, U+20A3-20A4, U+20A6-20A7, U+20A9, U+20AB-20AD, U+20B1-20B2, U+20B4-20B5, U+20B8-20BA, U+20BC-20BD, U+2116, U+2122, U+2126, U+2206, U+2212, U+2215, U+2219, U+2248, U+2260, U+2264-2265, U+27E8-27E9, U+F50E-F511, U+F518-F51B, U+F522-F525, U+F528-F529;
+  unicode-range: U+20A4, U+20A6-20A7, U+20A9, U+20AB-20AD, U+20B1-20B2, U+20B4-20B5, U+20B8-20BA, U+20BC-20BD, U+2116, U+2122, U+2126, U+2206, U+2212, U+2215, U+2219, U+2248, U+2260, U+2264-2265, U+27E8-27E9, U+F50E-F511, U+F518-F51B, U+F522-F525, U+F528-F529, U+F52C-F52D;
 }
 
 @font-face {
@@ -197,7 +197,7 @@
   font-style: normal;
   font-weight: 100 900;
   font-stretch: 50% 125%;
-  unicode-range: U+F52C-F52D, U+FB00-FB04;
+  unicode-range: U+FB00-FB04;
 }
 
 @font-face {
@@ -357,7 +357,7 @@
   font-style: italic;
   font-weight: 100 900;
   font-stretch: 50% 125%;
-  unicode-range: U+2014, U+2018-2019, U+201C-201D, U+2026;
+  unicode-range: U+2013-2014, U+2018-2019, U+201C-201D, U+2022, U+2026;
 }
 
 @font-face {
@@ -387,7 +387,7 @@
   font-style: italic;
   font-weight: 100 900;
   font-stretch: 50% 125%;
-  unicode-range: U+1EDC-1EF9, U+2010, U+2013, U+2015, U+201A, U+201E, U+2020-2022, U+2030, U+2032;
+  unicode-range: U+1EDC-1EF9, U+2010, U+2015, U+201A, U+201E, U+2020-2021, U+2030, U+2032-2033, U+2039;
 }
 
 @font-face {
@@ -397,7 +397,7 @@
   font-style: italic;
   font-weight: 100 900;
   font-stretch: 50% 125%;
-  unicode-range: U+2033, U+2039-203A, U+2044, U+2052, U+2074, U+20A1, U+20A3-20A4, U+20A6-20A7, U+20A9, U+20AB-20AD, U+20B1-20B2, U+20B4-20B5, U+20B8-20BA, U+20BC-20BD, U+2116, U+2122, U+2126, U+2206, U+2212, U+2215, U+2219, U+2248, U+2260, U+2264-2265, U+27E8-27E9, U+F50E-F510;
+  unicode-range: U+203A, U+2044, U+2052, U+2074, U+20A1, U+20A3-20A4, U+20A6-20A7, U+20A9, U+20AB-20AD, U+20B1-20B2, U+20B4-20B5, U+20B8-20BA, U+20BC-20BD, U+2116, U+2122, U+2126, U+2206, U+2212, U+2215, U+2219, U+2248, U+2260, U+2264-2265, U+27E8-27E9, U+F50E-F511, U+F518;
 }
 
 @font-face {
@@ -407,6 +407,6 @@
   font-style: italic;
   font-weight: 100 900;
   font-stretch: 50% 125%;
-  unicode-range: U+F511, U+F518-F51B, U+F522-F525, U+F528-F529, U+F52C-F52D, U+FB00-FB04;
+  unicode-range: U+F519-F51B, U+F522-F525, U+F528-F529, U+F52C-F52D, U+FB00-FB04;
 }
 

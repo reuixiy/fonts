@@ -1,10 +1,10 @@
 {
-  "buildDate": "2025-10-10T16:23:14Z",
-  "buildId": "18412323052",
-  "commit": "20df76b8faf1b9468b0d05b9f1ad2f30f2335a88",
-  "buildType": "selective",
-  "updatedFonts": "lxgwwenkaitc",
-  "processedFonts": "lxgwwenkaitc",
+  "buildDate": "2025-12-10T06:27:07Z",
+  "buildId": "20089501361",
+  "commit": "e8e238b6f820d86b31b0983e21d2e27f82231fd0",
+  "buildType": "full",
+  "updatedFonts": "all",
+  "processedFonts": "all",
   "fonts": {
   "imingcp": {
     "name": "I.MingCP",
