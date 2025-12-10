@@ -2,8 +2,8 @@ name: Daily Font Version Check
 
 on:
   schedule:
-    # Run daily at 16:00 UTC (00:00 AM Hong Kong Time)
-    - cron: '0 16 * * *'
+    # Run weekly on Mondays at 16:00 UTC
+    - cron: '0 16 * * 1'
   workflow_dispatch: # Allow manual triggering
 
 jobs:
