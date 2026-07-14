@@ -34,8 +34,6 @@ jobs:
       
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
-        with:
-          version: latest
 
       - name: Install Node.js dependencies
         run: pnpm install
