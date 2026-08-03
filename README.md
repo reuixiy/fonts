@@ -1,6 +1,6 @@
 # Web Font CDN
 
-Generated on: 2026-07-14T05:31:59.532Z
+Generated on: 2026-08-03T17:46:21.987Z
 Source: [reuixiy/fonts](https://github.com/reuixiy/fonts)
 
 ## Quick Start

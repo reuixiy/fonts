@@ -1,13 +1,13 @@
 {
   "fontId": "amstelvar",
   "displayName": "Amstelvar",
-  "generatedAt": "2026-07-14T05:28:36.452Z",
+  "generatedAt": "2026-08-03T17:46:21.923Z",
   "chunks": [
     {
       "chunkIndex": 0,
       "filename": "0.woff2",
       "style": "roman",
-      "size": 294,
+      "size": 290,
       "unicodeRanges": [
         "U+0",
         "U+D",
@@ -72,7 +72,7 @@
       "chunkIndex": 2,
       "filename": "2.woff2",
       "style": "roman",
-      "size": 85,
+      "size": 83,
       "unicodeRanges": [
         "U+A0-C5",
         "U+C7-D7",
@@ -84,7 +84,7 @@
       "chunkIndex": 3,
       "filename": "3.woff2",
       "style": "roman",
-      "size": 33,
+      "size": 32,
       "unicodeRanges": [
         "U+E1-E5",
         "U+E7-F7",
@@ -96,7 +96,7 @@
       "chunkIndex": 4,
       "filename": "4.woff2",
       "style": "roman",
-      "size": 71,
+      "size": 69,
       "unicodeRanges": [
         "U+100-130",
         "U+132-140"
@@ -107,7 +107,7 @@
       "chunkIndex": 5,
       "filename": "5.woff2",
       "style": "roman",
-      "size": 85,
+      "size": 84,
       "unicodeRanges": [
         "U+141-17E"
       ],
@@ -117,7 +117,7 @@
       "chunkIndex": 6,
       "filename": "6.woff2",
       "style": "roman",
-      "size": 109,
+      "size": 108,
       "unicodeRanges": [
         "U+18F",
         "U+192",
@@ -151,7 +151,7 @@
       "chunkIndex": 8,
       "filename": "8.woff2",
       "style": "roman",
-      "size": 105,
+      "size": 101,
       "unicodeRanges": [
         "U+374-375",
         "U+37E",
@@ -178,7 +178,7 @@
       "chunkIndex": 9,
       "filename": "9.woff2",
       "style": "roman",
-      "size": 29,
+      "size": 28,
       "unicodeRanges": [
         "U+3C6-3C8",
         "U+3CA-3CF",
@@ -190,7 +190,7 @@
       "chunkIndex": 10,
       "filename": "10.woff2",
       "style": "roman",
-      "size": 90,
+      "size": 88,
       "unicodeRanges": [
         "U+401-40F",
         "U+411-414",
@@ -211,7 +211,7 @@
       "chunkIndex": 11,
       "filename": "11.woff2",
       "style": "roman",
-      "size": 112,
+      "size": 109,
       "unicodeRanges": [
         "U+442",
         "U+444-44C",
@@ -230,7 +230,7 @@
       "chunkIndex": 12,
       "filename": "12.woff2",
       "style": "roman",
-      "size": 43,
+      "size": 42,
       "unicodeRanges": [
         "U+4D0-4D3",
         "U+4D6-4D9",
@@ -259,7 +259,7 @@
       "chunkIndex": 14,
       "filename": "14.woff2",
       "style": "roman",
-      "size": 46,
+      "size": 45,
       "unicodeRanges": [
         "U+1E80-1E85",
         "U+1E9E",
@@ -281,7 +281,7 @@
       "chunkIndex": 16,
       "filename": "16.woff2",
       "style": "roman",
-      "size": 54,
+      "size": 53,
       "unicodeRanges": [
         "U+1EDD-1EF9",
         "U+2010",
@@ -304,7 +304,7 @@
       "chunkIndex": 17,
       "filename": "17.woff2",
       "style": "roman",
-      "size": 105,
+      "size": 103,
       "unicodeRanges": [
         "U+20A4",
         "U+20A6-20A7",
@@ -337,7 +337,7 @@
       "chunkIndex": 18,
       "filename": "18.woff2",
       "style": "roman",
-      "size": 17,
+      "size": 16,
       "unicodeRanges": [
         "U+FB00-FB04"
       ],
@@ -345,5 +345,5 @@
     }
   ],
   "totalChunks": 19,
-  "totalSize": 1366
+  "totalSize": 1339
 }

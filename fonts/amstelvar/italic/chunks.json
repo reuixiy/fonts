@@ -1,7 +1,7 @@
 {
   "fontId": "amstelvar",
   "displayName": "Amstelvar",
-  "generatedAt": "2026-07-14T05:28:29.450Z",
+  "generatedAt": "2026-08-03T17:46:21.706Z",
   "chunks": [
     {
       "chunkIndex": 0,
@@ -10,75 +10,65 @@
       "size": 120,
       "unicodeRanges": [
         "U+D",
-        "U+20-5A"
+        "U+20-5F"
       ],
-      "characterCount": 60
+      "characterCount": 65
     },
     {
       "chunkIndex": 1,
       "filename": "1.woff2",
       "style": "italic",
-      "size": 64,
+      "size": 60,
       "unicodeRanges": [
-        "U+5B-7E"
+        "U+60-7E"
       ],
-      "characterCount": 36
+      "characterCount": 31
     },
     {
       "chunkIndex": 2,
       "filename": "2.woff2",
       "style": "italic",
-      "size": 80,
+      "size": 91,
       "unicodeRanges": [
-        "U+A0-DB"
+        "U+A0-E0"
       ],
-      "characterCount": 60
+      "characterCount": 65
     },
     {
       "chunkIndex": 3,
       "filename": "3.woff2",
       "style": "italic",
-      "size": 56,
+      "size": 42,
       "unicodeRanges": [
-        "U+DC-FF"
+        "U+E1-FF"
       ],
-      "characterCount": 36
+      "characterCount": 31
     },
     {
       "chunkIndex": 4,
       "filename": "4.woff2",
       "style": "italic",
-      "size": 73,
+      "size": 72,
       "unicodeRanges": [
-        "U+100-13B"
+        "U+100-140"
       ],
-      "characterCount": 60
+      "characterCount": 65
     },
     {
       "chunkIndex": 5,
       "filename": "5.woff2",
       "style": "italic",
-      "size": 87,
+      "size": 89,
       "unicodeRanges": [
-        "U+13C-177"
+        "U+141-17E"
       ],
-      "characterCount": 60
+      "characterCount": 62
     },
     {
       "chunkIndex": 6,
       "filename": "6.woff2",
       "style": "italic",
-      "size": 13,
-      "unicodeRanges": [
-        "U+178-17E"
-      ],
-      "characterCount": 7
-    },
-    {
-      "chunkIndex": 7,
-      "filename": "7.woff2",
-      "style": "italic",
-      "size": 109,
+      "size": 110,
       "unicodeRanges": [
         "U+18F",
         "U+192",
@@ -89,24 +79,14 @@
         "U+1EA-1EB",
         "U+1FA-21B",
         "U+22A-22D",
-        "U+230-232"
-      ],
-      "characterCount": 60
-    },
-    {
-      "chunkIndex": 8,
-      "filename": "8.woff2",
-      "style": "italic",
-      "size": 6,
-      "unicodeRanges": [
-        "U+233",
+        "U+230-233",
         "U+237"
       ],
-      "characterCount": 2
+      "characterCount": 62
     },
     {
-      "chunkIndex": 9,
-      "filename": "9.woff2",
+      "chunkIndex": 7,
+      "filename": "7.woff2",
       "style": "italic",
       "size": 14,
       "unicodeRanges": [
@@ -120,76 +100,77 @@
       "characterCount": 13
     },
     {
-      "chunkIndex": 10,
-      "filename": "10.woff2",
+      "chunkIndex": 8,
+      "filename": "8.woff2",
       "style": "italic",
-      "size": 94,
+      "size": 100,
       "unicodeRanges": [
         "U+374-375",
         "U+37E",
         "U+384-38A",
         "U+38C",
         "U+38E-3A1",
-        "U+3A3-3BF"
+        "U+3A3-3C4"
       ],
-      "characterCount": 60
+      "characterCount": 65
+    },
+    {
+      "chunkIndex": 9,
+      "filename": "9.woff2",
+      "style": "italic",
+      "size": 21,
+      "unicodeRanges": [
+        "U+3C5-3CF",
+        "U+3D7"
+      ],
+      "characterCount": 12
+    },
+    {
+      "chunkIndex": 10,
+      "filename": "10.woff2",
+      "style": "italic",
+      "size": 142,
+      "unicodeRanges": [
+        "U+401-441"
+      ],
+      "characterCount": 65
     },
     {
       "chunkIndex": 11,
       "filename": "11.woff2",
       "style": "italic",
-      "size": 32,
+      "size": 158,
       "unicodeRanges": [
-        "U+3C0-3CF",
-        "U+3D7"
+        "U+442-44F",
+        "U+451-45F",
+        "U+490-493",
+        "U+496-49D",
+        "U+4A0-4A3",
+        "U+4AA-4B3",
+        "U+4B6-4BB",
+        "U+4C0-4C2",
+        "U+4CF"
       ],
-      "characterCount": 17
+      "characterCount": 65
     },
     {
       "chunkIndex": 12,
       "filename": "12.woff2",
       "style": "italic",
-      "size": 135,
+      "size": 54,
       "unicodeRanges": [
-        "U+401-43C"
-      ],
-      "characterCount": 60
-    },
-    {
-      "chunkIndex": 13,
-      "filename": "13.woff2",
-      "style": "italic",
-      "size": 149,
-      "unicodeRanges": [
-        "U+43D-44F",
-        "U+451-45F",
-        "U+490-493",
-        "U+496-49D",
-        "U+4A0-4A3",
-        "U+4AA-4B3"
-      ],
-      "characterCount": 60
-    },
-    {
-      "chunkIndex": 14,
-      "filename": "14.woff2",
-      "style": "italic",
-      "size": 71,
-      "unicodeRanges": [
-        "U+4B6-4BB",
-        "U+4C0-4C2",
-        "U+4CF-4D3",
+        "U+4D0-4D3",
         "U+4D6-4D9",
         "U+4DC-4DD",
         "U+4E6-4E9",
         "U+4EE-4F3",
         "U+4FE-4FF"
       ],
-      "characterCount": 32
+      "characterCount": 22
     },
     {
-      "chunkIndex": 15,
-      "filename": "15.woff2",
+      "chunkIndex": 13,
+      "filename": "13.woff2",
       "style": "italic",
       "size": 7,
       "unicodeRanges": [
@@ -202,10 +183,10 @@
       "characterCount": 8
     },
     {
-      "chunkIndex": 16,
-      "filename": "16.woff2",
+      "chunkIndex": 14,
+      "filename": "14.woff2",
       "style": "italic",
-      "size": 51,
+      "size": 55,
       "unicodeRanges": [
         "U+300-304",
         "U+306-308",
@@ -213,27 +194,27 @@
         "U+327-328",
         "U+1E80-1E85",
         "U+1E9E",
-        "U+1EA0-1EB3"
+        "U+1EA0-1EB8"
       ],
-      "characterCount": 40
+      "characterCount": 45
     },
     {
-      "chunkIndex": 17,
-      "filename": "17.woff2",
+      "chunkIndex": 15,
+      "filename": "15.woff2",
       "style": "italic",
-      "size": 50,
+      "size": 48,
       "unicodeRanges": [
-        "U+1EB4-1EDB"
+        "U+1EB9-1EE5"
       ],
-      "characterCount": 40
+      "characterCount": 45
     },
     {
-      "chunkIndex": 18,
-      "filename": "18.woff2",
+      "chunkIndex": 16,
+      "filename": "16.woff2",
       "style": "italic",
-      "size": 49,
+      "size": 85,
       "unicodeRanges": [
-        "U+1EDC-1EF9",
+        "U+1EE6-1EF9",
         "U+2010",
         "U+2015",
         "U+201A",
@@ -241,17 +222,7 @@
         "U+2020-2021",
         "U+2030",
         "U+2032-2033",
-        "U+2039"
-      ],
-      "characterCount": 40
-    },
-    {
-      "chunkIndex": 19,
-      "filename": "19.woff2",
-      "style": "italic",
-      "size": 98,
-      "unicodeRanges": [
-        "U+203A",
+        "U+2039-203A",
         "U+2044",
         "U+2052",
         "U+2074",
@@ -260,7 +231,16 @@
         "U+20A6-20A7",
         "U+20A9",
         "U+20AB-20AD",
-        "U+20B1-20B2",
+        "U+20B1-20B2"
+      ],
+      "characterCount": 45
+    },
+    {
+      "chunkIndex": 17,
+      "filename": "17.woff2",
+      "style": "italic",
+      "size": 95,
+      "unicodeRanges": [
         "U+20B4-20B5",
         "U+20B8-20BA",
         "U+20BC-20BD",
@@ -276,25 +256,15 @@
         "U+2264-2265",
         "U+27E8-27E9",
         "U+F50E-F511",
-        "U+F518"
-      ],
-      "characterCount": 40
-    },
-    {
-      "chunkIndex": 20,
-      "filename": "20.woff2",
-      "style": "italic",
-      "size": 49,
-      "unicodeRanges": [
-        "U+F519-F51B",
+        "U+F518-F51B",
         "U+F522-F525",
         "U+F528-F529",
         "U+F52C-F52D",
         "U+FB00-FB04"
       ],
-      "characterCount": 16
+      "characterCount": 41
     }
   ],
-  "totalChunks": 21,
-  "totalSize": 1407
+  "totalChunks": 18,
+  "totalSize": 1363
 }
